@@ -6,10 +6,11 @@
                 ["doom" "purge" "-g"]]
         :install [["doom" "install"]]
         :check [["doom" "doctor"]]
-        :current-version ["doom" "info"]
+        :version ["doom" "info"]
         :update [["doom" "upgrade"]]}
  :brew-tmp {:description "Will be removed when all brew tasks will be described"
             :brew [["brew" "doctor"]]
             :update [["brew" "upgrade"]]}
  :zsh {:type :copy-files
+       :version ["zsh" "--version"]
        :update [["doom" "env"]]}}

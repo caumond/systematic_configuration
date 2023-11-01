@@ -3,20 +3,31 @@
    [clojure.string :as str]
    [babashka.process :refer [shell]]))
 
-(defn- exec-process
+(defn- execute-process
+  [cmd]
+  (let [_ (println (format "Command %s" (pr-str cmd)))]
+
+    (if (not (every? string? cmd))
+      (println "Malformed command")
+      (let [cmd (str/join " " cmd)
+            {:keys [exit]
+             :as res-cmd
+             :or {exit -1}} (when cmd
+                              (shell cmd))
+            new-res res-cmd]
+        (when-not (zero? exit)
+          (println "Error during execution")
+          (println "result is: " res-cmd))
+        (if (nil? cmd) res-cmd
+            new-res)))))
+
+(defn- execute-processes
   [cmds fail-fast?]
   (loop [cmds cmds
          res []]
-    (let [cmd (str/join " " (first cmds))
-          _ (println (format "Command %s" cmd))
-          {:keys [exit]
-           :as res-cmd
-           :or {exit -1}} (when cmd
-                            (shell cmd))
-          new-res (conj res res-cmd)]
-      (when-not (zero? exit)
-        (println "Error during execution")
-        (println "result is: " res-cmd))
+    (let [cmd (first cmds)
+          new-res (execute-process cmd)
+          {:keys [exit]} new-res]
       (cond
         (empty? (rest cmds)) new-res
         (nil? cmd) (recur (rest cmds)
@@ -27,15 +38,16 @@
         :else (when-not (empty? cmds)
                 (println "Skipping next commands"))))))
 
-(defn- execute*
-  [cmds fail-fast?]
-  (exec-process cmds fail-fast?))
-
 (defn execute-cmds
   [cmds]
   (mapv (comp :out)
-        (execute* cmds false)))
+        (execute-processes cmds false)))
+
+(defn execute-cmd
+  [cmd]
+  (-> (execute-process cmd)
+      :out))
 
 (defn execute-cmds-fail-fast
   [cmds]
-  (execute* cmds true))
+  (execute-processes cmds true))

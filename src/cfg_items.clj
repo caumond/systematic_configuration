@@ -4,6 +4,25 @@
             [clojure.java.io :as io]
             [clojure.edn :as edn]))
 
+(defn- brew-update-cfg-item
+  [{:keys [formula], :as cfg-item-val}]
+  (assoc cfg-item-val
+    :install [["brew" "install" formula]]
+    :update [["brew" "upgrade" formula]]))
+
+(def ^:private type-to-update-fn
+  "Map the type of the modification, as seen in the configuration files and map the function"
+  {:brew brew-update-cfg-item})
+
+(defn- process-types
+  "For each predefined type"
+  [configurations]
+  (map (fn [[cfg-item val]]
+         (if-let [update-fn (get type-to-update-fn (:type val))]
+           [cfg-item (update-fn val)]
+           [cfg-item val]))
+    configurations))
+
 (defn- read-data-as-resource
   [filename]
   (try (->> filename
@@ -26,14 +45,17 @@
   * `os` keyword among (:macos, :ubuntu)"
   [os cfg-item]
   (println "configuration item" cfg-item)
-  (let [configuration (utils/deep-merge (read-data-as-resource "cfg_item.edn")
-                                        (->> os
-                                             cfg-envs
-                                             (format "%s/%s.edn" cfg-dir)
-                                             read-data-as-resource))]
-    (if (nil? cfg-item) configuration (select-keys configuration [cfg-item]))))
+  (let [configurations (utils/deep-merge (read-data-as-resource "cfg_item.edn")
+                                         (->> os
+                                              cfg-envs
+                                              (format "%s/%s.edn" cfg-dir)
+                                              read-data-as-resource))
+        configurations (if (nil? cfg-item)
+                         configurations
+                         (select-keys configurations [cfg-item]))]
+    (process-types configurations)))
 
 (comment
-  (read-configuration :macos :brew)
+  (read-configuration :macos nil)
   ;
 )

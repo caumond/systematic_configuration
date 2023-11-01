@@ -7,8 +7,9 @@
   "Update our toolings"
   [os cfg-item]
   (println "Update toolings")
-  (let [configurations (cfg-items/read-configuration os cfg-item)]
-    (println (format "Found configurations %s" (vec (keys configurations))))
+  (let [configurations (->> (cfg-items/read-configuration os cfg-item)
+                            (filter (fn [[_ v]] (:update v))))]
+    (println (format "Found configurations %s" (mapv first configurations)))
     (doseq [[cfg-item {:keys [update]}] configurations]
       (println (format "Execute `%s`" cfg-item))
       (cmds/execute-cmds-fail-fast update))))

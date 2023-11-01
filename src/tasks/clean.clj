@@ -8,6 +8,7 @@
   Params:
   * `os` kewyord among `[:macos, :ubuntu]`"
   [os cfg-items]
+  (println "Clean toolings")
   (let [cfg-items (->> (cfg-items/read-configuration os cfg-items)
                        (filter (fn [[_ v]] (:clean v))))]
     (println (format "Clean following tasks `%s`" (mapv first cfg-items)))

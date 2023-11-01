@@ -5,14 +5,13 @@
 (defn- execute-process
   [cmd]
   (let [_ (println (format "Command %s" (pr-str cmd)))]
-    (if (not (every? string? cmd))
+    (if (or (empty? cmd) (not (every? string? cmd)))
       (println "Malformed command")
       (let [cmd (str/join " " cmd)
-            {:keys [exit], :as res-cmd, :or {exit -1}} (when cmd (shell cmd))
+            {:keys [exit], :as res-cmd, :or {exit -1}}
+              (when cmd (shell {:continue true} cmd))
             new-res res-cmd]
-        (when-not (zero? exit)
-          (println "Error during execution")
-          (println "result is: " res-cmd))
+        (when-not (zero? exit) (println "Error during execution"))
         (if (nil? cmd) res-cmd new-res)))))
 
 (defn- execute-processes

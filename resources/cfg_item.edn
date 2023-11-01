@@ -1,17 +1,15 @@
 ;; This file is describing all configuration items
 ;; All code here in [`:update`] keys should be cross platform
 ;; If you have code specific platform, you can use their `os` subdir
-{:brew
-   {:install
-    [["curl" "-fsSL" "https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh" "-o" "brew-install.sh"]
-     ["chmod" "+x" "brew-install.sh"]
-     ["echo" "You need to connect as admin to install brew"]
-     ["./brew-install.sh"]
-     ["rm" "./brew-install.sh"]]},
- :brew-tmp {:brew [["brew" "doctor"]],
-            :description
-              "Will be removed when all brew tasks will be described",
-            :update [["brew" "upgrade"]]},
+{:brew {:install
+          [["curl" "-fsSL"
+            "https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
+            "-o" "brew-install.sh"] ["chmod" "+x" "brew-install.sh"]
+           ["echo" "You need to connect as admin to install brew"]
+           ["./brew-install.sh"] ["rm" "./brew-install.sh"]],
+        :update [["brew" "update"]]},
+ :brew-global {:check [["brew" "doctor"]],
+               :description "Treating all brew formula and casks"},
  :doom {:check [["doom" "doctor"]],
         :clean [["doom" "clean"] ["doom" "purge" "-g"]],
         :install [["doom" "install"]],

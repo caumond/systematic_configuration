@@ -2,24 +2,24 @@
 ;; All code here in [`:update`] keys should be cross platform
 ;; If you have code specific platform, you can use their `os` subdir
 {:androidstudio {:formula "androidstudio", :type :brew},
- :black {:package "black", :type :pip3},
- :brew {:install
+ :brew {:check [["brew" "doctor"]],
+        :description "Brew installation and global tasks",
+        :install
           [["curl" "-fsSL"
             "https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
             "-o" "brew-install.sh"] ["chmod" "+x" "brew-install.sh"]
            ["echo" "You need to connect as admin to install brew"]
            ["./brew-install.sh"] ["rm" "./brew-install.sh"]],
         :update [["brew" "update"]]},
- :brew-global {:check [["brew" "doctor"]],
-               :description "Treating all brew formula and casks"},
  :clj-kondo {:formula "borkdude/brew/clj-kondo", :type :brew},
  :clojure-lsp-native {:formula "clojure-lsp/brew/clojure-lsp-native",
                       :type :brew},
- :cmake {:formula "cmake", :type :brew},
  :coreutils {:formula "coreutils", :type :brew},
  :doom {:check [["doom" "doctor"]],
         :clean [["doom" "clean"] ["doom" "purge" "-g"]],
-        :install [["doom" "install"]],
+        :install [["git" "clone" "--depth" "1"
+                   "https://github.com/doomemacs/doomemacs" "~/.config/emacs"]
+                  ["doom" "install"]],
         :type :copy-files,
         :update [["doom" "upgrade"]],
         :version ["doom" "info"]},
@@ -27,31 +27,39 @@
    {:doc
       "# See https://github.com/d12frosted/homebrew-emacs-plus for more details",
     :formula "emacs-plus --with-imagemagick --with-native-comp",
+    :prerequisites {:black {:package "black", :type :pip3},
+                    :cmake {:formula "cmake", :type :brew},
+                    :fd {:formula "fd", :type :brew},
+                    :graphviz {:formula "graphviz", :type :brew},
+                    :ripgrep {:formula "ripgrep", :type :brew}},
     :tap "d12frosted/emacs-plus",
     :type :brew},
- :fd {:formula "fd", :type :brew},
  :ffmpeg {:formula "ffmpeg", :type :brew},
- :git {:formula "git", :type :brew},
+ :git {:formula "git",
+       :install [["git" "config" "--global" "user.email" "anthony@caumond.com"
+                  "git" "config" "--global" "user.name" "Anthony CAUMOND"]],
+       :type :brew},
+ :glpk {:install [["mkdir -p ~/Dev/install" "cd ~/Dev/install"
+                   "wget http://ftp.gnu.org/gnu/glpk/glpk-5.0.tar.gz"
+                   "tar -xvzf glpk-5.0.tar.gz" "cd glpk-5.0" "./configure"]]},
  :gnupg {:formula "gnupg", :type :brew},
- :graphviz {:formula "graphviz", :type :brew},
  :grep {:formula "grep", :type :brew},
  :htop {:formula "htop", :type :brew},
- :install {:formula "install", :type :brew},
  :isort {:package "isort", :type :pip3},
- :iterm2 {},
+ :iterm2 {:formula "iterm2", :type :brew},
  :jq {:formula "jq", :type :brew},
  :ktlint {:formula "ktlint", :type :brew},
  :markdown {:formula "markdown", :type :brew},
  :nano {:formula "nano", :type :brew},
  :node {:formula "node", :type :brew},
- :nose {:package "nose", :type :pip3},
  :openjdk {:formula "openjdk", :type :brew},
- :pip {:a "python3.11 -m pip install --upgrade pip"}
+ :pip {:a "python3.11 -m pip install --upgrade pip"},
  :pipenv {:package "pipenv", :type :pip3},
  :pyflakes {:package "pyflakes", :type :pip3},
- :pytest {:package "pytest", :type :pip3},
- :python {:formula "python", :type :brew},
- :ripgrep {:formula "ripgrep", :type :brew},
+ :python {:formula "python",
+          :prerequisites {:nose {:package "nose", :type :pip3},
+                          :pytest {:package "pytest", :type :pip3}},
+          :type :brew},
  :rlwrap {:formula "rlwrap", :type :brew},
  :shellcheck {:formula "shellcheck", :type :brew},
  :shfmt {:formula "shfmt", :type :brew},

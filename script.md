@@ -65,25 +65,12 @@ Sortant	ssl0.ovh.net	SSL/TLS	465
    - Profiles > Default > General > Working Directory > Reuse previous section's directory
 - Install brew with
 ```shell
-git config --global user.email "anthony@caumond.com"
-git config --global user.name "Anthony CAUMOND"
-
 npm install -g typewritten
 yes | sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
 npm -g install js-beautify
 npm install --save-dev -g stylelint stylelint-config-standard
 npm install -g node-cljfmt
-
-mkdir -p ~/Dev/install
-cd ~/Dev/install
-wget http://ftp.gnu.org/gnu/glpk/glpk-5.0.tar.gz 
-tar -xvzf glpk-5.0.tar.gz
-cd glpk-5.0
-./configure
-
-git clone --depth 1 https://github.com/doomemacs/doomemacs ~/.config/emacs
-yes | ~/.config/emacs/bin/doom install
 
 sudo mkdir -p /usr/local/bin
 curl https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein > lein

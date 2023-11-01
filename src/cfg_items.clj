@@ -4,33 +4,39 @@
             [clojure.java.io :as io]
             [clojure.edn :as edn]))
 
+(def ^:private cfg-dir "Where configuration per os are stored" "os")
+
+(def ^:private cfg-envs
+  "Name of each os subdir"
+  {:macos "macos", :ubuntu "ubuntu"})
+
+(defn- assoc-concat [val kw coll] (update val kw #(concat coll %)))
+
 (defn- pip-update-cfg-item
-  [{:keys [package], :as cfg-item-val}]
-  (assoc cfg-item-val
-         :install [["pip3" "install" package]]
-         :update [["pip3" "install" "--upgrade" package]]
-         :check [["pip3" "check" package]]))
+  [{:keys [package type], :as cfg-item-val}]
+  (if (= :pip3 type)
+    (-> cfg-item-val
+        (assoc-concat :install [["pip3" "install" package]])
+        (assoc-concat :update [["pip3" "install" "--upgrade" package]])
+        (assoc-concat :check [["pip3" "check" package]]))
+    cfg-item-val))
 
 (defn- brew-update-cfg-item
   [{:keys [tap formula], :as cfg-item-val}]
-  (assoc cfg-item-val
-         :install (concat (when tap [["brew" "tap" tap]])
-                          [["brew" "install" formula]])
-         :update [["brew" "upgrade" formula]]))
-
-(def ^:private type-to-update-fn
-  "Map the type of the modification, as seen in the configuration files and map the function"
-  {:brew brew-update-cfg-item
-   :pip3 pip-update-cfg-item})
+  (if (= :pip3 type)
+    (cfg-item-val :install (concat (when tap [["brew" "tap" tap]])
+                                   [["brew" "install" formula]])
+                  :update [["brew" "upgrade" formula]])
+    cfg-item-val))
 
 (defn- process-types
   "For each predefined type"
   [configurations]
-  (mapv (fn [[cfg-item val]]
-          (if-let [update-fn (get type-to-update-fn (:type val))]
-            [cfg-item (update-fn val)]
-            [cfg-item val]))
-        configurations))
+  (->> configurations
+       (mapv (fn [[cfg-item val]] [cfg-item
+                                   (-> val
+                                       brew-update-cfg-item
+                                       pip-update-cfg-item)]))))
 
 (defn- read-data-as-resource
   [filename]
@@ -42,11 +48,22 @@
          (println (format "File `%s` could not be loaded" filename))
          nil)))
 
-(def ^:private cfg-dir "Where configuration per os are stored" "os")
+(defn- develop-prerequisite-1
+  [configurations]
+  (->> configurations
+       (mapcat (fn [[k v]]
+                 (concat [[k (dissoc v :prerequisites)]] (:prerequisites v))))))
 
-(def ^:private cfg-envs
-  "Name of each os subdir"
-  {:macos "macos", :ubuntu "ubuntu"})
+(defn- develop-prerequisites
+  [configurations]
+  (loop [configurations configurations
+         max-loops 10]
+    (let [updated-configurations (develop-prerequisite-1 configurations)]
+      (if (= updated-configurations configurations)
+        configurations
+        (if (pos? max-loops)
+          (recur updated-configurations (dec max-loops))
+          updated-configurations)))))
 
 (defn read-configuration
   "Read the merged configuration of what is necessary and how it is done for each os
@@ -62,9 +79,11 @@
         configurations (if (nil? cfg-item)
                          configurations
                          (select-keys configurations [cfg-item]))]
-    (process-types configurations)))
+    (->> configurations
+         process-types
+         develop-prerequisites)))
 
 (comment
-  (read-configuration :macos nil)
+  (println (read-configuration :macos :emacs))
   ;
-  )
+)

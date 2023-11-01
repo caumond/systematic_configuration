@@ -3,11 +3,7 @@ The configuration is centrally managed here, so it is systematic / repeatable.
 
 # Installation instructions
 
-Install babashka's with 
-
-``` clojure
-bash < <(curl -s https://raw.githubusercontent.com/babashka/babashka/master/install)
-```
+Run `setup.sh`
 
 # Design decisions
 

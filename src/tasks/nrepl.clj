@@ -7,7 +7,7 @@
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn nrepl
   "Launch a repl locally"
-  [_os _]
+  [_os _ _]
   (try (srv/start-server! {:host "localhost", :port 1339})
        (spit nrepl-file "1339")
        (-> (Runtime/getRuntime)

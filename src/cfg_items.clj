@@ -13,8 +13,8 @@
 (defn- assoc-concat [val kw coll] (update val kw #(concat coll %)))
 
 (defn- pip-update-cfg-item
-  [{:keys [package type], :as cfg-item-val}]
-  (if (= :pip3 type)
+  [{:keys [package], :as cfg-item-val}]
+  (if (some? package)
     (-> cfg-item-val
         (assoc-concat :install [["pip3" "install" package]])
         (assoc-concat :update [["pip3" "install" "--upgrade" package]])
@@ -23,10 +23,12 @@
 
 (defn- brew-update-cfg-item
   [{:keys [tap formula], :as cfg-item-val}]
-  (if (= :pip3 type)
-    (cfg-item-val :install (concat (when tap [["brew" "tap" tap]])
-                                   [["brew" "install" formula]])
-                  :update [["brew" "upgrade" formula]])
+  (if (some? formula)
+    (-> cfg-item-val
+        (assoc-concat :install
+                      (concat (when tap [["brew" "tap" tap]])
+                              [["brew" "install" formula]]))
+        (assoc-concat :update [["brew" "upgrade" formula]]))
     cfg-item-val))
 
 (defn- process-types
@@ -52,7 +54,8 @@
   [configurations]
   (->> configurations
        (mapcat (fn [[k v]]
-                 (concat [[k (dissoc v :prerequisites)]] (:prerequisites v))))))
+                 (concat [[k (dissoc v :prerequisites)]] (:prerequisites v))))
+       (into {})))
 
 (defn- develop-prerequisites
   [configurations]
@@ -70,7 +73,8 @@
   Params:
   * `os` keyword among (:macos, :ubuntu)"
   [os cfg-item]
-  (println "configuration item" cfg-item)
+  (when cfg-item
+    (println (format "Limited to configuration item `%s`" cfg-item)))
   (let [configurations (utils/deep-merge (read-data-as-resource "cfg_item.edn")
                                          (->> os
                                               cfg-envs

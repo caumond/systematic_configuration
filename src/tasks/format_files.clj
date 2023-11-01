@@ -6,10 +6,11 @@
   "Format-Files
   Params:
   * `os` kewyord among `[:macos, :ubuntu]`"
-  [_os _]
-  (cmds/execute-cmd ["fd -tf -e clj -e edn -x zprint -w {}"]))
+  [_os _ sandbox?]
+  (cmds/execute-cmd ["fd" "." "-tf" "-e" "clj" "-e" "edn" "-x" "zprint" "-w {}"]
+                    sandbox?))
 
 (comment
-  (format-files :macos nil)
+  (format-files :macos nil true)
   ;
 )

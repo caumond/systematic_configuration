@@ -7,16 +7,16 @@
   "Instal
   Params:
   * `os` kewyord among `[:macos, :ubuntu]`"
-  [os cfg-item]
+  [os cfg-item sandbox?]
   (let [cfg-items (->> (cfg-items/read-configuration os cfg-item)
                        (filter (fn [[_ v]] (:install v))))]
     (println (format "Install following tasks `%s`" (mapv first cfg-items)))
     (doseq [cfg-item cfg-items]
       (when-let [[cfg-item {:keys [install]}] cfg-item]
         (println (format "Install `%s`" cfg-item))
-        (cmds/execute-cmds install)))))
+        (cmds/execute-cmds install sandbox?)))))
 
 (comment
-  (install :macos nil)
+  (install :macos nil true)
   ;
 )

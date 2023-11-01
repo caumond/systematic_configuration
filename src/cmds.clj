@@ -3,8 +3,9 @@
             [babashka.process :refer [shell]]))
 
 (defn- execute-process
-  [cmd]
-  (let [_ (println (format "Command %s" (pr-str cmd)))]
+  [cmd sandbox?]
+  (println (format "Command %s" (pr-str cmd)))
+  (when-not sandbox?
     (if (or (empty? cmd) (not (every? string? cmd)))
       (println "Malformed command")
       (let [cmd (str/join " " cmd)
@@ -15,23 +16,33 @@
         (if (nil? cmd) res-cmd new-res)))))
 
 (defn- execute-processes
-  [cmds fail-fast?]
+  [cmds fail-fast? sandbox?]
   (loop [cmds cmds
          res []]
     (let [cmd (first cmds)
-          new-res (execute-process cmd)
+          new-res (execute-process cmd sandbox?)
           {:keys [exit]} new-res]
-      (cond (empty? (rest cmds)) new-res
+      (cond (nil? new-res) nil
+            (empty? (rest cmds)) new-res
             (nil? cmd) (recur (rest cmds) res)
             (or (zero? exit) (not fail-fast?)) (recur (rest cmds) new-res)
             :else (when-not (empty? cmds)
                     (println "Skipping next commands"))))))
 
-(defn execute-cmds [cmds] (mapv (comp :out) (execute-processes cmds false)))
+(defn execute-cmds
+  [cmds sandbox?]
+  (mapv (comp :out) (execute-processes cmds false sandbox?)))
 
 (defn execute-cmd
-  [cmd]
-  (-> (execute-process cmd)
+  [cmd sandbox?]
+  (-> (execute-process cmd sandbox?)
       :out))
 
-(defn execute-cmds-fail-fast [cmds] (execute-processes cmds true))
+(defn execute-cmds-fail-fast
+  [cmds sandbox?]
+  (execute-processes cmds true sandbox?))
+
+(comment
+  (execute-cmd ["doom" "clean"] true)
+  ;
+)

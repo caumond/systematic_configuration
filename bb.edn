@@ -1,17 +1,20 @@
 {:deps {org.clojure/tools.cli {:mvn/version "1.0.219"}},
  :paths ["src" "resources"],
  :tasks {:enter {},
-         :init (do (def os (current-os/current-os))
-                   (def cli-options (cli-opts/parse *command-line-args*))
-                   (cli-opts/do-opts cli-options)
-                   (println (format "os is: `%s`" os))
-                   (when (:errors cli-options)
-                     (apply println "invalid options: " (:errors cli-options))
-                     (System/exit -1))
-                   (def cfg-item
-                     (-> (get-in cli-options [:options :cfg-item])
-                         keyword))
-                   (defn execute-task [task-fn] (task-fn os cfg-item))),
+         :init
+           (do (def os (current-os/current-os))
+               (def cli-options (cli-opts/parse *command-line-args*))
+               (cli-opts/do-opts cli-options)
+               (println (format "os is: `%s`" os))
+               (when (:errors cli-options)
+                 (apply println "invalid options: " (:errors cli-options))
+                 (System/exit -1))
+               (def cfg-item
+                 (-> (get-in cli-options [:options :cfg-item])
+                     keyword))
+               (def sandbox? (boolean (get-in cli-options [:options :sandbox])))
+               (when sandbox? (println "Sandbox mode activated"))
+               (defn execute-task [task-fn] (task-fn os cfg-item sandbox?))),
          :requires ([cli-opts :as cli-opts]
                     [current-os]
                     [tasks.check :as check]

@@ -1,7 +1,7 @@
 ;; This file is describing all configuration items
 ;; All code here in [`:update`] keys should be cross platform
 ;; If you have code specific platform, you can use their `os` subdir
-{:androidstudio {:formula "androidstudio", :type :brew},
+{:androidstudio {:formula "androidstudio"},
  :brew {:check [["brew" "doctor"]],
         :description "Brew installation and global tasks",
         :install
@@ -11,66 +11,80 @@
            ["echo" "You need to connect as admin to install brew"]
            ["./brew-install.sh"] ["rm" "./brew-install.sh"]],
         :update [["brew" "update"]]},
- :clj-kondo {:formula "borkdude/brew/clj-kondo", :type :brew},
- :clojure-lsp-native {:formula "clojure-lsp/brew/clojure-lsp-native",
-                      :type :brew},
- :coreutils {:formula "coreutils", :type :brew},
- :doom {:check [["doom" "doctor"]],
-        :clean [["doom" "clean"] ["doom" "purge" "-g"]],
-        :install [["git" "clone" "--depth" "1"
-                   "https://github.com/doomemacs/doomemacs" "~/.config/emacs"]
-                  ["doom" "install"]],
-        :type :copy-files,
-        :update [["doom" "upgrade"]],
-        :version ["doom" "info"]},
- :emacs
-   {:doc
-      "# See https://github.com/d12frosted/homebrew-emacs-plus for more details",
-    :formula "emacs-plus --with-imagemagick --with-native-comp",
-    :prerequisites {:black {:package "black", :type :pip3},
-                    :cmake {:formula "cmake", :type :brew},
-                    :fd {:formula "fd", :type :brew},
-                    :graphviz {:formula "graphviz", :type :brew},
-                    :ripgrep {:formula "ripgrep", :type :brew}},
-    :tap "d12frosted/emacs-plus",
-    :type :brew},
- :ffmpeg {:formula "ffmpeg", :type :brew},
+ :clojure-project {:prerequisites
+                     {:clj-kondo {:formula "borkdude/brew/clj-kondo"},
+                      :clojure {:formula "clojure"},
+                      :jq {:formula "jq"},
+                      :openjdk {:formula "openjdk"},
+                      :rlwrap {:formula "rlwrap"},
+                      :tools-clojure {:formula "clojure/tools/clojure"}}},
+ :doom
+   {:check [["doom" "doctor"]],
+    :clean [["doom" "clean"] ["doom" "purge" "-g"]],
+    :install [["git" "clone" "--depth" "1"
+               "https://github.com/doomemacs/doomemacs" "~/.config/emacs"]
+              ["doom" "install"]],
+    :prerequisites
+      {:black {:package "black", :type :pip3},
+       :clojure-lsp-native {:formula "clojure-lsp/brew/clojure-lsp-native"},
+       :cmake {:formula "cmake"},
+       :emacs
+         {:doc
+            "# See https://github.com/d12frosted/homebrew-emacs-plus for more details",
+          :formula "emacs-plus --with-imagemagick --with-native-comp",
+          :tap "d12frosted/emacs-plus"},
+       :fd {:formula "fd"},
+       :graphviz {:formula "graphviz"},
+       :ktlint {:formula "ktlint"},
+       :ripgrep {:formula "ripgrep"},
+       :shfmt {:formula "shfmt"}},
+    :update [["doom" "upgrade"]],
+    :version ["doom" "info"]},
+ :ffmpeg {:formula "ffmpeg"},
+ :gimp {:forumla "gimp"},
  :git {:formula "git",
        :install [["git" "config" "--global" "user.email" "anthony@caumond.com"
-                  "git" "config" "--global" "user.name" "Anthony CAUMOND"]],
-       :type :brew},
+                  "git" "config" "--global" "user.name" "Anthony CAUMOND"]]},
  :glpk {:install [["mkdir -p ~/Dev/install" "cd ~/Dev/install"
                    "wget http://ftp.gnu.org/gnu/glpk/glpk-5.0.tar.gz"
                    "tar -xvzf glpk-5.0.tar.gz" "cd glpk-5.0" "./configure"]]},
- :gnupg {:formula "gnupg", :type :brew},
- :grep {:formula "grep", :type :brew},
- :htop {:formula "htop", :type :brew},
- :isort {:package "isort", :type :pip3},
- :iterm2 {:formula "iterm2", :type :brew},
- :jq {:formula "jq", :type :brew},
- :ktlint {:formula "ktlint", :type :brew},
- :markdown {:formula "markdown", :type :brew},
- :nano {:formula "nano", :type :brew},
- :node {:formula "node", :type :brew},
- :openjdk {:formula "openjdk", :type :brew},
- :pip {:a "python3.11 -m pip install --upgrade pip"},
- :pipenv {:package "pipenv", :type :pip3},
- :pyflakes {:package "pyflakes", :type :pip3},
- :python {:formula "python",
-          :prerequisites {:nose {:package "nose", :type :pip3},
-                          :pytest {:package "pytest", :type :pip3}},
-          :type :brew},
- :rlwrap {:formula "rlwrap", :type :brew},
- :shellcheck {:formula "shellcheck", :type :brew},
- :shfmt {:formula "shfmt", :type :brew},
- :testresources {:package "testresources", :type :pip3},
- :tidy-html5 {:formula "tidy-html5", :type :brew},
- :tools-clojure {:formula "clojure/tools/clojure", :type :brew},
- :tree {:formula "tree", :type :brew},
- :vim {:formula "vim", :type :brew},
- :virtualenv {:package "virtualenv", :type :pip3},
- :vlc {:formula "vlc", :type :brew},
- :wget {:formula "wget", :type :brew},
- :zsh {:formula "zsh", :type :brew},
+ :iterm2 {:formula "iterm2",
+          :prerequisites {:coreutils {:formula "coreutils"},
+                          :grep {:formula "grep"},
+                          :htop {:formula "htop"},
+                          :nano {:formula "nano"},
+                          :tree {:formula "tree"}}},
+ :markdown {:formula "markdown"},
+ :node {:formula "node"},
+ :python-projects
+   {:pre-requisites
+      {:pip {:install [["python3.11" "-m" "pip" "install" "--upgrade" "pip"]]},
+       :pipenv {:package "pipenv", :type :pip3},
+       :pyflakes {:package "pyflakes", :type :pip3},
+       :python {:formula "python",
+                :prerequisites {:isort {:package "isort", :type :pip3},
+                                :nose {:package "nose", :type :pip3},
+                                :pytest {:package "pytest", :type :pip3}}},
+       :testresources {:package "testresources", :type :pip3},
+       :virtualenv {:package "virtualenv", :type :pip3}}},
+ :security-tools
+   {:description "What is necessary to manage security keys",
+    :prerequisites {:gnupg {:formula "gnupg"},
+                    :ssh-keygen {:install [["ssh-keygen" "-t" "rsa" "-b" "4096"
+                                            "-C" "anthony@caumond.com"]
+                                           ["cat" "~/.ssh/id_rsa.pub"]]}}},
+ :vim {:formula "vim"},
+ :vlc {:formula "vlc"},
+ :wget {:formula "wget"},
+ :zsh
+   {:formula "zsh",
+    :prerequisites
+      {:typewritten
+         {:install
+            [["npm install -g typewritten"]
+             ["curl" "-fsSL"
+              "https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh"
+              "-o" "ohmyzsh-install.sh"] ["chmod" "+x" "ohmyzsh-install.sh"]
+             ["./ohmyzsh-install.sh"] ["rm" "./ohmyzsh-install.sh"]]}}},
  :zsh-env
    {:type :copy-files, :update [["doom" "env"]], :version ["zsh" "--version"]}}

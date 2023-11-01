@@ -59,14 +59,12 @@ Sortant	ssl0.ovh.net	SSL/TLS	465
 - Go to `https://www.brother.fr/services-et-supports/drivers` and select DS-640 as a scanner to download the latest drivers
 
 # Install bash like apps
-- Open iTerm2
 - Setup iTerm2:
    - General > Closing > Quit when all windows are closed
    - Profiles > Default > General > Working Directory > Reuse previous section's directory
-- Install brew with
 ```shell
 npm install -g typewritten
-yes | sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
 npm -g install js-beautify
 npm install --save-dev -g stylelint stylelint-config-standard
@@ -76,9 +74,4 @@ sudo mkdir -p /usr/local/bin
 curl https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein > lein
 chmod +x lein
 sudo mv lein /usr/local/bin/
-
-# Installing
-ssh-keygen -t rsa -b 4096 -C "anthony@caumond.com"
-cat ~/.ssh/id_rsa.pub
-# Now copy that key in 
 ```

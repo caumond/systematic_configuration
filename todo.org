@@ -10,6 +10,8 @@ monorepo
 * DONE Create the babashka's installation instructions
 * DONE Create the file copying
 * DONE Structure for configuration splitting platform and intention
+* DONE Do command only cli option
+* TODO Do cfg file save and restore
 * TODO Pick the clojure configuration
 * TODO Pick the gitconfig
 * TODO Pick the zshrc

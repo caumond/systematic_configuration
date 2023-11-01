@@ -1,8 +1,6 @@
-(ns current-os
-  "Returns the current os")
+(ns current-os "Returns the current os")
 
-(def os-name-to-kw
-  {"Mac OS X" :macos})
+(def os-name-to-kw {"Mac OS X" :macos})
 
 (defn current-os
   []
@@ -12,5 +10,5 @@
 
 (comment
   (current-os)
-;
-  )
+  ;
+)

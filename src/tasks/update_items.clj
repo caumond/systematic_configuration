@@ -1,7 +1,6 @@
 (ns tasks.update-items
-  (:require
-   [cfg-items]
-   [cmds]))
+  (:require [cfg-items]
+            [cmds]))
 
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn update-items
@@ -16,5 +15,5 @@
 
 (comment
   (update-items :macos)
-;
- )
+  ;
+)

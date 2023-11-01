@@ -1,30 +1,24 @@
 (ns cfg-items
   "Configuration items management"
-  (:require
-   [utils]
-   [clojure.java.io :as io]
-   [clojure.edn :as edn]))
+  (:require [utils]
+            [clojure.java.io :as io]
+            [clojure.edn :as edn]))
 
 (defn- read-data-as-resource
   [filename]
-  (try
-    (->> filename
-         io/resource
-         slurp
-         edn/read-string)
-    (catch Exception _
-      (println (format "File `%s` could not be loaded"
-                       filename))
-      nil)))
+  (try (->> filename
+            io/resource
+            slurp
+            edn/read-string)
+       (catch Exception _
+         (println (format "File `%s` could not be loaded" filename))
+         nil)))
 
-(def ^:private cfg-dir
-  "Where configuration per os are stored"
-  "os")
+(def ^:private cfg-dir "Where configuration per os are stored" "os")
 
 (def ^:private cfg-envs
   "Name of each os subdir"
-  {:macos "macos"
-   :ubuntu "ubuntu"})
+  {:macos "macos", :ubuntu "ubuntu"})
 
 (defn read-configuration
   "Read the merged configuration of what is necessary and how it is done for each os

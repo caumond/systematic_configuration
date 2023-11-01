@@ -1,0 +1,18 @@
+# remove
+.cache
+.clojure/.clj-kondo/.cache
+.clojure/.cpcache
+.clojure/.lsp/.cache
+.m2/repository/*
+
+* DONE Create the babashka's installation instructions
+* TODO Structure for configuration splitting platform and intention
+* TODO Create the file copying
+
+* TODO Pick the clojure configuration
+* TODO Pick the gitconfig
+* TODO Pick the zshrc
+* TODO Pick the doom configuration
+* TODO Add installation of glpk
+* TODO Add obs build
+* TODO Change zsh setup to see directories

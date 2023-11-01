@@ -11,22 +11,26 @@
            ["echo" "You need to connect as admin to install brew"]
            ["./brew-install.sh"] ["rm" "./brew-install.sh"]],
         :update [["brew" "update"]]},
- :clojure-project {:prerequisites
-                     {:clj-kondo {:formula "borkdude/brew/clj-kondo"},
-                      :clojure {:formula "clojure"},
-                      :jq {:formula "jq"},
-                      :openjdk {:formula "openjdk"},
-                      :rlwrap {:formula "rlwrap"},
-                      :tools-clojure {:formula "clojure/tools/clojure"}}},
+ :clojure-project
+   {:pre-reqs {:clj-kondo {:clear-dirs [".clojure/.clj-kondo/.cache"],
+                           :formula "borkdude/brew/clj-kondo"},
+               :clojure {:clear-dirs [".clojure/.cpcache"
+                                      ".m2/repository"], :formula "clojure"},
+               :jq {:formula "jq"},
+               :openjdk {:formula "openjdk"},
+               :rlwrap {:formula "rlwrap"},
+               :tools-clojure {:formula "clojure/tools/clojure"}}},
  :doom
    {:check [["doom" "doctor"]],
     :clean [["doom" "clean"] ["doom" "purge" "-g"]],
     :install [["git" "clone" "--depth" "1"
                "https://github.com/doomemacs/doomemacs" "~/.config/emacs"]
               ["doom" "install"]],
-    :prerequisites
+    :pre-reqs
       {:black {:package "black", :type :pip3},
-       :clojure-lsp-native {:formula "clojure-lsp/brew/clojure-lsp-native"},
+       :clojure-lsp-native {:clear-dirs [".clojure/.lsp/.cache"
+                                         ".cache/clojure-lsp"],
+                            :formula "clojure-lsp/brew/clojure-lsp-native"},
        :cmake {:formula "cmake"},
        :emacs
          {:doc
@@ -49,36 +53,37 @@
                    "wget http://ftp.gnu.org/gnu/glpk/glpk-5.0.tar.gz"
                    "tar -xvzf glpk-5.0.tar.gz" "cd glpk-5.0" "./configure"]]},
  :iterm2 {:formula "iterm2",
-          :prerequisites {:coreutils {:formula "coreutils"},
-                          :grep {:formula "grep"},
-                          :htop {:formula "htop"},
-                          :nano {:formula "nano"},
-                          :tree {:formula "tree"}}},
+          :pre-reqs {:coreutils {:formula "coreutils"},
+                     :grep {:formula "grep"},
+                     :htop {:formula "htop"},
+                     :nano {:formula "nano"},
+                     :tree {:formula "tree"}}},
  :markdown {:formula "markdown"},
  :node {:formula "node"},
+ :os {:clear-files [["fd" "-H" "-I" "-g" "'**/.DS_Store'" "-x" "rm" "{}"]] }
  :python-projects
-   {:pre-requisites
-      {:pip {:install [["python3.11" "-m" "pip" "install" "--upgrade" "pip"]]},
-       :pipenv {:package "pipenv", :type :pip3},
-       :pyflakes {:package "pyflakes", :type :pip3},
-       :python {:formula "python",
-                :prerequisites {:isort {:package "isort", :type :pip3},
-                                :nose {:package "nose", :type :pip3},
-                                :pytest {:package "pytest", :type :pip3}}},
-       :testresources {:package "testresources", :type :pip3},
-       :virtualenv {:package "virtualenv", :type :pip3}}},
+   {:pre-reqs {:pip {:install [["python3.11" "-m" "pip" "install" "--upgrade"
+                                "pip"]]},
+               :pipenv {:package "pipenv", :type :pip3},
+               :pyflakes {:package "pyflakes", :type :pip3},
+               :python {:formula "python",
+                        :pre-reqs {:isort {:package "isort", :type :pip3},
+                                   :nose {:package "nose", :type :pip3},
+                                   :pytest {:package "pytest", :type :pip3}}},
+               :testresources {:package "testresources", :type :pip3},
+               :virtualenv {:package "virtualenv", :type :pip3}}},
  :security-tools
    {:description "What is necessary to manage security keys",
-    :prerequisites {:gnupg {:formula "gnupg"},
-                    :ssh-keygen {:install [["ssh-keygen" "-t" "rsa" "-b" "4096"
-                                            "-C" "anthony@caumond.com"]
-                                           ["cat" "~/.ssh/id_rsa.pub"]]}}},
+    :pre-reqs {:gnupg {:formula "gnupg"},
+               :ssh-keygen {:install [["ssh-keygen" "-t" "rsa" "-b" "4096" "-C"
+                                       "anthony@caumond.com"]
+                                      ["cat" "~/.ssh/id_rsa.pub"]]}}},
  :vim {:formula "vim"},
  :vlc {:formula "vlc"},
  :wget {:formula "wget"},
  :zsh
    {:formula "zsh",
-    :prerequisites
+    :pre-reqs
       {:typewritten
          {:install
             [["npm install -g typewritten"]

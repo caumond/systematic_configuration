@@ -1,9 +1,4 @@
 # remove
-.cache
-.clojure/.clj-kondo/.cache
-.clojure/.cpcache
-.clojure/.lsp/.cache
-.m2/repository/*
 All .DS_store
 monorepo
 

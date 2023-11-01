@@ -1,8 +1,8 @@
 (ns cfg-items
   "Configuration items management"
-  (:require [utils]
+  (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [clojure.edn :as edn]))
+            [utils]))
 
 (def ^:private cfg-dir "Where configuration per os are stored" "os")
 
@@ -18,6 +18,7 @@
     (-> cfg-item-val
         (assoc-concat :install [["pip3" "install" package]])
         (assoc-concat :update [["pip3" "install" "--upgrade" package]])
+        (assoc-concat ::graph-deps [:pip])
         (assoc-concat :check [["pip3" "check" package]]))
     cfg-item-val))
 
@@ -25,6 +26,7 @@
   [{:keys [tap formula], :as cfg-item-val}]
   (if (some? formula)
     (-> cfg-item-val
+        (assoc-concat ::graph-deps [:brew])
         (assoc-concat :install
                       (concat (when tap [["brew" "tap" tap]])
                               [["brew" "install" formula]]))
@@ -50,18 +52,24 @@
          (println (format "File `%s` could not be loaded" filename))
          nil)))
 
-(defn- develop-prerequisite-1
+(defn- develop-pre-req-1
   [configurations]
   (->> configurations
-       (mapcat (fn [[k v]]
-                 (concat [[k (dissoc v :prerequisites)]] (:prerequisites v))))
+       (mapcat (fn [[cfg-item cfg-item-val]]
+                 (let [deps-name (vec (keys (:pre-reqs cfg-item-val)))
+                       new-deps-name (-> cfg-item-val
+                                         (dissoc :pre-reqs)
+                                         (merge (when-not (empty? deps-name)
+                                                  {::graph-deps deps-name})))]
+                   (concat [[cfg-item new-deps-name]]
+                           (:pre-reqs cfg-item-val)))))
        (into {})))
 
-(defn- develop-prerequisites
+(defn- develop-pre-reqs
   [configurations]
   (loop [configurations configurations
          max-loops 10]
-    (let [updated-configurations (develop-prerequisite-1 configurations)]
+    (let [updated-configurations (develop-pre-req-1 configurations)]
       (if (= updated-configurations configurations)
         configurations
         (if (pos? max-loops)
@@ -84,10 +92,6 @@
                          configurations
                          (select-keys configurations [cfg-item]))]
     (->> configurations
-         process-types
-         develop-prerequisites)))
+         develop-pre-reqs
+         process-types)))
 
-(comment
-  (println (read-configuration :macos :emacs))
-  ;
-)

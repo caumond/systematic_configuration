@@ -1,9 +1,12 @@
 {:paths ["src"
          "resources"]
  :deps {}
- :tasks {:init ()
-         :requires ([tasks.nrepl :as nrepl]
+ :tasks {:requires ([current-os]
+                    [tasks.nrepl :as nrepl]
+                    [tasks.clean :as clean]
                     [tasks.update-items :as update-items])
+         :init (def os
+                 (current-os/current-os))
          :enter {}
          nrepl  (nrepl/nrepl)
          update (update-items/update-items :macos)}}

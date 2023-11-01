@@ -6,13 +6,13 @@
 .m2/repository/*
 
 * DONE Create the babashka's installation instructions
-* TODO Structure for configuration splitting platform and intention
-* TODO Create the file copying
-
+* DONE Create the file copying
+* DONE Structure for configuration splitting platform and intention
 * TODO Pick the clojure configuration
 * TODO Pick the gitconfig
 * TODO Pick the zshrc
 * TODO Pick the doom configuration
 * TODO Add installation of glpk
-* TODO Add obs build
+* DONE Add obs build
 * TODO Change zsh setup to see directories
+* DONE Add os choice so a user can decide which one he is using

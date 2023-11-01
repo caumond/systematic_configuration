@@ -1,7 +1,9 @@
 ;; This file is describing all configuration items
 ;; All code here in [`:update`] keys should be cross platform
 ;; If you have code specific platform, you can use their `os` subdir
-{:brew {:install
+{:androidstudio {:formula "androidstudio", :type :brew},
+ :black {:package "black", :type :pip3},
+ :brew {:install
           [["curl" "-fsSL"
             "https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
             "-o" "brew-install.sh"] ["chmod" "+x" "brew-install.sh"]
@@ -10,13 +12,57 @@
         :update [["brew" "update"]]},
  :brew-global {:check [["brew" "doctor"]],
                :description "Treating all brew formula and casks"},
+ :clj-kondo {:formula "borkdude/brew/clj-kondo", :type :brew},
+ :clojure-lsp-native {:formula "clojure-lsp/brew/clojure-lsp-native",
+                      :type :brew},
+ :cmake {:formula "cmake", :type :brew},
+ :coreutils {:formula "coreutils", :type :brew},
  :doom {:check [["doom" "doctor"]],
         :clean [["doom" "clean"] ["doom" "purge" "-g"]],
         :install [["doom" "install"]],
         :type :copy-files,
         :update [["doom" "upgrade"]],
         :version ["doom" "info"]},
+ :emacs
+   {:doc
+      "# See https://github.com/d12frosted/homebrew-emacs-plus for more details",
+    :formula "emacs-plus --with-imagemagick --with-native-comp",
+    :tap "d12frosted/emacs-plus",
+    :type :brew},
+ :fd {:formula "fd", :type :brew},
+ :ffmpeg {:formula "ffmpeg", :type :brew},
+ :git {:formula "git", :type :brew},
+ :gnupg {:formula "gnupg", :type :brew},
+ :graphviz {:formula "graphviz", :type :brew},
+ :grep {:formula "grep", :type :brew},
+ :htop {:formula "htop", :type :brew},
+ :install {:formula "install", :type :brew},
+ :isort {:package "isort", :type :pip3},
  :iterm2 {},
+ :jq {:formula "jq", :type :brew},
+ :ktlint {:formula "ktlint", :type :brew},
+ :markdown {:formula "markdown", :type :brew},
+ :nano {:formula "nano", :type :brew},
+ :node {:formula "node", :type :brew},
+ :nose {:package "nose", :type :pip3},
+ :openjdk {:formula "openjdk", :type :brew},
+ :pip {:a "python3.11 -m pip install --upgrade pip"}
+ :pipenv {:package "pipenv", :type :pip3},
+ :pyflakes {:package "pyflakes", :type :pip3},
+ :pytest {:package "pytest", :type :pip3},
+ :python {:formula "python", :type :brew},
+ :ripgrep {:formula "ripgrep", :type :brew},
+ :rlwrap {:formula "rlwrap", :type :brew},
+ :shellcheck {:formula "shellcheck", :type :brew},
+ :shfmt {:formula "shfmt", :type :brew},
+ :testresources {:package "testresources", :type :pip3},
+ :tidy-html5 {:formula "tidy-html5", :type :brew},
+ :tools-clojure {:formula "clojure/tools/clojure", :type :brew},
+ :tree {:formula "tree", :type :brew},
+ :vim {:formula "vim", :type :brew},
+ :virtualenv {:package "virtualenv", :type :pip3},
+ :vlc {:formula "vlc", :type :brew},
+ :wget {:formula "wget", :type :brew},
  :zsh {:formula "zsh", :type :brew},
  :zsh-env
    {:type :copy-files, :update [["doom" "env"]], :version ["zsh" "--version"]}}

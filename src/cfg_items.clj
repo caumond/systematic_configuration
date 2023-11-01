@@ -4,24 +4,33 @@
             [clojure.java.io :as io]
             [clojure.edn :as edn]))
 
-(defn- brew-update-cfg-item
-  [{:keys [formula], :as cfg-item-val}]
+(defn- pip-update-cfg-item
+  [{:keys [package], :as cfg-item-val}]
   (assoc cfg-item-val
-    :install [["brew" "install" formula]]
-    :update [["brew" "upgrade" formula]]))
+         :install [["pip3" "install" package]]
+         :update [["pip3" "install" "--upgrade" package]]
+         :check [["pip3" "check" package]]))
+
+(defn- brew-update-cfg-item
+  [{:keys [tap formula], :as cfg-item-val}]
+  (assoc cfg-item-val
+         :install (concat (when tap [["brew" "tap" tap]])
+                          [["brew" "install" formula]])
+         :update [["brew" "upgrade" formula]]))
 
 (def ^:private type-to-update-fn
   "Map the type of the modification, as seen in the configuration files and map the function"
-  {:brew brew-update-cfg-item})
+  {:brew brew-update-cfg-item
+   :pip3 pip-update-cfg-item})
 
 (defn- process-types
   "For each predefined type"
   [configurations]
-  (map (fn [[cfg-item val]]
-         (if-let [update-fn (get type-to-update-fn (:type val))]
-           [cfg-item (update-fn val)]
-           [cfg-item val]))
-    configurations))
+  (mapv (fn [[cfg-item val]]
+          (if-let [update-fn (get type-to-update-fn (:type val))]
+            [cfg-item (update-fn val)]
+            [cfg-item val]))
+        configurations))
 
 (defn- read-data-as-resource
   [filename]
@@ -58,4 +67,4 @@
 (comment
   (read-configuration :macos nil)
   ;
-)
+  )

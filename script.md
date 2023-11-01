@@ -65,16 +65,6 @@ Sortant	ssl0.ovh.net	SSL/TLS	465
    - Profiles > Default > General > Working Directory > Reuse previous section's directory
 - Install brew with
 ```shell
-mkdir -p ~/Dev/cfg
-cd ~/Dev/cfg
-
-brew install vim git zsh ripgrep fd gnupg nano tree rlwrap htop cmake jq graphviz shellcheck node openjdk androidstudio clojure/tools/clojure coreutils grep clojure-lsp/brew/clojure-lsp-native borkdude/brew/clj-kondo tidy-html5 python markdown wget ffmpeg vlc shfmt ktlint
-brew tap d12frosted/emacs-plus
-brew install emacs-plus --with-imagemagick --with-native-comp
-# See https://github.com/d12frosted/homebrew-emacs-plus for more details
-
-pip3 install black isort pipenv testresources nose virtualenv pytest pyflakes
-
 git config --global user.email "anthony@caumond.com"
 git config --global user.name "Anthony CAUMOND"
 
@@ -99,16 +89,6 @@ sudo mkdir -p /usr/local/bin
 curl https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein > lein
 chmod +x lein
 sudo mv lein /usr/local/bin/
-
-curl -sLO https://raw.githubusercontent.com/babashka/babashka/master/install > install
-chmod +x install
-sudo ./install
-rm install
-
-# Setup repos
-mkdir -p ~/Dev/hephaistox/
-cd ~/Dev/hephaistox
-yes | git clone git@github.com:hephaistox/js_cli.git
 
 # Installing
 ssh-keygen -t rsa -b 4096 -C "anthony@caumond.com"

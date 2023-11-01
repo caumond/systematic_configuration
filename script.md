@@ -65,7 +65,6 @@ Sortant	ssl0.ovh.net	SSL/TLS	465
    - Profiles > Default > General > Working Directory > Reuse previous section's directory
 - Install brew with
 ```shell
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 mkdir -p ~/Dev/cfg
 cd ~/Dev/cfg
 

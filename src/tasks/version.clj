@@ -7,8 +7,8 @@
   "Version
   Params:
   * `os` kewyord among `[:macos, :ubuntu]`"
-  [os]
-  (let [cfg-items (->> (cfg-items/read-configuration os)
+  [os cfg-item]
+  (let [cfg-items (->> (cfg-items/read-configuration os cfg-item)
                        (filter (fn [[_ v]] (:version v))))]
     (println (format "Version following tasks `%s`" (mapv first cfg-items)))
     (doseq [cfg-item cfg-items]
@@ -17,6 +17,6 @@
         (cmds/execute-cmd version)))))
 
 (comment
-  (version :macos)
+  (version :macos nil)
   ;
 )

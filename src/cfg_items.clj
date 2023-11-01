@@ -24,11 +24,16 @@
   "Read the merged configuration of what is necessary and how it is done for each os
   Params:
   * `os` keyword among (:macos, :ubuntu)"
-  [os]
-  (utils/deep-merge (read-data-as-resource "cfg_item.edn")
-                    (->> os
-                         cfg-envs
-                         (format "%s/%s.edn" cfg-dir)
-                         read-data-as-resource)))
+  [os cfg-item]
+  (println "configuration item" cfg-item)
+  (let [configuration (utils/deep-merge (read-data-as-resource "cfg_item.edn")
+                                        (->> os
+                                             cfg-envs
+                                             (format "%s/%s.edn" cfg-dir)
+                                             read-data-as-resource))]
+    (if (nil? cfg-item) configuration (select-keys configuration [cfg-item]))))
 
-(read-configuration :macos)
+(comment
+  (read-configuration :macos :brew)
+  ;
+)

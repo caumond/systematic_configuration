@@ -7,8 +7,8 @@
   "Check
   Params:
   * `os` kewyord among `[:macos, :ubuntu]`"
-  [os]
-  (let [cfg-items (->> (cfg-items/read-configuration os)
+  [os cfg-item]
+  (let [cfg-items (->> (cfg-items/read-configuration os cfg-item)
                        (filter (fn [[_ v]] (:check v))))]
     (println (format "Check following tasks `%s`" (mapv first cfg-items)))
     (doseq [cfg-item cfg-items]
@@ -17,6 +17,6 @@
         (cmds/execute-cmds check)))))
 
 (comment
-  (check :macos)
+  (check :macos :brew)
   ;
 )

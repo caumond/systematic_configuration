@@ -1,7 +1,14 @@
 ;; This file is describing all configuration items
 ;; All code here in [`:update`] keys should be cross platform
 ;; If you have code specific platform, you can use their `os` subdir
-{:brew-tmp {:brew [["brew" "doctor"]],
+{:brew
+   {:install
+    [["curl" "-fsSL" "https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh" "-o" "brew-install.sh"]
+     ["chmod" "+x" "brew-install.sh"]
+     ["echo" "You need to connect as admin to install brew"]
+     ["./brew-install.sh"]
+     ["rm" "./brew-install.sh"]]},
+ :brew-tmp {:brew [["brew" "doctor"]],
             :description
               "Will be removed when all brew tasks will be described",
             :update [["brew" "upgrade"]]},
@@ -11,5 +18,7 @@
         :type :copy-files,
         :update [["doom" "upgrade"]],
         :version ["doom" "info"]},
- :zsh
+ :iterm2 {},
+ :zsh {:formula "zsh", :type :brew},
+ :zsh-env
    {:type :copy-files, :update [["doom" "env"]], :version ["zsh" "--version"]}}

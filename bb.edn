@@ -1,27 +1,24 @@
-{:paths ["src"
-         "resources"]
- :deps {}
- :tasks {:requires ([current-os]
+{:deps {},
+ :paths ["src" "resources"],
+ :tasks {:enter {},
+         :init (do (def os (current-os/current-os))
+                   (println (format "os is: `%s`" os))),
+         :requires ([current-os]
                     [tasks.nrepl :as nrepl]
                     [tasks.clean :as clean]
                     [tasks.check :as check]
+                    [tasks.format-files :as format-files]
                     [tasks.version :as version]
                     [tasks.install :as install]
-                    [tasks.update-items :as update-items])
-         :init (do (def os
-                     (current-os/current-os))
-                   (println (format "os is: `%s`" os)))
-         :enter {}
-         nrepl {:doc "Launch the nrepl"
-                :task (nrepl/nrepl)}
-         clean {:doc "Clean the setup"
-                :task (clean/clean os)}
-         version {:doc "Display current version of tooling"
-                  :task (version/version os)}
-
-         check {:doc "Ask all tooling to check its consistency"
-                :task (check/check os)}
-         install {:doc "Use to install toolings"
-                  :task (install/install os)}
-         update {:doc "Regularly update you environment"
-                 :task (update-items/update-items os)}}}
+                    [tasks.update-items :as update-items]),
+         check {:doc "Ask all tooling to check its consistency",
+                :task (check/check os)},
+         clean {:doc "Clean the setup", :task (clean/clean os)},
+         format {:doc "Format all project files",
+                 :task (format-files/format-files os)},
+         install {:doc "Use to install toolings", :task (install/install os)},
+         nrepl {:doc "Launch the nrepl", :task (nrepl/nrepl)},
+         update {:doc "Regularly update you environment",
+                 :task (update-items/update-items os)},
+         version {:doc "Display current version of tooling",
+                  :task (version/version os)}}}

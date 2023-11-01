@@ -17,11 +17,11 @@
                        filename))
       nil)))
 
-(def cfg-dir
+(def ^:private cfg-dir
   "Where configuration per os are stored"
   "os")
 
-(def cfg-envs
+(def ^:private cfg-envs
   "Name of each os subdir"
   {:macos "macos"
    :ubuntu "ubuntu"})

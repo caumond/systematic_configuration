@@ -7,17 +7,20 @@
   [cmds fail-fast?]
   (loop [cmds cmds
          res []]
-    (let [cmd  (str/join " " (first cmds))
+    (let [cmd (str/join " " (first cmds))
           _ (println (format "Command %s" cmd))
           {:keys [exit]
            :as res-cmd
-           :or {exit -1}} (shell cmd)
+           :or {exit -1}} (when cmd
+                            (shell cmd))
           new-res (conj res res-cmd)]
       (when-not (zero? exit)
         (println "Error during execution")
         (println "result is: " res-cmd))
       (cond
         (empty? (rest cmds)) new-res
+        (nil? cmd) (recur (rest cmds)
+                          res)
         (or (zero? exit)
             (not fail-fast?)) (recur (rest cmds)
                                      new-res)

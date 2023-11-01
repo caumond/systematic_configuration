@@ -5,8 +5,10 @@
                     [tasks.nrepl :as nrepl]
                     [tasks.clean :as clean]
                     [tasks.update-items :as update-items])
-         :init (def os
-                 (current-os/current-os))
+         :init (do (def os
+                      (current-os/current-os))
+                   (println (format "os is: `%s`" os)))
          :enter {}
          nrepl  (nrepl/nrepl)
-         update (update-items/update-items :macos)}}
+         clean (clean/clean os)
+         update (update-items/update-items os)}}

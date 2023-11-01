@@ -2,6 +2,8 @@
          "resources"]
  :deps {}
  :tasks {:init ()
-         :requires ([tasks.nrepl :as nrepl])
+         :requires ([tasks.nrepl :as nrepl]
+                    [tasks.update-items :as update-items])
          :enter {}
-         nrepl  (nrepl/nrepl)}}
+         nrepl  (nrepl/nrepl)
+         update (update-items/update-items :macos)}}

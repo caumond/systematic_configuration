@@ -1,0 +1,15 @@
+;; This file is describing all configuration items
+;; All code here in [`:update`] keys should be cross platform
+;; If you have code specific platform, you can use their `os` subdir
+{:doom {:type :copy-files
+        :clean [["doom" "clean"]
+                ["doom" "purge" "-g"]]
+        :install [["doom" "install"]]
+        :check [["doom" "doctor"]]
+        :current-version ["doom" "info"]
+        :update [["doom" "upgrade"]]}
+ :brew-tmp {:description "Will be removed when all brew tasks will be described"
+            :brew [["brew" "doctor"]]
+            :update [["brew" "upgrade"]]}
+ :zsh {:type :copy-files
+       :update [["doom" "env"]]}}

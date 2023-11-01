@@ -4,6 +4,7 @@
  :tasks {:requires ([current-os]
                     [tasks.nrepl :as nrepl]
                     [tasks.clean :as clean]
+                    [tasks.install :as install]
                     [tasks.update-items :as update-items])
          :init (do (def os
                       (current-os/current-os))
@@ -11,4 +12,5 @@
          :enter {}
          nrepl  (nrepl/nrepl)
          clean (clean/clean os)
+         install (install/install os)
          update (update-items/update-items os)}}

@@ -1,0 +1,7 @@
+{:paths ["src"
+         "resources"]
+ :deps {}
+ :tasks {:init ()
+         :requires ([tasks.nrepl :as nrepl])
+         :enter {}
+         nrepl  (nrepl/nrepl)}}

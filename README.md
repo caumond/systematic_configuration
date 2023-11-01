@@ -14,7 +14,6 @@ bash < <(curl -s https://raw.githubusercontent.com/babashka/babashka/master/inst
 * Use babashka 
    * Rationale: 
       * It is a well known technology
-      * I
    * Consequences
 * Should enable many target platform
     * Rationale

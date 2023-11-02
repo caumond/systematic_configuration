@@ -11,6 +11,7 @@ Run `setup.sh`
    * Rationale: 
       * It is a well known technology
    * Consequences
+      * Use for all tasks
 * Should enable many target platform
     * Rationale
       * For leverage both macos and linux hardwares we use

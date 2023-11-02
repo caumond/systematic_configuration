@@ -57,8 +57,3 @@ Sortant	ssl0.ovh.net	SSL/TLS	465
 - Open outlook, 
    - Connect to caumond@gmail.com
 - Go to `https://www.brother.fr/services-et-supports/drivers` and select DS-640 as a scanner to download the latest drivers
-
-# Install bash like apps
-- Setup iTerm2:
-   - General > Closing > Quit when all windows are closed
-   - Profiles > Default > General > Working Directory > Reuse previous section's directory

@@ -11,15 +11,20 @@
            ["echo" "You need to connect as admin to install brew"]
            ["./brew-install.sh"] ["rm" "./brew-install.sh"]],
         :update [["brew" "update"]]},
+ :c-project {:pre-reqs {:gcc {:formula "gcc"}}},
+ :clever {:formula "clever-tools"},
  :clojure-project
    {:pre-reqs {:clj-kondo {:formula "borkdude/brew/clj-kondo",
                            :tmp-dirs [".clojure/.clj-kondo/.cache"]},
                :clojure {:formula "clojure",
                          :tmp-dirs [".clojure/.cpcache" ".m2/repository"]},
                :jq {:formula "jq"},
+               :lein {:formula "leiningen"},
                :openjdk {:formula "openjdk"},
                :rlwrap {:formula "rlwrap"},
-               :tools-clojure {:formula "clojure/tools/clojure"}}},
+               :tools-clojure {:formula "clojure/tools/clojure"},
+               :tree-sitter {:formula "tree-sitter"}}},
+ :docker {:pre-reqs {:dockutil {:formula "dockutil"}}},
  :doom
    {:check [["doom" "doctor"]],
     :clean [["doom" "clean"] ["doom" "purge" "-g"]],
@@ -27,42 +32,58 @@
                "https://github.com/doomemacs/doomemacs" "~/.config/emacs"]
               ["doom" "install"]],
     :pre-reqs
-      {:black {:package "black", :type :pip3},
+      {:aspell {:formula "aspell"},
+       :black {:package "black", :type :pip3},
+       :cljfmt {:node-deps "node-cljfmt"},
        :clojure-lsp-native {:formula "clojure-lsp/brew/clojure-lsp-native",
                             :tmp-dirs [".clojure/.lsp/.cache"
                                        ".cache/clojure-lsp"]},
        :cmake {:formula "cmake"},
+       :cmake-docs {:formula "cmake-docs"},
        :emacs
          {:doc
-            "# See https://github.com/d12frosted/homebrew-emacs-plus for more details",
+            "# See https://github.com/d12frosted/homebrew-emacs-plus for more details, may be emacs-plus@28 emacs-plus@29",
           :formula "emacs-plus --with-imagemagick --with-native-comp",
+          :pre-reqs {:imagemagick {:formula "imagemagick"}},
           :tap "d12frosted/emacs-plus"},
        :fd {:formula "fd"},
        :graphviz {:formula "graphviz"},
+       :js-beautify {:npm-deps "js-beautify"},
        :ktlint {:formula "ktlint"},
+       :openjpeg {:formula "openjpeg"},
        :ripgrep {:formula "ripgrep"},
-       :shfmt {:formula "shfmt"}},
+       :shellcheck {:formula "shellcheck"},
+       :shfmt {:formula "shfmt"},
+       :stylelint {:npm-deps "stylelint"},
+       :stylelint-config-standard {:npm-deps "stylelint-config-standard"},
+       :tidy-html5 {:formula "tidy-html5"},
+       :zprint {:formula "zprint"}},
     :update [["doom" "upgrade"]],
     :version ["doom" "info"]},
  :ffmpeg {:formula "ffmpeg"},
  :gimp {:formula "gimp"},
  :git {:formula "git",
        :install [["git" "config" "--global" "user.email" "anthony@caumond.com"
-                  "git" "config" "--global" "user.name" "Anthony CAUMOND"]]},
+                  "git" "config" "--global" "user.name" "Anthony CAUMOND"]],
+       :pre-reqs {:gd {:formula "gd"}, :git-lfs {:formula "git-lfs"}}},
  :glpk {:install [["mkdir -p ~/Dev/install" "cd ~/Dev/install"
                    "wget http://ftp.gnu.org/gnu/glpk/glpk-5.0.tar.gz"
                    "tar -xvzf glpk-5.0.tar.gz" "cd glpk-5.0" "./configure"]]},
  :iterm2 {:formula "iterm2",
           :pre-reqs {:coreutils {:formula "coreutils"},
+                     :cowsay {:formula "cowsay"},
+                     :curl {:formula "curl"},
                      :grep {:formula "grep"},
                      :htop {:formula "htop"},
                      :nano {:formula "nano"},
+                     :tmux {:formula "tmux"},
                      :tree {:formula "tree"}}},
  :markdown {:formula "markdown"},
  :node {:formula "node"},
+ :obs {:formula "obs"},
  :os {:clean [["fd" "-H" "-I" "-g" "'**/.DS_Store'" "-x" "rm" "{}"]]},
  :python-projects
-   {:pre-reqs {:pip {:install [["python3.11" "-m" "pip" "install" "--upgrade"
+   {:pre-reqs {:pip {:install [["python3.12" "-m" "pip" "install" "--upgrade"
                                 "pip"]]},
                :pipenv {:package "pipenv", :type :pip3},
                :pyflakes {:package "pyflakes", :type :pip3},
@@ -84,12 +105,13 @@
  :zsh
    {:formula "zsh",
     :pre-reqs
-      {:typewritten
+      {:oh-my-zsh
          {:install
-            [["npm install -g typewritten"]
-             ["curl" "-fsSL"
+            [["curl" "-fsSL"
               "https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh"
               "-o" "ohmyzsh-install.sh"] ["chmod" "+x" "ohmyzsh-install.sh"]
-             ["./ohmyzsh-install.sh"] ["rm" "./ohmyzsh-install.sh"]]}}},
+             ["./ohmyzsh-install.sh"] ["rm" "./ohmyzsh-install.sh"]]},
+       :typewritten {:npm-deps typewritten},
+       :zsh-completions {:formula "zsh-completions"}}},
  :zsh-env
    {:type :copy-files, :update [["doom" "env"]], :version ["zsh" "--version"]}}

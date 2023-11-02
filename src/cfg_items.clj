@@ -15,24 +15,29 @@
 
 (defn- pip-update-cfg-item
   [{:keys [package], :as cfg-item-val}]
-  (if (some? package)
-    (-> cfg-item-val
-        (assoc-concat :install [["pip3" "install" package]])
-        (assoc-concat :update [["pip3" "install" "--upgrade" package]])
-        (assoc-concat ::graph-deps [:pip])
-        (assoc-concat :check [["pip3" "check" package]]))
-    cfg-item-val))
+  (merge cfg-item-val
+         (when (some? package)
+           (-> cfg-item-val
+               (assoc-concat :install [["pip3" "install" package]])
+               (assoc-concat :update [["pip3" "install" "--upgrade" package]])
+               (assoc-concat ::graph-deps [:pip])
+               (assoc-concat :check [["pip3" "check" package]])))))
 
 (defn- brew-update-cfg-item
   [{:keys [tap formula], :as cfg-item-val}]
-  (if (some? formula)
-    (-> cfg-item-val
-        (assoc-concat ::graph-deps [:brew])
-        (assoc-concat :install
-                      (concat (when tap [["brew" "tap" tap]])
-                              [["brew" "install" formula]]))
-        (assoc-concat :update [["brew" "upgrade" formula]]))
-    cfg-item-val))
+  (merge cfg-item-val
+         (when (some? formula)
+           (-> cfg-item-val
+               (assoc-concat ::graph-deps [:brew])
+               (assoc-concat :install
+                             (concat (when tap [["brew" "tap" tap]])
+                                     [["brew" "install" formula]]))
+               (assoc-concat :update [["brew" "upgrade" formula]])))))
+
+(defn- npm-cfg-item
+  [{:keys [npm-deps], :as cfg-item-val}]
+  (merge cfg-item-val
+         (when npm-deps {:install [["npm" "install" "-g" npm-deps]]})))
 
 (defn- tmp-dirs-cfg-item
   [{:keys [tmp-dirs], :as cfg-item-val}]
@@ -55,6 +60,7 @@
                                        brew-update-cfg-item
                                        pip-update-cfg-item
                                        tmp-dirs-cfg-item
+                                       npm-cfg-item
                                        tmp-files-cfg-item)]))
        (into {})))
 

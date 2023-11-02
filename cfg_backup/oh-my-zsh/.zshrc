@@ -12,8 +12,8 @@ export GH_TOKEN="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"
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
 ZSH_THEME="apple"
 
+# For iTerm2 plugin https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/iterm2/README.md#iterm2-plugin
 zstyle :omz:plugins:iterm2 shell-integration yes
-
 
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
@@ -30,7 +30,7 @@ zstyle :omz:plugins:iterm2 shell-integration yes
 
 # Uncomment one of the following lines to change the auto-update behavior
 # zstyle ':omz:update' mode disabled  # disable automatic updates
-# zstyle ':omz:update' mode auto      # update automatically without asking
+zstyle ':omz:update' mode auto      # update automatically without asking
 # zstyle ':omz:update' mode reminder  # just remind me to update when it's time
 
 # Uncomment the following line to change how often to auto-update (in days).
@@ -43,7 +43,7 @@ zstyle :omz:plugins:iterm2 shell-integration yes
 # DISABLE_LS_COLORS="true"
 
 # Uncomment the following line to disable auto-setting terminal title.
-# DISABLE_AUTO_TITLE="true"
+DISABLE_AUTO_TITLE="true"
 
 # Uncomment the following line to enable command auto-correction.
 # ENABLE_CORRECTION="true"
@@ -109,22 +109,24 @@ export JAVA_HOME=/opt/homebrew/opt/openjdk/bin/
 export CPPFLAGS="-I/opt/homebrew/opt/openjdk/include"
 
 fpath=($fpath "/Users/anthonycaumond/.zfunctions")
-fpath=($fpath "/Users/anthonycaumond/.zfunctions")
 
+# See https://typewritten.dev/#/prompt_customization?id=typewritten_prompt_layout
 # Set typewritten ZSH as a prompt
-TYPEWRITTEN_RIGHT_PROMPT_PREFIX=$HOST" "
-# TYPEWRITTEN_PROMPT_LAYOUT="pure"
+# TYPEWRITTEN_RIGHT_PROMPT_PREFIX=$HOST" "
+# TYPEWRITTEN_LEFT_PROMPT_PREFIX=$HOST" "
+TYPEWRITTEN_PROMPT_LAYOUT="pure"
+TYPEWRITTEN_SYMBOL="->"
+TYPEWRITTEN_RELATIVE_PATH="adaptive"
+
 autoload -U promptinit; promptinit
 prompt typewritten
 
 test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
 
 source ~/.iterm2_shell_integration.zsh
+alias l="ls -la --color"
 
 alias h="cd ~/Dev/hephaistox/monorepo/clojure"
-alias base="cd ~/Dev/hephaistox/monorepo/clojure/base"
-alias o="cd ~/Dev/hephaistox/monorepo/clojure/optor"
-alias la="cd ~/Dev/hephaistox/monorepo/clojure/landing"
 
 _bb_tasks() {
     local matches=(`bb tasks |tail -n +3 |cut -f1 -d ' '`)

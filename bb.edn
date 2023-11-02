@@ -1,4 +1,5 @@
-{:deps {org.clojure/tools.cli {:mvn/version "1.0.219"}},
+{:deps {metosin/malli {:mvn/version "0.13.0"},
+        org.clojure/tools.cli {:mvn/version "1.0.219"}},
  :paths ["src" "resources"],
  :tasks {:enter {},
          :init
@@ -22,6 +23,7 @@
                     [tasks.format-files :as format-files]
                     [tasks.install :as install]
                     [tasks.nrepl :as nrepl]
+                    [tasks.save :as save]
                     [tasks.update-items :as update-items]
                     [tasks.version :as version]),
          check {:doc "Ask all tooling to check its consistency",
@@ -32,6 +34,8 @@
          install {:doc "Use to install toolings",
                   :task (execute-task install/install)},
          nrepl {:doc "Launch the nrepl", :task (execute-task nrepl/nrepl)},
+         save {:doc "Save the current configuration",
+               :task (execute-task save/save)},
          update {:doc "Regularly update you environment",
                  :task (execute-task update-items/update-items)},
          version {:doc "Display current version of tooling",

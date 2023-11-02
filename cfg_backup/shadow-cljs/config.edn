@@ -1,0 +1,1 @@
+{:open-file-command ["emacsclient" "-n" ["+%s:%s" :line :column] :file]}

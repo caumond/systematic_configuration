@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: obj-md
+# uuid:
+# key: obj-md
+# condition: t
+# --
+*
+  * rationale:
+  * consequences:
+  * limitations:

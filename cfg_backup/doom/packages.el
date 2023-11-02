@@ -50,3 +50,5 @@
 ;(unpin! t)
 
 (package! babashka)
+(package! zprint-mode)
+(add-load-path! "~/.config/doom/hephaistox.el")

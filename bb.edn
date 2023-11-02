@@ -32,8 +32,8 @@
          clean {:doc "Clean the setup", :task (execute-task clean/clean)},
          format {:doc "Format all project files",
                  :task (execute-task format-files/format-files)},
-         init {:doc "Init the setup - to be run only once"
-               :task (execute-task init/init)}
+         init {:doc "Init the setup - to be run only once",
+               :task (execute-task init/init)},
          install {:doc "Use to install toolings",
                   :task (execute-task install/install)},
          nrepl {:doc "Launch the nrepl", :task (execute-task nrepl/nrepl)},

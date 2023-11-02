@@ -66,7 +66,7 @@
        :stylelint {:node-deps "stylelint"},
        :stylelint-config-standard {:node-deps "stylelint-config-standard"},
        :tidy-html5 {:formula "tidy-html5"},
-       :zprint {:cfgs ["~/.zprintrc"], :formula "zprint"}},
+       :zprint {:cfgs ["~/.zprintrc"], :formula "zprint" :tmp-dirs [".zprint/urlcache"]}},
     :update [["doom" "upgrade"]],
     :version ["doom" "info"]},
  :ffmpeg {:formula "ffmpeg"},
@@ -107,8 +107,8 @@
    {:description "What is necessary to manage security keys",
     :pre-reqs {:gnupg {:formula "gnupg"},
                :ssh-keygen {:init [["ssh-keygen" "-t" "rsa" "-b" "4096" "-C"
-                                       "anthony@caumond.com"]
-                                      ["cat" "~/.ssh/id_rsa.pub"]]}}},
+                                    "anthony@caumond.com"]
+                                   ["cat" "~/.ssh/id_rsa.pub"]]}}},
  :vim {:formula "vim"},
  :vlc {:formula "vlc"},
  :wget {:formula "wget"},

@@ -106,7 +106,7 @@
  :security-tools
    {:description "What is necessary to manage security keys",
     :pre-reqs {:gnupg {:formula "gnupg"},
-               :ssh-keygen {:install [["ssh-keygen" "-t" "rsa" "-b" "4096" "-C"
+               :ssh-keygen {:init [["ssh-keygen" "-t" "rsa" "-b" "4096" "-C"
                                        "anthony@caumond.com"]
                                       ["cat" "~/.ssh/id_rsa.pub"]]}}},
  :vim {:formula "vim"},

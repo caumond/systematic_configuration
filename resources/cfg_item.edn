@@ -45,7 +45,7 @@
     :update [["doom" "upgrade"]],
     :version ["doom" "info"]},
  :ffmpeg {:formula "ffmpeg"},
- :gimp {:forumla "gimp"},
+ :gimp {:formula "gimp"},
  :git {:formula "git",
        :install [["git" "config" "--global" "user.email" "anthony@caumond.com"
                   "git" "config" "--global" "user.name" "Anthony CAUMOND"]]},

@@ -2,6 +2,7 @@
   "Configuration items management"
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [deps-graph]
             [utils]))
 
 (def ^:private cfg-dir "Where configuration per os are stored" "os")
@@ -33,14 +34,15 @@
         (assoc-concat :update [["brew" "upgrade" formula]]))
     cfg-item-val))
 
-(defn- process-types
+(defn- expand-pre-built
   "For each predefined type"
   [configurations]
   (->> configurations
        (mapv (fn [[cfg-item val]] [cfg-item
                                    (-> val
                                        brew-update-cfg-item
-                                       pip-update-cfg-item)]))))
+                                       pip-update-cfg-item)]))
+       (into {})))
 
 (defn- read-data-as-resource
   [filename]
@@ -88,10 +90,23 @@
                                               cfg-envs
                                               (format "%s/%s.edn" cfg-dir)
                                               read-data-as-resource))
-        configurations (if (nil? cfg-item)
-                         configurations
-                         (select-keys configurations [cfg-item]))]
-    (->> configurations
-         develop-pre-reqs
-         process-types)))
+        configurations (-> (if (nil? cfg-item)
+                             configurations
+                             (select-keys configurations [cfg-item]))
+                           develop-pre-reqs
+                           expand-pre-built)
+        seq-cfg (-> configurations
+                    (deps-graph/build-from ::graph-deps)
+                    deps-graph/topological-sort)]
+    (->> seq-cfg
+         (mapcat (fn [k]
+                   [k (get configurations
+                           k)]))
+         (apply array-map))))
 
+(comment
+  (println
+   (pr-str
+    (read-configuration :macos nil)))
+;
+  )

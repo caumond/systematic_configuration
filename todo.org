@@ -1,5 +1,4 @@
 # remove
-All .DS_store
 monorepo
 
 * DONE Create the babashka's installation instructions

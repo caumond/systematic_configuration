@@ -12,10 +12,10 @@
            ["./brew-install.sh"] ["rm" "./brew-install.sh"]],
         :update [["brew" "update"]]},
  :clojure-project
-   {:pre-reqs {:clj-kondo {:clear-dirs [".clojure/.clj-kondo/.cache"],
-                           :formula "borkdude/brew/clj-kondo"},
-               :clojure {:clear-dirs [".clojure/.cpcache"
-                                      ".m2/repository"], :formula "clojure"},
+   {:pre-reqs {:clj-kondo {:formula "borkdude/brew/clj-kondo",
+                           :tmp-dirs [".clojure/.clj-kondo/.cache"]},
+               :clojure {:formula "clojure",
+                         :tmp-dirs [".clojure/.cpcache" ".m2/repository"]},
                :jq {:formula "jq"},
                :openjdk {:formula "openjdk"},
                :rlwrap {:formula "rlwrap"},
@@ -28,9 +28,9 @@
               ["doom" "install"]],
     :pre-reqs
       {:black {:package "black", :type :pip3},
-       :clojure-lsp-native {:clear-dirs [".clojure/.lsp/.cache"
-                                         ".cache/clojure-lsp"],
-                            :formula "clojure-lsp/brew/clojure-lsp-native"},
+       :clojure-lsp-native {:formula "clojure-lsp/brew/clojure-lsp-native",
+                            :tmp-dirs [".clojure/.lsp/.cache"
+                                       ".cache/clojure-lsp"]},
        :cmake {:formula "cmake"},
        :emacs
          {:doc
@@ -60,7 +60,7 @@
                      :tree {:formula "tree"}}},
  :markdown {:formula "markdown"},
  :node {:formula "node"},
- :os {:clear-files [["fd" "-H" "-I" "-g" "'**/.DS_Store'" "-x" "rm" "{}"]] }
+ :os {:clean [["fd" "-H" "-I" "-g" "'**/.DS_Store'" "-x" "rm" "{}"]]},
  :python-projects
    {:pre-reqs {:pip {:install [["python3.11" "-m" "pip" "install" "--upgrade"
                                 "pip"]]},

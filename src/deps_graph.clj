@@ -13,22 +13,16 @@
          sorted-deps []
          graph-deps graph-deps]
     (let [leaves (->> graph-deps
-                      (filter (fn [[_ v]]
-                                (empty? v)))
+                      (filter (fn [[_ v]] (empty? v)))
                       (mapv first)
                       sort)
           new-sorted-deps (vec (concat sorted-deps leaves))
           new-graph-deps (->> (apply dissoc graph-deps leaves)
-                              (mapv (fn [[k v]]
-                                      [k (remove (set leaves) v)]))
+                              (mapv (fn [[k v]] [k (remove (set leaves) v)]))
                               (into {}))]
-
       (if (empty? leaves)
         (vec new-sorted-deps)
-        (when (< n 10)
-          (recur (inc n)
-                 new-sorted-deps
-                 new-graph-deps))))))
+        (when (< n 10) (recur (inc n) new-sorted-deps new-graph-deps))))))
 
 ;; (comment
 ;;   (require '[cfg-items :as cfg-items])

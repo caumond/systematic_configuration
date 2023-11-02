@@ -34,6 +34,18 @@
         (assoc-concat :update [["brew" "upgrade" formula]]))
     cfg-item-val))
 
+(defn- tmp-dirs-cfg-item
+  [{:keys [tmp-dirs], :as cfg-item-val}]
+  (merge cfg-item-val
+         (when (some? tmp-dirs)
+           {:clean (mapv (fn [clean-dir] ["rm" "-fr" clean-dir]) tmp-dirs)})))
+
+(defn- tmp-files-cfg-item
+  [{:keys [tmp-files], :as cfg-item-val}]
+  (merge cfg-item-val
+         (when (some? tmp-files)
+           {:clean (mapv (fn [tmp-file] ["rm" "-f" tmp-file]) tmp-files)})))
+
 (defn- expand-pre-built
   "For each predefined type"
   [configurations]
@@ -41,7 +53,9 @@
        (mapv (fn [[cfg-item val]] [cfg-item
                                    (-> val
                                        brew-update-cfg-item
-                                       pip-update-cfg-item)]))
+                                       pip-update-cfg-item
+                                       tmp-dirs-cfg-item
+                                       tmp-files-cfg-item)]))
        (into {})))
 
 (defn- read-data-as-resource
@@ -91,22 +105,18 @@
                                               (format "%s/%s.edn" cfg-dir)
                                               read-data-as-resource))
         configurations (-> (if (nil? cfg-item)
-                             configurations
-                             (select-keys configurations [cfg-item]))
+                               configurations
+                               (select-keys configurations [cfg-item]))
                            develop-pre-reqs
                            expand-pre-built)
         seq-cfg (-> configurations
                     (deps-graph/build-from ::graph-deps)
                     deps-graph/topological-sort)]
     (->> seq-cfg
-         (mapcat (fn [k]
-                   [k (get configurations
-                           k)]))
+         (mapcat (fn [k] [k (get configurations k)]))
          (apply array-map))))
 
 (comment
-  (println
-   (pr-str
-    (read-configuration :macos nil)))
-;
-  )
+  (println (pr-str (read-configuration :macos nil)))
+  ;
+)

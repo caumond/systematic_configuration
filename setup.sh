@@ -4,3 +4,4 @@ curl -sLO https://raw.githubusercontent.com/babashka/babashka/master/install > i
 chmod +x install
 sudo ./install
 rm install
+bb init

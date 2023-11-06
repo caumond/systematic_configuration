@@ -18,6 +18,7 @@
               [:description {:optional true} :string]
               [:formula {:optional true} :string]
               [:install {:optional true} cmds]
+              [:init {:optional true} cmds]
               [:node-deps {:optional true} :string]
               [:package {:optional true} :string]
               [:pre-reqs {:optional true} [:map-of :keyword [:ref ::app]]]

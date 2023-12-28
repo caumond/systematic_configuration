@@ -2,6 +2,7 @@
   "The dependency graph allow to execute tasks in the appropriate order")
 
 (defn build-from
+  "Build a map associating a key of `cfg-items` with the value of `kw`"
   [cfg-items kw]
   (->> cfg-items
        (map (fn [[k v]] [k (get v kw)]))
@@ -13,7 +14,7 @@
          sorted-deps []
          graph-deps graph-deps]
     (let [leaves (->> graph-deps
-                      (filter (fn [[_ v]] (empty? v)))
+                      (filter (fn [[_ v]] (some? v)))
                       (mapv first)
                       sort)
           new-sorted-deps (vec (concat sorted-deps leaves))

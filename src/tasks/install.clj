@@ -4,7 +4,7 @@
 
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn install
-  "Instal
+  "Install
   Params:
   * `os` kewyord among `[:macos, :ubuntu]`"
   [os cfg-item sandbox?]

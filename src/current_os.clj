@@ -1,6 +1,10 @@
-(ns current-os "Returns the current os")
+(ns current-os
+  "Returns the current os
 
-(def os-name-to-kw {"Mac OS X" :macos})
+  Use hostnamectl to have a clearer idea of the distribution's name")
+
+(def os-name-to-kw {"Mac OS X" :macos
+                    "Linux" :ubuntu})
 
 (defn current-os
   []

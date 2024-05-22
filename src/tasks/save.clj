@@ -35,8 +35,8 @@
                                           str))
                       (fs/copy (fs/expand-home cfg) dst-file)))
                 (println (format
-                           "File copy of `%s` is skipped, as it doesn't exist"
-                           cfg))))))))))
+                          "File copy of `%s` is skipped, as it doesn't exist"
+                          cfg))))))))))
 
 (comment
   (save :macos nil false)

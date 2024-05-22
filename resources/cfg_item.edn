@@ -5,70 +5,71 @@
  :brew {:check [["brew" "doctor"]],
         :description "Brew installation and global tasks",
         :install
-          [["curl" "-fsSL"
-            "https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
-            "-o" "brew-install.sh"] ["chmod" "+x" "brew-install.sh"]
-           ["echo" "You need to connect as admin to install brew"]
-           ["./brew-install.sh"] ["rm" "./brew-install.sh"]],
+        [["curl" "-fsSL"
+          "https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
+          "-o" "brew-install.sh"] ["chmod" "+x" "brew-install.sh"]
+         ["echo" "You need to connect as admin to install brew"]
+         ["./brew-install.sh"] ["rm" "./brew-install.sh"]],
         :update [["brew" "update"]]},
  :c-project {:pre-reqs {:gcc {:formula "gcc"}}},
  :clever {:cfgs ["~/.config/clever-cloud/clever-tools.json"],
           :formula "clever-tools"},
- :clojure-project
-   {:pre-reqs {:clj-kondo {:formula "borkdude/brew/clj-kondo",
-                           :tmp-dirs [".clojure/.clj-kondo/.cache"]},
-               :clojure {:cfgs ["~/.clojure/deps.edn"],
-                         :formula "clojure",
-                         :tmp-dirs [".clojure/.cpcache" ".m2/repository"],
-                         :version ["clojure" "-version"]},
-               :jq {:formula "jq"},
-               :lein {:formula "leiningen"},
-               :openjdk {:formula "openjdk"},
-               :rlwrap {:formula "rlwrap"},
-               :shadow-cljs {:cfgs ["~/.shadow-cljs/config.edn"],
-                             :node-deps "shadow-cljs"},
-               :tools-clojure {:cfgs ["~/.clojure/tools/tools.edn"],
-                               :formula "clojure/tools/clojure"},
-               :tree-sitter {:formula "tree-sitter"}}},
+ :clojure-project {:pre-reqs
+                   {:clj-kondo {:formula "borkdude/brew/clj-kondo",
+                                :tmp-dirs [".clojure/.clj-kondo/.cache"]},
+                    :clojure {:cfgs ["~/.clojure/deps.edn"],
+                              :formula "clojure",
+                              :tmp-dirs [".clojure/.cpcache" ".m2/repository"],
+                              :version ["clojure" "-version"]},
+                    :jq {:formula "jq"},
+                    :lein {:formula "leiningen"},
+                    :openjdk {:formula "openjdk"},
+                    :rlwrap {:formula "rlwrap"},
+                    :shadow-cljs {:cfgs ["~/.shadow-cljs/config.edn"],
+                                  :node-deps "shadow-cljs"},
+                    :tools-clojure {:cfgs ["~/.clojure/tools/tools.edn"],
+                                    :formula "clojure/tools/clojure"},
+                    :tree-sitter {:formula "tree-sitter"}}},
  :docker {:pre-reqs {:dockutil {:formula "dockutil"}}},
  :doom
-   {:cfgs ["~/.config/doom/config.el" "~/.config/doom/custom.el"
-           "~/.config/doom/init.el" "~/.config/doom/packages.el"
-           "~/.config/doom/snippets"],
-    :check [["doom" "doctor"]],
-    :clean [["doom" "clean"] ["doom" "purge" "-g"]],
-    :install [["git" "clone" "--depth" "1"
-               "https://github.com/doomemacs/doomemacs" "~/.config/emacs"]
-              ["doom" "install"]],
-    :pre-reqs
-      {:aspell {:formula "aspell"},
-       :black {:package "black"},
-       :cljfmt {:node-deps "node-cljfmt"},
-       :clojure-lsp-native {:formula "clojure-lsp/brew/clojure-lsp-native",
-                            :tmp-dirs [".clojure/.lsp/.cache"
-                                       ".cache/clojure-lsp"]},
-       :cmake {:formula "cmake"},
-       :cmake-docs {:formula "cmake-docs"},
-       :emacs
-         {:description
-            "# See https://github.com/d12frosted/homebrew-emacs-plus for more details, may be emacs-plus@28 emacs-plus@29",
-          :formula "emacs-plus --with-imagemagick --with-native-comp",
-          :pre-reqs {:imagemagick {:formula "imagemagick"}},
-          :tap "d12frosted/emacs-plus"},
-       :fd {:formula "fd"},
-       :graphviz {:formula "graphviz"},
-       :js-beautify {:node-deps "js-beautify"},
-       :ktlint {:formula "ktlint"},
-       :openjpeg {:formula "openjpeg"},
-       :ripgrep {:formula "ripgrep"},
-       :shellcheck {:formula "shellcheck"},
-       :shfmt {:formula "shfmt"},
-       :stylelint {:node-deps "stylelint"},
-       :stylelint-config-standard {:node-deps "stylelint-config-standard"},
-       :tidy-html5 {:formula "tidy-html5"},
-       :zprint {:cfgs ["~/.zprintrc"], :formula "zprint" :tmp-dirs [".zprint/urlcache"]}},
-    :update [["doom" "upgrade"]],
-    :version ["doom" "info"]},
+ {:cfgs ["~/.config/doom/config.el" "~/.config/doom/custom.el"
+         "~/.config/doom/init.el" "~/.config/doom/packages.el"
+         "~/.config/doom/snippets"],
+  :check [["doom" "doctor"]],
+  :clean [["doom" "clean"] ["doom" "purge" "-g"]],
+  :install [["git" "clone" "--depth" "1"
+             "https://github.com/doomemacs/doomemacs" "~/.config/emacs"]
+            ["doom" "install"]],
+  :pre-reqs
+  {:aspell {:formula "aspell"},
+   :black {:package "black"},
+   :cljfmt {:node-deps "node-cljfmt"},
+   :clojure-lsp-native {:formula "clojure-lsp/brew/clojure-lsp-native",
+                        :tmp-dirs [".clojure/.lsp/.cache"
+                                   ".cache/clojure-lsp"]},
+   :cmake {:formula "cmake"},
+   :cmake-docs {:formula "cmake-docs"},
+   :emacs
+   {:description
+    "# See https://github.com/d12frosted/homebrew-emacs-plus for more details, may be emacs-plus@28 emacs-plus@29",
+    :formula "emacs-plus --with-imagemagick --with-native-comp",
+    :pre-reqs {:imagemagick {:formula "imagemagick"}},
+    :tap "d12frosted/emacs-plus"},
+   :fd {:formula "fd"},
+   :graphviz {:formula "graphviz"},
+   :js-beautify {:node-deps "js-beautify"},
+   :ktlint {:formula "ktlint"},
+   :openjpeg {:formula "openjpeg"},
+   :ripgrep {:formula "ripgrep"},
+   :shellcheck {:formula "shellcheck"},
+   :shfmt {:formula "shfmt"},
+   :stylelint {:node-deps "stylelint"},
+   :stylelint-config-standard {:node-deps "stylelint-config-standard"},
+   :tidy-html5 {:formula "tidy-html5"},
+   :zprint
+   {:cfgs ["~/.zprintrc"], :formula "zprint", :tmp-dirs [".zprint/urlcache"]}},
+  :update [["doom" "upgrade"]],
+  :version ["doom" "info"]},
  :ffmpeg {:formula "ffmpeg"},
  :gimp {:formula "gimp"},
  :git {:cfgs ["~/.gitconfig"],
@@ -92,36 +93,35 @@
  :obs {:formula "obs"},
  :os {:clean [["fd" "-H" "-I" "-g" "'**/.DS_Store'" "-x" "rm" "{}"]]},
  :python-projects
-   {:pre-reqs
-      {:pip {:install [["python3.12" "-m" "pip" "install" "--upgrade" "pip"]],
-             :update [["python3.11" "-m" "pip" "install" "--upgrade" "pip"]]},
-       :pipenv {:package "pipenv"},
-       :pyflakes {:package "pyflakes"},
-       :python {:formula "python",
-                :pre-reqs {:isort {:package "isort"},
-                           :nose {:package "nose"},
-                           :pytest {:package "pytest"}}},
-       :testresources {:package "testresources"},
-       :virtualenv {:package "virtualenv"}}},
+ {:pre-reqs {:pip
+             {:install [["python3.12" "-m" "pip" "install" "--upgrade" "pip"]],
+              :update [["python3.11" "-m" "pip" "install" "--upgrade" "pip"]]},
+             :pipenv {:package "pipenv"},
+             :pyflakes {:package "pyflakes"},
+             :python {:formula "python",
+                      :pre-reqs {:isort {:package "isort"},
+                                 :nose {:package "nose"},
+                                 :pytest {:package "pytest"}}},
+             :testresources {:package "testresources"},
+             :virtualenv {:package "virtualenv"}}},
  :security-tools
-   {:description "What is necessary to manage security keys",
-    :pre-reqs {:gnupg {:formula "gnupg"},
-               :ssh-keygen {:init [["ssh-keygen" "-t" "rsa" "-b" "4096" "-C"
-                                    "anthony@caumond.com"]
-                                   ["cat" "~/.ssh/id_rsa.pub"]]}}},
+ {:description "What is necessary to manage security keys",
+  :pre-reqs {:gnupg {:formula "gnupg"},
+             :ssh-keygen {:init [["ssh-keygen" "-t" "rsa" "-b" "4096" "-C"
+                                  "anthony@caumond.com"]
+                                 ["cat" "~/.ssh/id_rsa.pub"]]}}},
  :vim {:formula "vim"},
  :vlc {:formula "vlc"},
  :wget {:formula "wget"},
  :zsh
-   {:formula "zsh",
-    :pre-reqs
-      {:oh-my-zsh
-         {:cfgs ["~/.zshrc"],
-          :install
-            [["curl" "-fsSL"
-              "https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh"
-              "-o" "ohmyzsh-install.sh"] ["chmod" "+x" "ohmyzsh-install.sh"]
-             ["./ohmyzsh-install.sh"] ["rm" "./ohmyzsh-install.sh"]]},
-       :typewritten {:node-deps "typewritten"},
-       :zsh-completions {:formula "zsh-completions"}}},
+ {:formula "zsh",
+  :pre-reqs {:oh-my-zsh
+             {:cfgs ["~/.zshrc"],
+              :install
+              [["curl" "-fsSL"
+                "https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh"
+                "-o" "ohmyzsh-install.sh"] ["chmod" "+x" "ohmyzsh-install.sh"]
+               ["./ohmyzsh-install.sh"] ["rm" "./ohmyzsh-install.sh"]]},
+             :typewritten {:node-deps "typewritten"},
+             :zsh-completions {:formula "zsh-completions"}}},
  :zsh-env {:update [["doom" "env"]], :version ["zsh" "--version"]}}

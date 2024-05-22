@@ -13,18 +13,16 @@
 (def app-schema
   [:schema
    {:registry
-      {::app [:map {:closed true} [:cfgs {:optional true} [:vector :string]]
-              [:check {:optional true} cmds] [:clean {:optional true} cmds]
-              [:description {:optional true} :string]
-              [:formula {:optional true} :string]
-              [:install {:optional true} cmds]
-              [:init {:optional true} cmds]
-              [:node-deps {:optional true} :string]
-              [:package {:optional true} :string]
-              [:pre-reqs {:optional true} [:map-of :keyword [:ref ::app]]]
-              [:tap {:optional true} :string]
-              [:tmp-dirs {:optional true} [:vector :string]]
-              [:update {:optional true} cmds] [:version {:optional true} cmd]]}}
+    {::app [:map {:closed true} [:cfgs {:optional true} [:vector :string]]
+            [:check {:optional true} cmds] [:clean {:optional true} cmds]
+            [:description {:optional true} :string]
+            [:formula {:optional true} :string] [:install {:optional true} cmds]
+            [:init {:optional true} cmds] [:node-deps {:optional true} :string]
+            [:package {:optional true} :string]
+            [:pre-reqs {:optional true} [:map-of :keyword [:ref ::app]]]
+            [:tap {:optional true} :string]
+            [:tmp-dirs {:optional true} [:vector :string]]
+            [:update {:optional true} cmds] [:version {:optional true} cmd]]}}
    ::app])
 
 (def apps-schema [:map-of :keyword app-schema])
@@ -43,7 +41,7 @@
          (when (some? package)
            (-> cfg-item-val
                (assoc-concat :install [["pip3" "install" package]])
-               (assoc-concat :update [["pip3" "install" "--upgrade" package]])
+               (assoc-concat :update [["pip3" "install" "--upgrade" package "--break-system-packages"]])
                (assoc-concat ::graph-deps [:pip])
                (assoc-concat :check [["pip3" "check" package]])))))
 

@@ -10,7 +10,7 @@
       (println "Malformed command")
       (let [cmd (str/join " " cmd)
             {:keys [exit], :as res-cmd, :or {exit -1}}
-              (when cmd (shell {:continue true} cmd))
+            (when cmd (shell {:continue true} cmd))
             new-res res-cmd]
         (when-not (zero? exit) (println "Error during execution"))
         (if (nil? cmd) res-cmd new-res)))))

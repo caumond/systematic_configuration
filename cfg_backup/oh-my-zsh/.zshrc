@@ -1,5 +1,6 @@
 # If you come from bash you might have to change your $PATH.
-export PATH=/opt/homebrew/opt/openjdk/bin:$HOME/bin:/usr/local/bin:/opt/homebrew/bin:$HOME/.config/emacs/bin:/opt/homebrew/opt/coreutils/libexec/gnubin:$PATH
+export PATH=/opt/homebrew/opt/openjdk/bin:$HOME/bin:/usr/local/bin:/opt/homebrew/bin:$HOME/.config/emacs/bin:$PATH
+#/opt/homebrew/opt/coreutils/libexec/gnubin has been removed as brew doctor requires
 
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
@@ -134,4 +135,12 @@ _bb_tasks() {
     _files # autocomplete filenames as well
 }
 compdef _bb_tasks bb
-export PATH="/opt/homebrew/sbin:$PATH"
+_hh_tasks() {
+    local matches=(`bb heph-task tasks |tail -n +3 |cut -f1 -d ' '`)
+    compadd -a matches
+}
+compdef _hh_tasks hh
+export PATH="/opt/homebrew/sbin:$HOME/.hephaistox/:$PATH"
+export CLOJARS_USERNAME=hephaistox
+export CLOJARS_PASSWORD=CLOJARS_18a4d3955692dec652c770219ff13c9a9d823b7b95e896ca36a5fd792a3e
+

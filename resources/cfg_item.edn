@@ -81,7 +81,6 @@
  :iterm2 {:cfgs ["~/Library/Preferences/com.googlecode.iterm2.plist"],
           :formula "iterm2",
           :pre-reqs {:coreutils {:formula "coreutils"},
-                     :cowsay {:formula "cowsay"},
                      :curl {:formula "curl"},
                      :grep {:formula "grep"},
                      :htop {:formula "htop"},

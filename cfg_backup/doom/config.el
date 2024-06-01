@@ -3,22 +3,48 @@
 ;; Place your private configuration here! Remember, you do not need to run 'doom
 ;; sync' after modifying this file!
 
-(setq auto-revert-check-vc-info t)
-
+;; Note:
 ;; How to set a variable (with or without after!) is described here: https://github.com/doomemacs/doomemacs/blob/master/docs/faq.org#changes-to-my-config-arent-taking-effect
 
+;; To update version control regularly, even if the file is not modified.
+(setq auto-revert-check-vc-info t)
+
+
+;; Configure projectile
 ;; See `https://docs.projectile.mx/projectile/configuration.html', for details
 (after! projectile
-  (setq projectile-create-missing-test-files t)
-  (setq projectile-auto-discover nil)
-  (setq projectile-sort-order 'access-time)
-  (add-to-list 'projectile-globally-ignored-directories "~")
-  (add-to-list 'projectile-globally-ignored-directories "~/Dev/hephaistox/monorepo")
+  (setq projectile-create-missing-test-files t) ;; Create the test file if does not exist
+  (setq projectile-auto-discover nil)  ;; Don't create projectile project automatically.
+  (setq projectile-sort-order 'access-time)  ;; Projectile shows files sorted with access time
+  (add-to-list 'projectile-globally-ignored-directories "~")  ;; User directory is not considered as a project
+  (add-to-list 'projectile-globally-ignored-directories "~/Dev/hephaistox/monorepo") ;; Monorepo is not considered as a project
   (setq projectile-project-root-files-bottom-up (remove ".git"
-                                                        projectile-project-root-files-bottom-up)))
+                                                        projectile-project-root-files-bottom-up))) ;; Our monorepo may have some `.git' subdirectories and there are not projects, just temporary copies.
 
+
+;; Cider setup
+;; See `https://docs.cider.mx/cider/config/basic_config.html' for details
+(use-package! cider
+  :after clojure-mode
+  :config
+  (set-lookup-handlers! 'cider-mode nil))
+(after! cider
+  (setq cider-eldoc-display-for-symbol-at-point nil)
+  (setq cider-auto-mode nil)  ;; Apparently helps performance: https://github.com/clojure-emacs/cider/issues/3346 .
+  (setq cider-auto-test-mode t) ;; Automatically run tests when compiling a namespace.
+  (setq cider-default-cljs-repl 'shadow) ;; Shadow is the default cljs repl.
+  (setq cider-comment-prefix "") ;; Remove comment prefix as I use it to generate test values.
+  (setq cider-comment-continued-prefix "")  ;; Same for next lines.
+  (setq cider-stacktrace-default-filters '(clojure tooling dup java repl)) ;; when an exception is raised default stacktrace filters show only project clojure lines.
+  (setq cider-test-fail-fast nil) ;; Fail fast means we don't see all namespaces errors but stop at the first failing deftest. Which is problematic as they are not executed in the order of the namespace.
+  (setq cider-repl-pop-to-buffer-on-connect nil) ;; Doesn't show the repl on connection
+  (setq cider-clojure-cli-parameters "-J-XX:-OmitStackTraceInFastThrow")) ;; parameters when launching a repl.  -J-XX:-OmitStackTraceInFastThrow means all exceptions will be raised, default jvm options is to stop outputiing them.
+
+
+;; cljr is used together with lsp.
 ;; See `https://github.com/clojure-emacs/clj-refactor.el/wiki#customization' for details
-(after! cljr
+(after! clj-refactor
+  ;; Settings to automatically insert headers of test files.
   (setq cljr-expectations-test-declaration
         "[clojure.test :refer [deftest is testing]]")
   (setq cljr-clojure-test-declaration
@@ -28,21 +54,31 @@
   (setq cljr-cljc-clojure-test-declaration
         "#?(:clj [clojure.test :refer [deftest is testing]]
 :cljs [cljs.test :refer [deftest is testing] :include-macros true])"))
-
-;; See `https://docs.cider.mx/cider/config/basic_config.html' for details
-(after! cider
-  (setq cider-auto-mode t)
-  (setq cider-default-cljs-repl 'shadow)
-  (setq cider-comment-prefix ";")
-  (setq cider-repl-pop-to-buffer-on-connect nil)
-  (setq cider-comment-continued-prefix ";")
-  (setq cider-clojure-cli-global-options "-J-XX:-OmitStackTraceInFastThrow"))
+(use-package! clj-refactor
+  :after clojure-mode
+  :config
+  (set-lookup-handlers! 'clj-refactor-mode nil))
 
 
+;; Mermaid-mode
+;; Automatically activate mermaid-mode as a major mode when opening `.mermaid' suffix files.
+(add-to-list 'auto-mode-alist '("\\.mermaid\\'" . mermaid-mode))
+
+
+;; lsp grammarly
+(use-package! lsp-grammarly
+  :ensure t
+  :hook (text-mode . (lambda ()
+                       (require 'lsp-grammarly)
+                       (lsp)
+                       (set-lsp-priority! 'lsp-grammarly 2))))
+
+;; lsp clojure
+(after! lsp-clojure
+  (setq lsp-lens-enable nil))
+
+;; hephaistox
 (map! "C-M-x" #'call-hephaistox)
-
-;; (add-hook 'before-save-hook
-;;           #'call-hephaistox)
 
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets. It is optional.
@@ -75,17 +111,19 @@
 ;; See https://github.com/doomemacs/themes#theme-list
 ;;'doom-one
 (setq doom-theme 'doom-dracula)
-(setq org-duration-format (quote h:mm))
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
-(setq display-line-numbers-type 'visual)
+(setq display-line-numbers t)
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
+;; Thesse variables are a special case of variables that should be set outside after!
 (setq org-directory "~/Dev/perso/my-notes/todos")
 (setq! org-agenda-files
        '("~/Dev/perso/my-notes/todos/main.org"))
+(after! org
+  (setq org-duration-format (quote h:mm)))
 
 ;; Whenever you reconfigure a package, make sure to wrap your config in an
 ;; `after!' block, otherwise Doom's defaults may override your settings. E.g.
@@ -122,110 +160,16 @@
 (setq! initial-frame-alist
        '((fullscreen . maximized)))
 
-(map! "C-M-;" #'call-hephaistox)
-
 ;; C Control
 ;; M Option
 ;; s Command
 ;; S Shift
-;;
-;;(map! "C-M-s-e" #'sp-absorb-sexp)
-(map! "C-M-s-b" #'sp-add-to-next-sexp)
-;;(map! "C-M-s-e" #'sp-add-to-previous-sexp)
-(map! "C-M-b" #'sp-backward-barf-sexp)
+(map! "C-M-;" #'babashka-project-tasks)
 (map! "M-s-t" #'projectile-toggle-between-implementation-and-test)
-;; (map! "C-M-b" #'sp-backward-copy-sexp)
-;; (map! "C-M-b" #'sp-backward-delete-char)
-;; (map! "C-M-b" #'sp-backward-delete-symbol)
-;; (map! "C-M-b" #'sp-backward-delete-word)
-;; (map! "C-M-b" #'sp-backward-down-sexp)
-;; (map! "C-M-b" #'sp-backward-kill-sexp)
-;; (map! "C-M-b" #'sp-backward-kill-symbol)
-;; (map! "C-M-b" #'sp-backward-kill-word)
-;; (map! "C-M-b" #'sp-backward-parallel-sexp)
-;; (map! "C-M-b" #'sp-backward-sexp)
-;; (map! "C-M-b" #'sp-backward-slurp-sexp)
 (map! "C-M-v" #'sp-forward-slurp-sexp)
-;; (map! "C-M-b" #'sp-backward-symbol)
-;; (map! "C-M-b" #'sp-backward-unwrap-sexp)
-;; (map! "C-M-b" #'sp-backward-up-sexp)
-;; (map! "C-M-b" #'sp-backward-whitespace)
-;; (map! "C-M-b" #'sp-beginning-of-next-sexp)
-;; (map! "C-M-b" #'sp-beginning-of-previous-sexp)
-;; (map! "C-M-b" #'sp-beginning-of-sexp)
-;; (map! "C-M-b" #'sp-change-enclosing)
-;; (map! "C-M-b" #'sp-change-inner)
-;; (map! "C-M-b" #'sp-char-escaped-p)
-;; (map! "C-M-b" #'sp-cheat-sheet) ;; Generate a cheat sheet
-;; (map! "C-M-b" #'sp-clone-sexp)
-;;
-;;(map! "C-M-;" #'sp-comment)
-;; (map! "C-M-b" #'sp-convolute-sexp)
-;; (map! "C-M-b" #'sp-copy-sexp)
-;; (map! "C-M-b" #'sp-dedent-adjust-sexp)
-;; (map! "C-M-b" #'sp-delete-char)
-;; (map! "C-M-b" #'sp-delete-pair)
-;; (map! "C-M-b" #'sp-delete-region)
-;; (map! "C-M-b" #'sp-delete-symbol)
-;; (map! "C-M-b" #'sp-delete-word)
-;; (map! "C-M-b" #'sp-describe-system) ;; To tell the system data
-(map! "C-M-s-e" #'sp-emit-sexp)
-;; (map! "C-M-b" #'sp-end-of-next-sexp)
-;; (map! "C-M-b" #'sp-end-of-previous-sexp)
-;; (map! "C-M-b" #'sp-end-of-sexp)
-;; (map! "C-M-b" #'sp-extract-after-sexp)
-;; (map! "C-M-b" #'sp-extract-before-sexp)
-(map! "C-M-s-b" #'sp-forward-barf-sexp)
-;;(map! "C-M-b" #'sp-forward-parallel-sexp)
-;;(map! "C-M-f" #'sp-forward-sexp)
-;;(map! "C-M-s-b" #'sp-forward-slurp-sexp)
-;;(map! "C-M-b" #'sp-forward-symbol)
-;; (map! "C-M-b" #'sp-forward-whitespace)
-;; (map! "C-M-b" #'sp-highlight-current-sexp)
-;; (map! "C-M-b" #'sp-html-next-tag)
-;; (map! "C-M-b" #'sp-html-post-handler)
-;; (map! "C-M-b" #'sp-html-previous-tag)
-;; (map! "C-M-b" #'sp-indent-adjust-sexp)
-;; (map! "C-M-b" #'sp-indent-defun)
-(map! "C-M-j" #'sp-join-sexp)
-;; (map! "C-M-b" #'sp-kill-hybrid-sexp)
-;; (map! "C-M-b" #'sp-kill-region)
 (map! "C-k" #'sp-kill-sexp)
-;; (map! "C-M-b" #'sp-kill-symbol)
-;; (map! "C-M-b" #'sp-kill-symbol)
-;; (map! "C-M-b" #'sp-kill-whole-line)
 (map! "C-M-k" #'sp-kill-word)
-;; (map! "C-M-b" #'sp-mark-sexp)
-;; (map! "C-M-b" #'sp-narrow-to-sexp)
-;; (map! "C-M-b" #'sp-newline)
-;; (map! "C-M-b" #'sp-next-sexp)
-;; (map! "C-M-b" #'sp-previous-sexp)
-;; (map! "C-M-b" #'sp-push-hybrid-sexp)
-;; (map! "C-M-b" #'sp-prefix-tag-object)
-;; (map! "C-M-b" #'sp-prefix-pair-object)
-;; (map! "C-M-b" #'sp-prefix-symbol-object)
-;; (map! "C-M-b" #'sp-prefix-save-excursion)
-;; (map! "C-M-b" #'sp-region-ok-p) ;; Seems to be internal
 (map! "C-M-s-r" #'sp-raise-sexp)
-;; (map! "C-M-b" #'sp-rewrap-sexp)
-;; (map! "C-M-b" #'sp-select-next-thing)
-;; (map! "C-M-b" #'sp-select-previous-thing)
-;; (map! "C-M-b" #'sp-select-next-thing-exchange)
-;; (map! "C-M-b" #'sp-select-previous-thing-exchange)
-;; (map! "C-M-b" #'sp-skip-backward-to-symbol)
-;; (map! "C-M-b" #'sp-skip-forward-to-symbol)
-;; (map! "C-M-b" #'sp-splice-sexp)
-;; (map! "C-M-b" #'sp-transpose-hybrid-sexp)
-;; (map! "C-M-b" #'sp-transpose-sexp)
-;; (map! "C-M-b" #'sp-unwrap-sexp)
-;; (map! "C-M-b" #'sp-up-sexp)
-;; (map! "C-M-b" #'sp-update-local-pairs)
-;; (map! "C-M-b" #'sp-use-paredit-bindings)
-;; (map! "C-M-b" #'sp-use-smartparens-bindings)
-;; (map! "C-M-b" #'sp-use-textmode-stringlike-parser-p)
-;; (map! "C-M-b" #'sp-wrap)
-;(map! "C-M-:" #'sp-wrap-cancel)
 (map! "C-M-è" #'sp-wrap-curly)
 (map! "C-M-(" #'sp-wrap-round)
 (map! "C-M-§" #'sp-wrap-square)
-(map! "C-f" #'format-all-buffer)

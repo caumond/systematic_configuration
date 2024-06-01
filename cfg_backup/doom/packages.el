@@ -51,4 +51,5 @@
 
 (package! babashka)
 (package! zprint-mode)
-(add-load-path! "~/.config/doom/hephaistox.el")
+(package! mermaid-mode)
+(package! lsp-grammarly)

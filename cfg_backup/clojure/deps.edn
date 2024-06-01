@@ -1,2 +1,2 @@
-{:aliases {;; Add cross-project aliases here
-          }}
+{:deps {cider/cider-nrepl #:mvn{:version "0.45.0"}
+        refactor-nrepl/refactor-nrepl #:mvn{:version "3.9.1"}}}

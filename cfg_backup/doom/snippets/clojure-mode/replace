@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name:
+# uuid:
+# key: replace
+# condition: t
+# --
+%s/::/:automaton-simulation-de.simulation-engine\//g

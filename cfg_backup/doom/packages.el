@@ -49,7 +49,7 @@
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
 ;(unpin! t)
 
-(package! babashka)
-(package! zprint-mode)
-(package! mermaid-mode)
-(package! lsp-grammarly)
+;; (package! babashka)
+;; (package! zprint-mode)
+;; (package! mermaid-mode)
+;; (package! lsp-grammarly)

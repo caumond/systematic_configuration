@@ -12,3 +12,5 @@
 	editor = emacs
 [init]
 	defaultBranch = main
+[github]
+	user = caumond

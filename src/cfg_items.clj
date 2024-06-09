@@ -41,7 +41,9 @@
          (when (some? package)
            (-> cfg-item-val
                (assoc-concat :install [["pip3" "install" package]])
-               (assoc-concat :update [["pip3" "install" "--upgrade" package "--break-system-packages"]])
+               (assoc-concat :update
+                             [["pip3" "install" "--upgrade" package
+                               "--break-system-packages"]])
                (assoc-concat ::graph-deps [:pip])
                (assoc-concat :check [["pip3" "check" package]])))))
 
@@ -123,12 +125,11 @@
 
 (defn- validate-cfg
   [file-content]
-  (if (m/validate apps-schema file-content)
-    (println "Configuration is valid")
-    (do (println "Error in the configuration:")
-        (println (->> file-content
-                      (m/explain apps-schema)
-                      me/humanize))))
+  (when-not (m/validate apps-schema file-content)
+    (println "Error in the configuration:")
+    (println (->> file-content
+                  (m/explain apps-schema)
+                  me/humanize)))
   file-content)
 
 (defn read-configuration

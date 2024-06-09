@@ -11,14 +11,14 @@
 
 ;; ;; Configure projectile
 ;; ;; See `https://docs.projectile.mx/projectile/configuration.html', for details
-;; (after! projectile
-;;   (setq projectile-create-missing-test-files t) ;; Create the test file if does not exist
-;;   (setq projectile-auto-discover nil)  ;; Don't create projectile project automatically.
-;;   (setq projectile-sort-order 'access-time)  ;; Projectile shows files sorted with access time
-;;   (add-to-list 'projectile-globally-ignored-directories "~")  ;; User directory is not considered as a project
-;;   (add-to-list 'projectile-globally-ignored-directories "~/Dev/hephaistox/monorepo") ;; Monorepo is not considered as a project
-;;   (setq projectile-project-root-files-bottom-up (remove ".git"
-;;                                                         projectile-project-root-files-bottom-up))) ;; Our monorepo may have some `.git' subdirectories and there are not projects, just temporary copies.
+(after! projectile
+   (setq projectile-create-missing-test-files t) ;; Create the test file if does not exist
+   (setq projectile-auto-discover nil)  ;; Don't create projectile project automatically.
+   (setq projectile-sort-order 'access-time)  ;; Projectile shows files sorted with access time
+   (add-to-list 'projectile-globally-ignored-directories "~")  ;; User directory is not considered as a project
+   (add-to-list 'projectile-globally-ignored-directories "~/Dev/hephaistox/monorepo") ;; Monorepo is not considered as a project
+   (setq projectile-project-root-files-bottom-up (remove ".git"
+                                                         projectile-project-root-files-bottom-up))) ;; Our monorepo may have some `.git' subdirectories and there are not projects, just temporary copies.
 
 
 ;; ;; Cider setup
@@ -27,43 +27,40 @@
 ;; ;;   :after clojure-mode
 ;; ;;   :config
 ;; ;;   (set-lookup-handlers! 'cider-mode nil))
-;; (after! cider
-;;   (setq cider-eldoc-display-for-symbol-at-point nil)
-;;   (setq cider-auto-mode nil)  ;; Apparently helps performance: https://github.com/clojure-emacs/cider/issues/3346 .
-;;   (setq cider-auto-test-mode t) ;; Automatically run tests when compiling a namespace.
-;;   (setq cider-default-cljs-repl 'shadow) ;; Shadow is the default cljs repl.
-;;   (setq cider-comment-prefix "") ;; Remove comment prefix as I use it to generate test values.
-;;   (setq cider-comment-continued-prefix "")  ;; Same for next lines.
-;;   (setq cider-stacktrace-default-filters '(project clj tooling dup java repl)) ;; when an exception is raised default stacktrace filters show only project clojure lines.
-;;   (setq cider-test-fail-fast nil) ;; Fail fast means we don't see all namespaces errors but stop at the first failing deftest. Which is problematic as they are not executed in the order of the namespace.
-;;   (setq cider-repl-pop-to-buffer-on-connect nil) ;; Doesn't show the repl on connection
-;;   (setq cider-clojure-cli-parameters "-J-XX:-OmitStackTraceInFastThrow")) ;; parameters when launching a repl.  -J-XX:-OmitStackTraceInFastThrow means all exceptions will be raised, default jvm options is to stop outputiing them.
+(after! cider
+  (setq cider-eldoc-display-for-symbol-at-point nil)
+  (setq cider-auto-test-mode t) ;; Automatically run tests when compiling a namespace.
+  (setq cider-default-cljs-repl 'shadow) ;; Shadow is the default cljs repl.
+  (setq cider-comment-prefix "") ;; Remove comment prefix as I use it to generate test values.
+  (setq cider-comment-continued-prefix "")  ;; Same for next lines.
+  (setq cider-stacktrace-default-filters '(project clj tooling dup java repl)) ;; when an exception is raised default stacktrace filters show only project clojure lines.
+  (setq cider-test-fail-fast nil) ;; Fail fast means we don't see all namespaces errors but stop at the first failing deftest. Which is problematic as they are not executed in the order of the namespace.
+  (setq cider-repl-pop-to-buffer-on-connect nil) ;; Doesn't show the repl on connection
+  (setq cider-clojure-cli-parameters "-J-XX:-OmitStackTraceInFastThrow")) ;; parameters when launching a repl.  -J-XX:-OmitStackTraceInFastThrow means all exceptions will be raised, default jvm options is to stop outputiing them.
 
 
 ;; ;; cljr is used together with lsp.
 ;; ;; See `https://github.com/clojure-emacs/clj-refactor.el/wiki#customization' for details
-;; (after! clj-refactor
-;;   ;; Settings to automatically insert headers of test files.
-;;   (setq cljr-expectations-test-declaration
-;;         "[clojure.test :refer [deftest is testing]]")
-;;   (setq cljr-clojure-test-declaration
-;;         "[clojure.test :refer [deftest is testing]]")
-;;   (setq cljr-cljs-clojure-test-declaration
-;;         "[cljs.test :refer [deftest is testing] :include-macros true]")
-;;   (setq cljr-cljc-clojure-test-declaration
-;;         "#?(:clj [clojure.test :refer [deftest is testing]]
-;; :cljs [cljs.test :refer [deftest is testing] :include-macros true])"))
-;; ;; (use-package! clj-refactor
-;; ;;   :after clojure-mode
-;; ;;   :config
-;; ;;   (set-lookup-handlers! 'clj-refactor-mode nil))
+ (after! clj-refactor
+   ;; Settings to automatically insert headers of test files.
+   (setq cljr-expectations-test-declaration
+         "[clojure.test :refer [deftest is testing]]")
+   (setq cljr-clojure-test-declaration
+         "[clojure.test :refer [deftest is testing]]")
+   (setq cljr-cljs-clojure-test-declaration
+         "[cljs.test :refer [deftest is testing] :include-macros true]")
+   (setq cljr-cljc-clojure-test-declaration
+         "#?(:clj [clojure.test :refer [deftest is testing]]
+ :cljs [cljs.test :refer [deftest is testing] :include-macros true])"))
+ ;; (use-package! clj-refactor
+ ;;   :after clojure-mode
+ ;;   :config
+ ;;   (set-lookup-handlers! 'clj-refactor-mode nil))
 
-;; ;; ;
-;;                                         ; (use-package tree-sitter
-;; ;;   :config
-;; ;;   (add-to-list 'tree-sitter-major-mode-language-alist '(clojurec-mode . clojure))
-;; ;;   (add-to-list 'tree-sitter-major-mode-language-alist '(clojurescript-mode . clojure)))
-
+;; (use-package tree-sitter
+;;   :config
+;;   (add-to-list 'tree-sitter-major-mode-language-alist '(clojurec-mode . clojure))
+;;   (add-to-list 'tree-sitter-major-mode-language-alist '(clojurescript-mode . clojure)))
 
 (setq auth-sources '("~/.authinfo.gpg"))
 

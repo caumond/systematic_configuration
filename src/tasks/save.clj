@@ -6,9 +6,8 @@
 (def backup-dir "cfg_backup")
 
 (defn save
-  "Save
-  Params:
-  * `os` kewyord among `[:macos, :ubuntu]`"
+  "Save laptop configuration in the repo.
+  `os` is a kewyord among `[:macos, :ubuntu]` telling which configuration type to save."
   [os cfg-item sandbox?]
   (let [cfg-items (->> (cfg-items/read-configuration os cfg-item)
                        (filter (fn [[_ v]] (:cfgs v))))]

@@ -27,6 +27,8 @@
              [tasks.save :as save]
              [tasks.update-items :as update-items]
              [tasks.version :as version]),
+  cfg-item-version {:doc "Display current version of configuration items.",
+                    :task (execute-task version/version)},
   check {:doc "Ask all tooling to check its consistency",
          :task (execute-task check/check)},
   clean {:doc "Clean the setup", :task (execute-task clean/clean)},
@@ -39,6 +41,4 @@
   nrepl {:doc "Launch the nrepl", :task (execute-task nrepl/nrepl)},
   save {:doc "Save the current configuration", :task (execute-task save/save)},
   update {:doc "Regularly update you environment",
-          :task (execute-task update-items/update-items)},
-  version {:doc "Display current version of tooling",
-           :task (execute-task version/version)}}}
+          :task (execute-task update-items/update-items)}}}

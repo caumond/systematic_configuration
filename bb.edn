@@ -33,7 +33,9 @@
          :task (execute-task check/check)},
   clean {:doc "Clean the setup", :task (execute-task clean/clean)},
   format {:doc "Format all project files",
-          :task (execute-task format-files/format-files)},
+          :task (if sandbox?
+                  (println (cmds/cmd-to-str format-files/cmd))
+                  (format-files/format-files))},
   init {:doc "Init the setup - to be run only once",
         :task (execute-task init/init)},
   install {:doc "Use to install toolings",

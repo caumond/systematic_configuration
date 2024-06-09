@@ -16,7 +16,16 @@
                      (cmds/execute-cmds check sandbox?))))]
     (when (some true? (map boolean res)) (System/exit -1))))
 
+(defn ncheck
+  "Check
+  Params:
+  * `os` kewyord among `[:macos, :ubuntu]`"
+  [os]
+  (->> (cfg-items/read-all-os-configuration os)
+       (filter (fn [[_ v]] (:check v)))
+       (mapcat (fn [[cfg-item {:keys [check]}]] (when cfg-item check)))))
+
 (comment
-  (check :macos :brew true)
+  (ncheck :macos)
   ;
 )

@@ -43,7 +43,7 @@
                (assoc-concat :install [["pip3" "install" package]])
                (assoc-concat :update
                              [["pip3" "install" "--upgrade" package
-                               "--break-system-packages"]])
+                               #_"--break-system-packages"]])
                (assoc-concat ::graph-deps [:pip])
                (assoc-concat :check [["pip3" "check" package]])))))
 
@@ -148,6 +148,26 @@
         configurations (-> (if (nil? cfg-item)
                                configurations
                                (select-keys configurations [cfg-item]))
+                           develop-pre-reqs
+                           expand-pre-built)
+        seq-cfg (-> configurations
+                    (deps-graph/build-from ::graph-deps)
+                    deps-graph/topological-sort)]
+    (->> seq-cfg
+         (mapcat (fn [k] [k (get configurations k)]))
+         (apply array-map))))
+
+(defn read-all-os-configuration
+  "Read the merged configuration of what is necessary and how it is done for each os
+  * `os` keyword among (:macos, :ubuntu)"
+  [os]
+  (let [configurations (-> (read-data-as-resource "cfg_item.edn")
+                           validate-cfg
+                           (utils/deep-merge (->> os
+                                                  cfg-envs
+                                                  (format "%s/%s.edn" cfg-dir)
+                                                  read-data-as-resource)))
+        configurations (-> configurations
                            develop-pre-reqs
                            expand-pre-built)
         seq-cfg (-> configurations

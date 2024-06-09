@@ -6,17 +6,19 @@
   :init (do (def os (current-os/current-os))
             (def cli-options (cli-opts/parse *command-line-args*))
             (cli-opts/do-opts cli-options)
-            (println (format "os is: `%s`" os))
+            (def sandbox? (boolean (get-in cli-options [:options :sandbox])))
+            (println (format "Configuration: os=%s%s"
+                             os
+                             (if sandbox? ", sandbox activated" "")))
             (when (:errors cli-options)
               (apply println "invalid options: " (:errors cli-options))
               (System/exit -1))
             (def cfg-item
               (-> (get-in cli-options [:options :cfg-item])
                   keyword))
-            (def sandbox? (boolean (get-in cli-options [:options :sandbox])))
-            (when sandbox? (println "Sandbox mode activated"))
             (defn execute-task [task-fn] (task-fn os cfg-item sandbox?))),
   :requires ([cli-opts :as cli-opts]
+             [ncmds]
              [current-os]
              [tasks.check :as check]
              [tasks.clean :as clean]
@@ -30,11 +32,12 @@
   cfg-item-version {:doc "Display current version of configuration items.",
                     :task (execute-task version/version)},
   check {:doc "Ask all tooling to check its consistency",
-         :task (execute-task check/check)},
+         :task (let [cmds (check/ncheck os)]
+                 (if sandbox? (ncmds/print cmds) (ncmds/execute-cmds cmds)))},
   clean {:doc "Clean the setup", :task (execute-task clean/clean)},
   format {:doc "Format all project files",
           :task (if sandbox?
-                  (println (cmds/cmd-to-str format-files/cmd))
+                  (println (ncmds/cmd-to-str format-files/cmd))
                   (format-files/format-files))},
   init {:doc "Init the setup - to be run only once",
         :task (execute-task init/init)},

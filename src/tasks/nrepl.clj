@@ -1,4 +1,5 @@
 (ns tasks.nrepl
+  "Launch a bb repl."
   (:require [babashka.fs :as fs]
             [babashka.nrepl.server :as srv]))
 
@@ -6,8 +7,8 @@
 
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn nrepl
-  "Launch a repl locally"
-  [_os _ _]
+  "Launch a repl locally."
+  []
   (try (srv/start-server! {:host "localhost", :port 1339})
        (spit nrepl-file "1339")
        (-> (Runtime/getRuntime)

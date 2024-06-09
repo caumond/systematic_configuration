@@ -40,7 +40,7 @@
         :task (execute-task init/init)},
   install {:doc "Use to install toolings",
            :task (execute-task install/install)},
-  nrepl {:doc "Launch the nrepl", :task (execute-task nrepl/nrepl)},
+  nrepl {:doc "Launch the nrepl", :task (nrepl/nrepl)},
   save {:doc "Save the current configuration", :task (execute-task save/save)},
   update {:doc "Regularly update you environment",
           :task (execute-task update-items/update-items)}}}

@@ -1,4 +1,5 @@
 (ns tasks.version
+  "Version of configuration-items."
   (:require [cmds]
             [cfg-items]))
 
@@ -15,6 +16,14 @@
       (when-let [[cfg-item {:keys [version]}] cfg-item]
         (println (format "Version `%s`" cfg-item))
         (cmds/execute-cmd version sandbox?)))))
+
+(defn nversion
+  "Returns."
+  [os]
+  (->> (cfg-items/read-all-os-configuration os)
+       (filter (fn [[_ v]] (:version v)))
+       (mapv (fn [cfg-item]
+               (when-let [[_ {:keys [version]}] cfg-item] version)))))
 
 (comment
   (version :macos nil true)

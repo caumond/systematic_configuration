@@ -29,8 +29,10 @@
              [tasks.save :as save]
              [tasks.update-items :as update-items]
              [tasks.version :as version]),
-  cfg-item-version {:doc "Display current version of configuration items.",
-                    :task (execute-task version/version)},
+  cfg-item-version
+  {:doc "Display current version of configuration items.",
+   :task (let [cmds (version/nversion os)]
+           (if sandbox? (ncmds/print cmds) (ncmds/execute-cmds cmds)))},
   check {:doc "Ask all tooling to check its consistency",
          :task (let [cmds (check/ncheck os)]
                  (if sandbox? (ncmds/print cmds) (ncmds/execute-cmds cmds)))},

@@ -1,8 +1,8 @@
-(ns ncfg-items-test
+(ns cfg-items-test
   (:require [clojure.test :refer [deftest is testing]]
             [malli.core :as m]
             [malli.error :as me]
-            [ncfg-items :as sut]
+            [cfg-items :as sut]
             [ncmds]))
 
 (defn humanize
@@ -12,8 +12,10 @@
       me/humanize))
 
 (deftest cfg-item-schema-test
-  (is (m/schema sut/cfg-items-schema)
-      "Raise an exception if schema is invalid."))
+  (is (m/schema sut/cfg-items-schema {:registry sut/registry})
+      "Raise an exception if schema is invalid.")
+  (is (-> (m/schema sut/cfg-items-schema {:registry sut/registry})
+          (humanize {:foo {}}))))
 
 (deftest brew-update-test
   (testing "Formula without tap."
@@ -21,8 +23,13 @@
            (humanize sut/brew-package-manager
                      {:formula "aspell", :package-manager :brew}))
         "The schema of only one formula is accepted.")
-    (is (= {:version-cmd ["brew" "list" "aspell" "--versions"],
-            :check-cmd [],
+    (is (some?
+         (:package-manager
+          (humanize sut/brew-package-manager
+                    {:formula "aspell", :package-manager :brow})))
+        "Wrong package manager is rejected.")
+    (is (= {:version-cmds [["brew" "list" "aspell" "--versions"]],
+            :check-cmds [],
             :clean-cmds [["brew" "cleanup" "aspell"]],
             :init-cmds [],
             :install-cmds [["brew" "install" "aspell" "-q"]],
@@ -32,10 +39,10 @@
   (comment
     ;; With command
     (-> (sut/brew-update {:formula "aspell", :package-manager :brew})
-        :version-cmd
-        ncmds/execute-cmd)
+        :version-cmds
+        [ncmds/execute-cmd])
     ;
-  )
+    )
   (testing "Formula with a tap."
     (is (= nil
            (humanize sut/brew-package-manager
@@ -43,8 +50,8 @@
                       :formula "aspell",
                       :tap "d12frosted/emacs-plus"}))
         "The schema of formula and tap is accepted.")
-    (is (= {:version-cmd ["brew" "list" "aspell" "--versions"],
-            :check-cmd [],
+    (is (= {:version-cmds ["brew" "list" "aspell" "--versions"],
+            :check-cmds [],
             :clean-cmds [["brew" "cleanup" "aspell"]],
             :init-cmds [],
             :install-cmds [["brew" "tap" "d12frosted/emacs-plus"]
@@ -61,10 +68,15 @@
   (testing "With npm-dep only."
     (is (= nil
            (humanize sut/npm-package-manager
-                     {:package-manager :npm, :npm-dep "typewritten"}))
+                     {:package-manager :npm, :npm-deps ["typewritten"]}))
         "the schema of formula and tap is accepted.")
-    (is (= {:version-cmd ["npm" "version" "-g"],
-            :check-cmd [],
+    (is (some?
+         (:package-manager
+          (humanize sut/npm-package-manager
+                    {:package-manager :npm-old, :npm-deps ["typewritten"]})))
+        "Wrong package manager is rejected")
+    (is (= {:version-cmds ["npm" "version" "-g"],
+            :check-cmds [],
             :clean-cmds [],
             :init-cmds [],
             :install-cmds [["npm" "install" "-g" "typewritten"]],
@@ -83,7 +95,7 @@
         :version
         ncmds/execute-cmds)
     ;
-  ))
+    ))
 
 (deftest manual-update-test
   (is (some? (humanize sut/manual-package-manager {:package-manager :manual}))
@@ -92,6 +104,11 @@
          (humanize sut/manual-package-manager
                    {:package-manager :manual, :install-cmds [["pwd"]]}))
       "Valid manual package.")
+  (is (some?
+       (:package-manager
+        (humanize sut/manual-package-manager
+                  {:package-manager :manuel, :install-cmds [["pwd"]]})))
+      "Invalid package manager is rejected")
   (comment
     (-> (sut/manual-update {:package-manager :manual, :install-cmds [["pwd"]]})
         :install-cmds)))
@@ -115,8 +132,8 @@
          (sut/expand {:test {:tmp-files ["a" "b" "cd"]}})))
   (is (=
        {:test {:clean-cmds [["rm" "-f" "a"] ["rm" "-f" "b"] ["rm" "-f" "cd"]]},
-        :test2 {:version-cmd ["brew" "list" "black" "--versions"],
-                :check-cmd [],
+        :test2 {:version-cmds ["brew" "list" "black" "--versions"],
+                :check-cmds [],
                 :clean-cmds [["rm" "-f" "a"] ["rm" "-f" "b"] ["rm" "-f" "cd"]],
                 :init-cmds [],
                 :install-cmds [["brew" "install" "black" "-q"]],

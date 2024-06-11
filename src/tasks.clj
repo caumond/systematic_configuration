@@ -6,16 +6,16 @@
 (defn cfg-version
   [cfg-items]
   (->> cfg-items
-       (map (fn [[_ {:keys [cfg-version-cmd]}]] cfg-version-cmd))
-       (filterv some?)))
+       (mapcat (fn [[_ {:keys [cfg-version-cmds]}]] cfg-version-cmds))
+       (filterv (comp not empty?))))
 
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn check
   "Call the check of cfg-items."
   [cfg-items]
   (->> cfg-items
-       (map (fn [[_ {:keys [check-cmd]}]] check-cmd))
-       (filterv some?)))
+       (mapcat (fn [[_ {:keys [check-cmds]}]] check-cmds))
+       (filterv (comp not empty?))))
 
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn clean
@@ -28,7 +28,7 @@
 (defn format
   "Format clojure Files."
   []
-  ["fd" "." "-tf" "-e" "clj" "-e" "edn" "-x" "zprint" "-w" "{}"])
+  [["fd" "." "-tf" "-e" "clj" "-e" "edn" "-x" "zprint" "-w" "{}"]])
 
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn init
@@ -45,9 +45,8 @@
 
 (def backup-dir "cfg_backup")
 
+#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn save
-  "Save laptop configuration in the repo.
-  `os` is a kewyord among `[:macos, :ubuntu]` telling which configuration type to save."
   [cfg-items]
   (->> cfg-items
        (mapcat (fn [[cfg-item-name {:keys [cfg-files]}]]
@@ -60,6 +59,7 @@
                                             (fs/file-name cfg-file))])))))
        (filterv some?)))
 
+#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn copy-file
   [cfg-file dst-file]
   (when (fs/exists? (fs/expand-home cfg-file))
@@ -72,13 +72,10 @@
                               str))
           (fs/copy (fs/expand-home cfg-file) dst-file)))))
 
+#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn update
   [cfg-items]
   (->> cfg-items
        (mapcat (fn [[_ {:keys [update-cmds]}]] update-cmds))
        (filterv some?)))
 
-(defn validate
-  [cfg-items]
-  (->> cfg-items
-       (mapcat (fn [[_ {:keys [validate-cmds]}]] validate-cmds))))

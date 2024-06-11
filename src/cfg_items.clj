@@ -1,95 +1,168 @@
 (ns cfg-items
-  "Configuration items management"
+  "`cfg-items` stands for `configuration-items`, which is a sequence of item like this:
+
+  ```clojure
+  :clever{:cfg-files [\"~/.config/clever-cloud/clever-tools.json\"],
+          :formula \"clever-tools\"}
+  ```"
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [deps-graph]
             [malli.core :as m]
             [malli.error :as me]
-            [utils]))
+            [malli.util :as mu]
+            [utils]
+            [deps-graph.map :as graph-map]))
+
+(def malli-registry (merge (m/default-schemas) (mu/schemas)))
+
 (def cmd [:vector :string])
 
-(def cmds [:vector cmd])
+(def cmds [:sequential cmd])
 
-(def app-schema
-  [:schema
-   {:registry
-    {::app [:map {:closed true} [:cfgs {:optional true} [:vector :string]]
-            [:check {:optional true} cmds] [:clean {:optional true} cmds]
-            [:description {:optional true} :string]
-            [:formula {:optional true} :string] [:install {:optional true} cmds]
-            [:init {:optional true} cmds] [:node-deps {:optional true} :string]
-            [:package {:optional true} :string]
-            [:pre-reqs {:optional true} [:map-of :keyword [:ref ::app]]]
-            [:tap {:optional true} :string]
-            [:tmp-dirs {:optional true} [:vector :string]]
-            [:update {:optional true} cmds] [:version {:optional true} cmd]]}}
-   ::app])
+(def cfg-item-name :keyword)
 
-(def apps-schema [:map-of :keyword app-schema])
+(def brew-package-manager
+  "Package management with brew."
+  [:map {:closed true}
+   [:package-manager {:description "one package manager among existings."} [:enum :brew]]
+   [:cask {:description "Is the formula a cask?" :optional true} :boolean]
+   [:formula {:description "`brew` formula to install the `cfg-item`."} :string]
+   [:tap {:optional true, :description "`brew` tap where to find the formula."}
+    :string]])
 
-(def ^:private cfg-dir "Where configuration per os are stored" "os")
+(def npm-package-manager
+  "Package management with npm."
+  [:map {:closed true} [:package-manager [:enum :npm]]
+   [:npm-deps {:description "`npm` dependency."} [:vector :string]]])
+
+(def manual-package-manager
+  "No package management, done manually with sh commands."
+  [:map {:closed true} [:package-manager [:enum :manual]]
+   [:check-cmds
+    {:optional true, :description "Check the installation of the `cfg-item`."}
+    cmds]
+   [:clean-cmds {:optional true, :description "Clean the `cfg-item`."} cmds]
+   [:init-cmds
+    {:optional true,
+     :description "Commands to init - run once - the configuration item."} cmds]
+   [:install-cmds
+    {:description "Commands describing how to manually install the `cfg-item`."
+     :optional true}
+    cmds]
+   [:update-cmds
+    {:optional true, :description "Update the installation of `cfg-item`."}
+    cmds]
+   [:cfg-version-cmds
+    {:optional true, :description "Command for displaying the version."} cmds]])
+
+(def common-behavior
+  [:map
+   [:description {:optional true, :description "Optional description of the `cfg-item`."}
+    :string]
+   [:post-package
+    {:optional true,
+     :description "Command to setup after package has been installed."}
+    cmds]
+   [:pre-reqs
+    {:optional true,
+     :description
+     "List of cfg-item pre requisites. They have the exact same compatibility."}
+    [:map-of cfg-item-name [:ref ::app]]]
+   [:cfg-files
+    {:optional true,
+     :description "Configuration files of this `cfg-item` to save."}
+    [:vector :string]]
+   [:tmp-files {:optional true, :description "Temporary files to remove."}
+    [:vector :string]]
+   [:tmp-dirs
+    {:optional true, :description "Temporary directory to remove."}
+    [:vector :string]]])
+
+(def assembly
+  [:or
+   [:union npm-package-manager common-behavior]
+   [:union manual-package-manager common-behavior]
+   [:union brew-package-manager common-behavior]])
+
+(def registry
+  (assoc malli-registry
+         ::app
+         assembly))
+
+"One `cfg-item` schema, is one of the package-manager and some global properites available for all of them."
+
+(def cfg-items-schema
+  [:map-of cfg-item-name [:ref ::app]])
+
+(def ^:private cfg-dir "Directory where configuration per os are stored" "os")
 
 (def ^:private cfg-envs
   "Name of each os subdir"
   {:macos "macos", :ubuntu "ubuntu"})
 
-(defn- assoc-concat [val kw coll] (update val kw #(concat coll %)))
+(defn brew-update
+  "Create commands for a brew package manager."
+  [{:keys [tap formula package-manager cask], :as _cfg-item}]
+  (when (= package-manager :brew)
+    {:cfg-version-cmds [(concat ["brew" "list"] [formula "--versions"])],
+     :check-cmds [], ;; brew cfg-item is checking all managed cfg-items at
+     ;; once.
+     :clean-cmds [["brew" "cleanup" formula]],
+     :graph-deps [package-manager],
+     :init-cmds [], ;; no need
+     :install-cmds
+     (->> [(concat ["brew" "install"] (when cask ["--cask"]) [formula "-q"])]
+          (concat (when tap [["brew" "tap" tap]]))
+          vec),
+     :package-manager package-manager,
+     :update-cmds [["brew" "upgrade" formula]]}))
 
-(defn- pip-update-cfg-item
-  [{:keys [package], :as cfg-item-val}]
-  (merge cfg-item-val
-         (when (some? package)
-           (-> cfg-item-val
-               (assoc-concat :install [["pip3" "install" package]])
-               (assoc-concat :update
-                             [["pip3" "install" "--upgrade" package
-                               #_"--break-system-packages"]])
-               (assoc-concat ::graph-deps [:pip])
-               (assoc-concat :check [["pip3" "check" package]])))))
+(defn npm-update
+  "Create commands for an npm package manager."
+  [{:keys [npm-deps package-manager], :as _cfg-item}]
+  (when (= package-manager :npm)
+    {:cfg-version-cmds [["npm" "version" "-g"]],
+     :check-cmds (mapv (fn [npm-dep] ["npm" "doctor" npm-dep]) npm-deps),
+     :clean-cmds [], ;; npm cache clean is discouraged by npm.
+     :graph-deps [package-manager],
+     :init-cmds [], ;; no need
+     :install-cmds (mapv (fn [npm-dep] ["npm" "install" "-g" npm-dep])
+                         npm-deps),
+     :package-manager package-manager,
+     :update-cmds (mapv (fn [npm-dep] ["npm" "update" "-g" npm-dep])
+                        npm-deps)}))
 
-(defn- brew-update-cfg-item
-  [{:keys [tap formula], :as cfg-item-val}]
-  (merge cfg-item-val
-         (when (some? formula)
-           (-> cfg-item-val
-               (assoc-concat ::graph-deps [:brew])
-               (assoc-concat :install
-                             (concat (when tap [["brew" "tap" tap]])
-                                     [["brew" "install" formula]]))
-               (assoc-concat :update [["brew" "upgrade" formula]])
-               (assoc-concat :version ["brew" "list" formula "--versions"])))))
+(defn manual-update
+  "Create commands for the manual package manager."
+  [{:keys [package-manager], :as cfg-item}]
+  (when (= package-manager :manual) cfg-item))
 
-(defn- npm-cfg-item
-  [{:keys [npm-deps], :as cfg-item-val}]
-  (merge cfg-item-val
-         (when npm-deps {:install [["npm" "install" "-g" npm-deps]]})))
+(defn common-update
+  "Create common commands for the package manager."
+  [{:keys [tmp-files tmp-dirs post-package cfg-files], :as _cfg-item}]
+  (cond-> {}
+    tmp-files (assoc :clean-cmds
+                     (->> tmp-files
+                          (mapv (fn [tmp-file] ["rm" "-f" tmp-file]))))
+    cfg-files (assoc :cfg-files cfg-files)
+    post-package (assoc :post-package post-package)
+    tmp-dirs (update :clean-cmds
+                     conj
+                     (->> tmp-dirs
+                          (mapv (fn [tmp-dir] ["rm" "-fr" tmp-dir]))))))
 
-(defn- tmp-dirs-cfg-item
-  [{:keys [tmp-dirs], :as cfg-item-val}]
-  (merge cfg-item-val
-         (when (some? tmp-dirs)
-           {:clean (mapv (fn [clean-dir] ["rm" "-fr" clean-dir]) tmp-dirs)})))
-
-(defn- tmp-files-cfg-item
-  [{:keys [tmp-files], :as cfg-item-val}]
-  (merge cfg-item-val
-         (when (some? tmp-files)
-           {:clean (mapv (fn [tmp-file] ["rm" "-f" tmp-file]) tmp-files)})))
-
-(defn- expand-pre-built
-  "For each predefined type"
-  [configurations]
-  (->> configurations
-       (mapv (fn [[cfg-item val]] [cfg-item
-                                   (-> val
-                                       brew-update-cfg-item
-                                       pip-update-cfg-item
-                                       tmp-dirs-cfg-item
-                                       npm-cfg-item
-                                       tmp-files-cfg-item)]))
+(defn expand
+  [cfg-items]
+  (->> cfg-items
+       (mapv (fn [[cfg-item-name cfg-item]]
+               [cfg-item-name
+                (->> cfg-item
+                     ((juxt brew-update npm-update manual-update common-update))
+                     (apply merge))]))
        (into {})))
 
-(defn- read-data-as-resource
+(defn read-data-as-resource
   [filename]
   (try (->> filename
             io/resource
@@ -100,8 +173,8 @@
          nil)))
 
 (defn- develop-pre-req-1
-  [configurations]
-  (->> configurations
+  [cfg-items]
+  (->> cfg-items
        (mapcat (fn [[cfg-item cfg-item-val]]
                  (let [deps-name (vec (keys (:pre-reqs cfg-item-val)))
                        new-deps-name (-> cfg-item-val
@@ -112,66 +185,67 @@
                            (:pre-reqs cfg-item-val)))))
        (into {})))
 
-(defn- develop-pre-reqs
-  [configurations]
-  (loop [configurations configurations
+#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
+(defn develop-pre-reqs
+  [cfg-items]
+  (loop [cfg-items cfg-items
          max-loops 10]
-    (let [updated-configurations (develop-pre-req-1 configurations)]
-      (if (= updated-configurations configurations)
-        configurations
+    (let [updated-cfg-items (develop-pre-req-1 cfg-items)]
+      (if (= updated-cfg-items cfg-items)
+        cfg-items
         (if (pos? max-loops)
-          (recur updated-configurations (dec max-loops))
-          updated-configurations)))))
+          (recur updated-cfg-items (dec max-loops))
+          updated-cfg-items)))))
 
-(defn- validate-cfg
+(defn validate-cfg
   [file-content]
-  (when-not (m/validate apps-schema file-content)
-    (println "Error in the configuration:")
-    (println (->> file-content
-                  (m/explain apps-schema)
-                  me/humanize)))
-  file-content)
+  (when-not (m/validate cfg-items-schema file-content
+                        {:registry registry})
+    {:error (->> file-content
+                 (m/explain (m/schema cfg-items-schema {:registry registry}))
+                 me/with-spell-checking
+                 me/humanize)}))
 
-(defn read-configuration
-  "Read the merged configuration of what is necessary and how it is done for each os
-  Params:
-  * `os` keyword among (:macos, :ubuntu)"
-  [os cfg-item]
-  (when cfg-item
-    (println (format "Limited to configuration item `%s`" cfg-item)))
-  (let [configurations (-> (read-data-as-resource "cfg_item.edn")
-                           validate-cfg
-                           (utils/deep-merge (->> os
-                                                  cfg-envs
-                                                  (format "%s/%s.edn" cfg-dir)
-                                                  read-data-as-resource)))
-        configurations (-> (if (nil? cfg-item)
-                               configurations
-                               (select-keys configurations [cfg-item]))
-                           develop-pre-reqs
-                           expand-pre-built)]
-    (->> configurations
-         (mapcat (fn [k] [k (get configurations k)]))
-         (apply array-map))))
+(def cfg-filename "cfg_item.edn")
 
-(defn read-all-os-configuration
-  "Read the merged configuration of what is necessary and how it is done for each os
-  * `os` keyword among (:macos, :ubuntu)"
+(defn read-configurations
   [os]
-  (let [configurations (-> (read-data-as-resource "cfg_item.edn")
-                           validate-cfg
-                           (utils/deep-merge (->> os
-                                                  cfg-envs
-                                                  (format "%s/%s.edn" cfg-dir)
-                                                  read-data-as-resource)))
-        configurations (-> configurations
-                           develop-pre-reqs
-                           expand-pre-built)]
-    (->> configurations
-         (mapcat (fn [k] [k (get configurations k)]))
-         (apply array-map))))
+  (-> (read-data-as-resource cfg-filename)
+      (utils/deep-merge (->> os
+                             cfg-envs
+                             (format "%s/%s.edn" cfg-dir)
+                             read-data-as-resource))))
 
-(comment
-  (println (pr-str (read-configuration :macos nil)))
-  ;
-)
+(defn limit-configurations
+  [configurations cfg-items]
+  (cond-> configurations (seq cfg-items) (select-keys cfg-items)))
+
+(defn cfg-items-sorted
+  [cfg-items]
+  (deps-graph/topological-layers cfg-items deps-graph.map/simple 10))
+
+;; (defn validate-data
+;;   "Return true if the data is matching the schema
+;;   Params:
+;;   * `schema` schema to match
+;;   * `data` data to check appliance to schema"
+;;   [schema data]
+;;   (-> schema
+;;       (malli/schema {:registry registry})
+;;       (malli/validate data)))
+
+;; (defn validate-data-humanize
+;;   "Returns nil if valid, the error message otherwise.
+
+;;   Params:
+;;   * `schema` schema to match
+;;   * `data` data to check appliance to schema"
+;;   [schema data]
+;;   (when-not (-> schema
+;;                 (malli/schema {:registry registry})
+;;                 (validate-data data))
+;;     {:error (-> (malli/explain schema data)
+;;                 malli-error/with-spell-checking
+;;                 malli-error/humanize)
+;;      :schema schema
+;;      :data data}))

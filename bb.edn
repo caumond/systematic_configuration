@@ -1,68 +1,70 @@
 {:deps {metosin/malli {:mvn/version "0.13.0"},
         org.clojure/tools.cli {:mvn/version "1.0.219"}},
  :paths ["src" "resources"],
- :tasks
- {:enter {},
-  :init (do (def os (current-os/current-os))
-            (def cli-options (cli-opts/parse *command-line-args*))
-            (cli-opts/do-opts cli-options)
-            (def sandbox? (boolean (get-in cli-options [:options :sandbox])))
-            (when (:errors cli-options)
-              (apply println "invalid options: " (:errors cli-options))
-              (System/exit -1))
-            (def cfg-item
-              (-> (get-in cli-options [:options :cfg-item])
-                  keyword))
-            (def cfg-items
-              (-> (cond-> (ncfg-items/read-configurations os) cfg-item
-                          (ncfg-items/limit-configurations [cfg-item]))
-                  ncfg-items/develop-pre-reqs
-                  ncfg-items/expand))
-            (defn execute-cmd
-              [cmd]
-              (if sandbox?
-                (println (ncmds/to-str cmd))
-                (let [execution (ncmds/execute-cmd cmd)]
-                  (if (empty? execution)
-                    (println "success.")
-                    (run! println
-                          (conj (mapv :cmd execution)
-                                "Following commands have failed\n"))))))
-            (defn execute-all-cmds
-              [cmds]
-              (if sandbox?
-                (run! println (map ncmds/to-str cmds))
-                (let [execution (ncmds/execute-all-cmds cmds)]
-                  (if (empty? execution)
-                    (println "success.")
-                    (run! println
-                          (conj (mapv :cmd execution)
-                                "Following commands have failed\n"))))))),
-  :requires ([cli-opts :as cli-opts]
-             [current-os]
-             [babashka.fs :as fs]
-             [clojure.pprint :as pp]
-             [ncfg-items]
-             [ncmds]
-             [tasks]
-             [tasks.nrepl :as nrepl]),
-  cfg-version {:doc "Display current version of configuration items.",
-               :task (execute-all-cmds (tasks/cfg-version cfg-items))},
-  check {:doc "Ask all tooling to check their consistency",
-         :task (execute-all-cmds (tasks/check cfg-items))},
-  clean {:doc "Clean the setup",
-         :task (execute-all-cmds (tasks/clean cfg-items))},
-  format {:doc "Format all project files", :task (execute-cmd (tasks/format))},
-  init {:doc "Init the setup - to be run only once",
-        :task (execute-all-cmds (tasks/init cfg-items))},
-  install {:doc "Use to install toolings",
-           :task (execute-all-cmds (tasks/install cfg-items))},
-  nrepl {:doc "Launch the nrepl", :task (nrepl/nrepl cfg-items)},
-  save {:doc "Save the current configuration",
-        :task (do (fs/delete-tree tasks/backup-dir)
-                  (execute-all-cmds (tasks/save cfg-items)))},
-  show {:doc "Show the detail of an app", :task (pp/pprint cfg-items)},
-  update {:doc "Regularly update you environment",
-          :task (execute-all-cmds (tasks/update cfg-items))}
-  validate {:doc "validate"
-            :task (execute-all-cmds (tasks/validate cfg-items))}}}
+ :tasks {:enter {},
+         :init
+         (do (def os (current-os/current-os))
+             (def cli-options (cli-opts/parse *command-line-args*))
+             (cli-opts/do-opts cli-options)
+             (def sandbox? (boolean (get-in cli-options [:options :sandbox])))
+             (when (:errors cli-options)
+               (apply println "invalid options: " (:errors cli-options))
+               (System/exit -1))
+             (def cfg-item
+               (-> cli-options
+                   :arguments
+                   first
+                   keyword))
+             (def cfg-items
+               (-> (cond-> (cfg-items/read-configurations os) cfg-item
+                           (cfg-items/limit-configurations [cfg-item]))
+                   cfg-items/develop-pre-reqs
+                   cfg-items/expand))
+             (defn execute-all-cmds
+               [cmds]
+               (cond (empty? cmds) (println "nothing to do.")
+                     sandbox? (run! println (map ncmds/to-str cmds))
+                     :else (let [execution (ncmds/execute-all-cmds cmds)]
+                             (if (empty? execution)
+                               (println "success.")
+                               (run! println
+                                     (conj
+                                      (mapv :cmd execution)
+                                      "Following commands have failed\n"))))))),
+         :requires ([cli-opts :as cli-opts]
+                    [current-os]
+                    [babashka.fs :as fs]
+                    [clojure.pprint :as pp]
+                    [cfg-items]
+                    [ncmds]
+                    [tasks]
+                    [tasks.nrepl :as nrepl]),
+         cfg-version {:doc "Display current version of configuration items.",
+                      :task (execute-all-cmds (tasks/cfg-version cfg-items))},
+         check {:doc "Ask all cfg item to check their consistency",
+                :task (execute-all-cmds (tasks/check cfg-items))},
+         clean {:doc "Clean the setup - remove outdated downloads",
+                :task (execute-all-cmds (tasks/clean cfg-items))},
+         format {:doc "Format all project files",
+                 :task (execute-all-cmds (tasks/format))},
+         init {:doc "Init the setup - to be run only once",
+               :task (execute-all-cmds (tasks/init cfg-items))},
+         install {:doc "Use to install cfg-item",
+                  :task (execute-all-cmds (tasks/install cfg-items))},
+         nrepl {:doc "Launch the nrepl", :task (nrepl/nrepl)},
+         save {:doc "Save the current configuration",
+               :task (let [files (tasks/save cfg-items)]
+                       (fs/delete-tree tasks/backup-dir)
+                       (if sandbox?
+                         (run! println files)
+                         (run! (partial apply tasks/copy-file) files)))},
+         show {:doc "Show the detail of an app", :task (pp/pprint cfg-items)},
+         update {:doc "Regularly update you environment",
+                 :task (execute-all-cmds (tasks/update cfg-items))},
+         validate {:doc "validate",
+                   :task (if-let [errors (-> (cfg-items/read-data-as-resource
+                                              cfg-items/cfg-filename)
+                                             cfg-items/validate-cfg)]
+                           (do (println "Error in the configuration: ")
+                               (pp/pprint errors))
+                           (println "Is valid configuration file."))}}}

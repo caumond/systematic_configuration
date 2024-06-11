@@ -3,8 +3,7 @@
 
 (def cli-options
   [["-h" "--help" "Displays this help"]
-   ["-s" "--sandbox" "Don't execute the commands, just sandbox them"]
-   ["-c" "--cfg-item CFG_ITEM" "Run only one configuration item"]])
+   ["-s" "--sandbox" "Don't execute the commands, just sandbox them"]])
 
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn parse [args] (parse-opts args cli-options))

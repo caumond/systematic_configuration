@@ -25,8 +25,9 @@
 (def brew-package-manager
   "Package management with brew."
   [:map {:closed true}
-   [:package-manager {:description "one package manager among existings."} [:enum :brew]]
-   [:cask {:description "Is the formula a cask?" :optional true} :boolean]
+   [:package-manager {:description "one package manager among existings."}
+    [:enum :brew]]
+   [:cask {:description "Is the formula a cask?", :optional true} :boolean]
    [:formula {:description "`brew` formula to install the `cfg-item`."} :string]
    [:tap {:optional true, :description "`brew` tap where to find the formula."}
     :string]])
@@ -47,9 +48,8 @@
     {:optional true,
      :description "Commands to init - run once - the configuration item."} cmds]
    [:install-cmds
-    {:description "Commands describing how to manually install the `cfg-item`."
-     :optional true}
-    cmds]
+    {:description "Commands describing how to manually install the `cfg-item`.",
+     :optional true} cmds]
    [:update-cmds
     {:optional true, :description "Update the installation of `cfg-item`."}
     cmds]
@@ -58,12 +58,12 @@
 
 (def common-behavior
   [:map
-   [:description {:optional true, :description "Optional description of the `cfg-item`."}
+   [:description
+    {:optional true, :description "Optional description of the `cfg-item`."}
     :string]
    [:post-package
     {:optional true,
-     :description "Command to setup after package has been installed."}
-    cmds]
+     :description "Command to setup after package has been installed."} cmds]
    [:pre-reqs
     {:optional true,
      :description
@@ -75,25 +75,19 @@
     [:vector :string]]
    [:tmp-files {:optional true, :description "Temporary files to remove."}
     [:vector :string]]
-   [:tmp-dirs
-    {:optional true, :description "Temporary directory to remove."}
+   [:tmp-dirs {:optional true, :description "Temporary directory to remove."}
     [:vector :string]]])
 
 (def assembly
-  [:or
-   [:union npm-package-manager common-behavior]
+  [:or [:union npm-package-manager common-behavior]
    [:union manual-package-manager common-behavior]
    [:union brew-package-manager common-behavior]])
 
-(def registry
-  (assoc malli-registry
-         ::app
-         assembly))
+(def registry (assoc malli-registry ::app assembly))
 
 "One `cfg-item` schema, is one of the package-manager and some global properites available for all of them."
 
-(def cfg-items-schema
-  [:map-of cfg-item-name [:ref ::app]])
+(def cfg-items-schema [:map-of cfg-item-name [:ref ::app]])
 
 (def ^:private cfg-dir "Directory where configuration per os are stored" "os")
 
@@ -199,8 +193,7 @@
 
 (defn validate-cfg
   [file-content]
-  (when-not (m/validate cfg-items-schema file-content
-                        {:registry registry})
+  (when-not (m/validate cfg-items-schema file-content {:registry registry})
     {:error (->> file-content
                  (m/explain (m/schema cfg-items-schema {:registry registry}))
                  me/with-spell-checking

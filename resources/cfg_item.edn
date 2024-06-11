@@ -11,13 +11,14 @@
          ["./brew-install.sh"] ["rm" "./brew-install.sh"]],
         :package-manager :manual,
         :update-cmds [["brew" "update"]]},
- :c-project {:pre-reqs {:gcc {:formula "gcc", :package-manager :brew}}
-             :package-manager :manual},
+ :c-project {:package-manager :manual,
+             :pre-reqs {:gcc {:formula "gcc", :package-manager :brew}}},
  :clever {:cfg-files ["~/.config/clever-cloud/clever-tools.json"],
           :formula "clever-tools",
           :package-manager :brew},
  :clojure-project
- {:pre-reqs {:clj-kondo {:formula "borkdude/brew/clj-kondo",
+ {:package-manager :manual,
+  :pre-reqs {:clj-kondo {:formula "borkdude/brew/clj-kondo",
                          :package-manager :brew,
                          :tmp-dirs [".clojure/.clj-kondo/.cache"]},
              :clojure {:cfg-files ["~/.clojure/deps.edn"],
@@ -34,53 +35,54 @@
              :tools-clojure {:cfg-files ["~/.clojure/tools/tools.edn"],
                              :formula "clojure/tools/clojure",
                              :package-manager :brew},
-             :tree-sitter {:formula "tree-sitter", :package-manager :brew}}
-  :package-manager :manual},
- :docker {:pre-reqs {:dockutil {:formula "dockutil", :package-manager :brew}}
-          :package-manager :manual},
- :doom {:cfg-files ["~/.config/doom/config.el" "~/.config/doom/custom.el"
-                    "~/.config/doom/init.el" "~/.config/doom/packages.el"
-                    "~/.config/doom/snippets"],
-        :package-manager :manual
-        :check-cmds [["doom" "doctor"]],
-        :clean-cmds [["doom" "clean"] ["doom" "purge" "-g"]],
-        :install-cmds [["git" "clone" "--depth" "1"
-                        "https://github.com/doomemacs/doomemacs" "~/.config/emacs"]
-                       ["doom" "install"]],
-        :pre-reqs {:aspell {:formula "aspell", :package-manager :brew},
-                   :black {:formula "black", :package-manager :brew},
-                   :cljfmt {:npm-deps ["node-cljfmt"], :package-manager :npm},
-                   :clojure-lsp-native {:formula "clojure-lsp/brew/clojure-lsp-native",
-                                        :package-manager :brew,
-                                        :tmp-dirs [".clojure/.lsp/.cache"
-                                                   ".cache/clojure-lsp"]},
-                   :cmake {:formula "cmake", :package-manager :brew},
-                   :cmake-docs {:formula "cmake-docs", :package-manager :brew},
-                   :emacs
-                   {:description
-                    "# See https://github.com/d12frosted/homebrew-emacs-plus for more details, may be emacs-plus@28 emacs-plus@29",
-                    :formula "emacs-plus --with-imagemagick --with-native-comp",
-                    :package-manager :brew,
-                    :pre-reqs {:imagemagick {:formula "imagemagick", :package-manager :brew}},
-                    :tap "d12frosted/emacs-plus"},
-                   :fd {:formula "fd", :package-manager :brew},
-                   :graphviz {:formula "graphviz", :package-manager :brew},
-                   :js-beautify {:npm-deps ["js-beautify"], :package-manager :npm},
-                   :ktlint {:formula "ktlint", :package-manager :brew},
-                   :openjpeg {:formula "openjpeg", :package-manager :brew},
-                   :ripgrep {:formula "ripgrep", :package-manager :brew},
-                   :shellcheck {:formula "shellcheck", :package-manager :brew},
-                   :shfmt {:formula "shfmt", :package-manager :brew},
-                   :stylelint {:npm-deps ["stylelint"], :package-manager :npm},
-                   :stylelint-config-standard {:npm-deps ["stylelint-config-standard"],
-                                               :package-manager :npm},
-                   :tidy-html5 {:formula "tidy-html5", :package-manager :brew},
-                   :zprint {:cfg-files ["~/.zprintrc"],
-                            :formula "zprint",
-                            :package-manager :brew,
-                            :tmp-dirs [".zprint/urlcache"]}},
-        :update-cmds [["doom" "upgrade"]],
-        :cfg-version-cmds [["doom" "info"]]},
+             :tree-sitter {:formula "tree-sitter", :package-manager :brew}}},
+ :docker {:package-manager :manual,
+          :pre-reqs {:dockutil {:formula "dockutil", :package-manager :brew}}},
+ :doom
+ {:cfg-files ["~/.config/doom/config.el" "~/.config/doom/custom.el"
+              "~/.config/doom/init.el" "~/.config/doom/packages.el"
+              "~/.config/doom/snippets"],
+  :cfg-version-cmds [["doom" "info"]],
+  :check-cmds [["doom" "doctor"]],
+  :clean-cmds [["doom" "clean"] ["doom" "purge" "-g"]],
+  :install-cmds [["git" "clone" "--depth" "1"
+                  "https://github.com/doomemacs/doomemacs" "~/.config/emacs"]
+                 ["doom" "install"]],
+  :package-manager :manual,
+  :pre-reqs
+  {:aspell {:formula "aspell", :package-manager :brew},
+   :black {:formula "black", :package-manager :brew},
+   :cljfmt {:npm-deps ["node-cljfmt"], :package-manager :npm},
+   :clojure-lsp-native {:formula "clojure-lsp/brew/clojure-lsp-native",
+                        :package-manager :brew,
+                        :tmp-dirs [".clojure/.lsp/.cache"
+                                   ".cache/clojure-lsp"]},
+   :cmake {:formula "cmake", :package-manager :brew},
+   :cmake-docs {:formula "cmake-docs", :package-manager :brew},
+   :emacs
+   {:description
+    "# See https://github.com/d12frosted/homebrew-emacs-plus for more details, may be emacs-plus@28 emacs-plus@29",
+    :formula "emacs-plus --with-imagemagick --with-native-comp",
+    :package-manager :brew,
+    :pre-reqs {:imagemagick {:formula "imagemagick", :package-manager :brew}},
+    :tap "d12frosted/emacs-plus"},
+   :fd {:formula "fd", :package-manager :brew},
+   :graphviz {:formula "graphviz", :package-manager :brew},
+   :js-beautify {:npm-deps ["js-beautify"], :package-manager :npm},
+   :ktlint {:formula "ktlint", :package-manager :brew},
+   :openjpeg {:formula "openjpeg", :package-manager :brew},
+   :ripgrep {:formula "ripgrep", :package-manager :brew},
+   :shellcheck {:formula "shellcheck", :package-manager :brew},
+   :shfmt {:formula "shfmt", :package-manager :brew},
+   :stylelint {:npm-deps ["stylelint"], :package-manager :npm},
+   :stylelint-config-standard {:npm-deps ["stylelint-config-standard"],
+                               :package-manager :npm},
+   :tidy-html5 {:formula "tidy-html5", :package-manager :brew},
+   :zprint {:cfg-files ["~/.zprintrc"],
+            :formula "zprint",
+            :package-manager :brew,
+            :tmp-dirs [".zprint/urlcache"]}},
+  :update-cmds [["doom" "upgrade"]]},
  :ffmpeg {:formula "ffmpeg", :package-manager :brew},
  :gimp {:formula "gimp", :package-manager :brew},
  :git {:cfg-files ["~/.gitconfig"],
@@ -90,7 +92,8 @@
                   :git-lfs {:formula "git-lfs", :package-manager :brew}}},
  :glpk {:install-cmds [["mkdir -p ~/Dev/install" "cd ~/Dev/install"
                         "wget http://ftp.gnu.org/gnu/glpk/glpk-5.0.tar.gz"
-                        "tar -xvzf glpk-5.0.tar.gz" "cd glpk-5.0" "./configure"]],
+                        "tar -xvzf glpk-5.0.tar.gz" "cd glpk-5.0"
+                        "./configure"]],
         :package-manager :manual},
  :iterm2 {:cfg-files ["~/Library/Preferences/com.googlecode.iterm2.plist"],
           :formula "iterm2",
@@ -107,24 +110,31 @@
  :obs {:formula "obs", :package-manager :brew},
  :os {:clean-cmds [["fd" "-H" "-I" "-g" "'**/.DS_Store'" "-x" "rm" "{}"]],
       :package-manager :manual},
- ;; :python-projects {:pre-reqs {:pip {:install-cmds [["python3.12" "-m" "pip" "install"
+ ;; :python-projects {:pre-reqs {:pip {:install-cmds [["python3.12" "-m"
+ ;; "pip" "install"
  ;;                                                    "--upgrade" "pip"]],
- ;;                                    :update-cmds [["python3.11" "-m" "pip" "install"
+ ;;                                    :update-cmds [["python3.11" "-m"
+ ;;                                    "pip" "install"
  ;;                                                   "--upgrade" "pip"]]
  ;;                                    :package-manager :manual},
  ;;                              :pipenv {:package "pipenv"},
  ;;                              :pyflakes {:package "pyflakes"},
  ;;                              :python {:formula "python",
- ;;                                       :package-manager :brew :pre-reqs {:isort {:package
+ ;;                                       :package-manager :brew :pre-reqs
+ ;;                                       {:isort {:package
  ;;                                                                                 "isort"},
- ;;                                                                         :nose {:package "nose"}, :pytest
- ;;                                                                         {:package "pytest"}}},
+ ;;                                                                         :nose
+ ;;                                                                         {:package
+ ;;                                                                         "nose"},
+ ;;                                                                         :pytest
+ ;;                                                                         {:package
+ ;;                                                                         "pytest"}}},
  ;;                              :testresources {:package "testresources"},
  ;;                              :virtualenv {:package "virtualenv"}}
  ;;                   :package-manager :manual}
  :security-tools
  {:description "What is necessary to manage security keys",
-  :package-manager :manual
+  :package-manager :manual,
   :pre-reqs {:gnupg {:formula "gnupg", :package-manager :brew},
              :ssh-keygen {:init-cmds [["ssh-keygen" "-t" "rsa" "-b" "4096" "-C"
                                        "anthony@caumond.com"]
@@ -136,16 +146,17 @@
  :zsh
  {:formula "zsh",
   :package-manager :brew,
-  :pre-reqs {:oh-my-zsh {:cfg-files ["~/.zshrc"],
-                         :install-cmds [["curl" "-fsSL"
-                                         "https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh"
-                                         "-o" "ohmyzsh-install.sh"] ["chmod" "+x" "ohmyzsh-install.sh"]
-                                        ["./ohmyzsh-install.sh"] ["rm" "./ohmyzsh-install.sh"]],
-                         :package-manager :manual},
-             :typewritten {:npm-deps ["typewritten"]
-                           :package-manager :npm},
-             :zsh-completions {:formula "zsh-completions"
+  :pre-reqs {:oh-my-zsh
+             {:cfg-files ["~/.zshrc"],
+              :install-cmds
+              [["curl" "-fsSL"
+                "https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh"
+                "-o" "ohmyzsh-install.sh"] ["chmod" "+x" "ohmyzsh-install.sh"]
+               ["./ohmyzsh-install.sh"] ["rm" "./ohmyzsh-install.sh"]],
+              :package-manager :manual},
+             :typewritten {:npm-deps ["typewritten"], :package-manager :npm},
+             :zsh-completions {:formula "zsh-completions",
                                :package-manager :brew}}},
- :zsh-env {:package-manager :manual,
-           :update-cmds [["doom" "env"]],
-           :cfg-version-cmds [["zsh" "--version"]]}}
+ :zsh-env {:cfg-version-cmds [["zsh" "--version"]],
+           :package-manager :manual,
+           :update-cmds [["doom" "env"]]}}

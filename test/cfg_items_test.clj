@@ -23,10 +23,9 @@
            (humanize sut/brew-package-manager
                      {:formula "aspell", :package-manager :brew}))
         "The schema of only one formula is accepted.")
-    (is (some?
-         (:package-manager
-          (humanize sut/brew-package-manager
-                    {:formula "aspell", :package-manager :brow})))
+    (is (some? (:package-manager (humanize sut/brew-package-manager
+                                           {:formula "aspell",
+                                            :package-manager :brow})))
         "Wrong package manager is rejected.")
     (is (= {:version-cmds [["brew" "list" "aspell" "--versions"]],
             :check-cmds [],
@@ -42,7 +41,7 @@
         :version-cmds
         [ncmds/execute-cmd])
     ;
-    )
+  )
   (testing "Formula with a tap."
     (is (= nil
            (humanize sut/brew-package-manager
@@ -70,10 +69,9 @@
            (humanize sut/npm-package-manager
                      {:package-manager :npm, :npm-deps ["typewritten"]}))
         "the schema of formula and tap is accepted.")
-    (is (some?
-         (:package-manager
-          (humanize sut/npm-package-manager
-                    {:package-manager :npm-old, :npm-deps ["typewritten"]})))
+    (is (some? (:package-manager (humanize sut/npm-package-manager
+                                           {:package-manager :npm-old,
+                                            :npm-deps ["typewritten"]})))
         "Wrong package manager is rejected")
     (is (= {:version-cmds ["npm" "version" "-g"],
             :check-cmds [],
@@ -95,7 +93,7 @@
         :version
         ncmds/execute-cmds)
     ;
-    ))
+  ))
 
 (deftest manual-update-test
   (is (some? (humanize sut/manual-package-manager {:package-manager :manual}))
@@ -104,10 +102,9 @@
          (humanize sut/manual-package-manager
                    {:package-manager :manual, :install-cmds [["pwd"]]}))
       "Valid manual package.")
-  (is (some?
-       (:package-manager
-        (humanize sut/manual-package-manager
-                  {:package-manager :manuel, :install-cmds [["pwd"]]})))
+  (is (some? (:package-manager (humanize sut/manual-package-manager
+                                         {:package-manager :manuel,
+                                          :install-cmds [["pwd"]]})))
       "Invalid package manager is rejected")
   (comment
     (-> (sut/manual-update {:package-manager :manual, :install-cmds [["pwd"]]})

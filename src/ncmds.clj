@@ -2,49 +2,53 @@
   "Execute commands."
   (:refer-clojure :exclude [print])
   (:require [clojure.string :as str]
-            [babashka.process :refer [shell]]))
+            [babashka.process :refer [shell]]
+            [malli.core :as m]))
 
-(defn cmd-to-str [cmd] (str/join " " cmd))
+(defn to-str [cmd] (str/join " " cmd))
 
-(defn print
-  [cmds]
-  (doseq [cmd cmds]
-    (-> cmd
-        cmd-to-str
-        println)))
+(defn validate-cmd [cmd] (malli.core/validate [:sequential :string] cmd))
 
-(defn- execute-process
+(defn- execute-process*
+  [cmd string?]
+  (let [{:keys [exit], :as res, :or {exit -1}}
+        (apply shell
+               (cond-> {:continue true} string? (assoc :out :string))
+               cmd)]
+    (when-not (zero? exit) (println "Error during execution. Exit-code " exit))
+    res))
+
+(defn execute-as-string
   [cmd]
-  (println (format "Execute `%s`" (pr-str (cmd-to-str cmd))))
-  (when-not (or (empty? cmd) (not (every? string? cmd)))
-    (let [cmd (cmd-to-str cmd)
-          {:keys [exit], :as res-cmd, :or {exit -1}}
-          (when cmd (shell {:continue true} cmd))
-          new-res res-cmd]
-      (when-not (zero? exit) (println "Error during execution"))
-      (if (nil? cmd) res-cmd new-res))))
-
-(defn- execute-processes
-  [cmds fail-fast?]
-  (loop [cmds cmds
-         res []]
-    (let [cmd (first cmds)
-          new-res (execute-process cmd)
-          {:keys [exit]} new-res]
-      (cond (nil? new-res) nil
-            (empty? (rest cmds)) new-res
-            (nil? cmd) (recur (rest cmds) res)
-            (or (zero? exit) (not fail-fast?)) (recur (rest cmds) new-res)
-            :else (when-not (empty? cmds)
-                    (println "Skipping next commands"))))))
-
-(defn execute-cmds [cmds] (mapv (comp :out) (execute-processes cmds false)))
+  (try (-> cmd
+           (execute-process* true)
+           :out)
+       (catch Exception _ nil)))
 
 (defn execute-cmd
+  "Helper for executing a command.
+  Returns `nil` if succesful, an error map with
+  * `:cmd` and `exit-code` keys in the map in case execution has failed in shell.
+  * `:cmd` and `:exception` keys in the map in case the execution has not started."
   [cmd]
-  (-> (execute-process cmd)
-      :out))
+  (try (let [res (-> cmd
+                     (execute-process* false))]
+         (when-not (zero? (:exit res)) {:cmd cmd, :exit-code (:exit res)}))
+       (catch Exception e {:cmd cmd, :exception e})))
 
-(defn execute-cmds-fail-fast
+(defn execute-cmds
+  "Execute commands.
+  Return `nil` if all are successful.
+  Stops on the first failing and returns a map with the error if it is failing."
   [cmds]
-  (mapv (comp :out) (execute-processes cmds true)))
+  (->> cmds
+       (map execute-cmd)
+       (filter some?)
+       first))
+
+(defn execute-all-cmds
+  "Execute all processes, return a sequence of map with the error if it is failing, `nil` if success."
+  [cmds]
+  (->> cmds
+       (map execute-cmd)
+       (filterv some?)))

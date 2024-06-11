@@ -1,0 +1,93 @@
+;; This file is describing all configuration items.
+;; Code specific platform stands in `os` subdir.
+{:androidstudio {:formula "androidstudio", :package-manager :brew},
+ :brew {:check-cmd ["brew" "doctor"],
+        :description "Brew installation and global tasks",
+        :install-cmds
+        [["curl" "-fsSL"
+          "https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
+          "-o" "brew-install.sh"] ["chmod" "+x" "brew-install.sh"]
+         ["echo" "You need to connect as admin to install brew"]
+         ["./brew-install.sh"] ["rm" "./brew-install.sh"]],
+        :package-manager :manual,
+        :update-cmds [["brew" "update"]]},
+ :c-project {:pre-reqs {:gcc {:formula "gcc", :package-manager :brew}}},
+ :clever {:cfg-files ["~/.config/clever-cloud/clever-tools.json"],
+          :formula "clever-tools",
+          :package-manager :brew},
+ :clojure-project
+ {:pre-reqs {:clj-kondo {:formula "borkdude/brew/clj-kondo",
+                         :package-manager :brew,
+                         :tmp-dirs [".clojure/.clj-kondo/.cache"]},
+             :clojure {:cfgs ["~/.clojure/deps.edn"],
+                       :formula "clojure",
+                       :package-manager :brew,
+                       :tmp-dirs [".clojure/.cpcache" ".m2/repository"],
+                       :version ["clojure" "-version"]},
+             :jq {:formula "jq", :package-manager :brew},
+             :lein {:formula "leiningen", :package-manager :brew},
+             :openjdk {:formula "openjdk", :package-manager :brew},
+             :rlwrap {:formula "rlwrap", :package-manager :brew},
+             :shadow-cljs {:cfgs ["~/.shadow-cljs/config.edn"],
+                           :package-manager :npm
+                           :node-deps "shadow-cljs"},
+             :tools-clojure {:cfgs ["~/.clojure/tools/tools.edn"],
+                             :formula "clojure/tools/clojure",
+                             :package-manager :brew},
+             :tree-sitter {:formula "tree-sitter", :package-manager :brew}}}
+ :docker {:pre-reqs {:dockutil {:formula "dockutil"
+                                :package-manager :brew}}}
+ :doom {:cfg-files ["~/.config/doom/config.el" "~/.config/doom/custom.el"
+                    "~/.config/doom/init.el" "~/.config/doom/packages.el"
+                    "~/.config/doom/snippets"],
+        :check-cmd ["doom" "doctor"],
+        :clean-cmds [["doom" "clean"] ["doom" "purge" "-g"]],
+        :install-cmds [["git" "clone" "--depth" "1"
+                        "https://github.com/doomemacs/doomemacs" "~/.config/emacs"]
+                       ["doom" "install"]],
+        :pre-reqs {:aspell {:formula "aspell"
+                            :package-manager :brew},
+                   :black {:formula "black"
+                           :package-manager :brew},
+                   :cljfmt {:node-deps "node-cljfmt"
+                            :package-manager :npm},
+                   :clojure-lsp-native {:formula "clojure-lsp/brew/clojure-lsp-native",
+                                        :package-manager :brew
+                                        :tmp-dirs [".clojure/.lsp/.cache"
+                                                   ".cache/clojure-lsp"]},
+                   :cmake {:formula "cmake"
+                           :package-manager :brew},
+                   :cmake-docs {:formula "cmake-docs"
+                                :package-manager :brew},
+                   :emacs {:description "# See https://github.com/d12frosted/homebrew-emacs-plus for more details, may be emacs-plus@28 emacs-plus@29",
+                           :formula "emacs-plus --with-imagemagick --with-native-comp",
+                           :package-manager :brew
+                           :pre-reqs {:imagemagick {:formula "imagemagick"
+                                                    :package-manager :brew}},
+                           :tap "d12frosted/emacs-plus"},
+                   :fd {:formula "fd"
+                        :package-manager :brew},
+                   :graphviz {:formula "graphviz"
+                              :package-manager :brew},
+                   :js-beautify {:node-deps "js-beautify"
+                                 :package-manager :npm},
+                   :ktlint {:formula "ktlint"
+                            :package-manager :brew},
+                   :openjpeg {:formula "openjpeg"
+                              :package-manager :brew},
+                   :ripgrep {:formula "ripgrep"
+                             :package-manager :brew},
+                   :shellcheck {:formula "shellcheck"
+                                :package-manager :brew},
+                   :shfmt {:formula "shfmt"
+                           :package-manager :brew},
+                   :stylelint {:node-deps "stylelint"
+                               :package-manager :npm},
+                   :stylelint-config-standard {:node-deps "stylelint-config-standard"
+                                               :package-manager :npm},
+                   :tidy-html5 {:formula "tidy-html5"
+                                :package-manager :brew},
+                   :zprint {:cfgs ["~/.zprintrc"], :formula "zprint", :tmp-dirs [".zprint/urlcache"]
+                            :package-manager :brew}},
+        :update-cmds [["doom" "upgrade"]],
+        :version-cmd ["doom" "info"]}}

@@ -1,33 +1,27 @@
-(ns deps-graph
-  "The dependency graph allow to execute tasks in the appropriate order")
+(ns deps-graph "Dependency graph.")
 
-(defn build-from
-  [cfg-items kw]
-  (->> cfg-items
-       (map (fn [[k v]] [k (get v kw)]))
-       (into {})))
+(defn topological-layers
+  "Sort the graph topologically, so nodes are grouped in an ordered collection of node-name, in such a way that a node in layer number `n` has no successor in layers after `n`.
 
-(defn topological-sort
-  [graph-deps]
+  The graph is assumed to be a direct acyclic graph, with oriented edges. It is accessed through the graph manipulation functions.
+
+  The iterations are limited to `max-iteration` to limit endless loops.
+
+  Use flatten on it to turn it into a topologically ordered list of nodes."
+  [dag {:keys [dag-nodes node-names node-edges remove-nodes remove-successors]}
+   max-iteration]
   (loop [n 0
-         sorted-deps []
-         graph-deps graph-deps]
-    (let [leaves (->> graph-deps
-                      (filter (fn [[_ v]] (empty? v)))
-                      (mapv first)
-                      sort)
-          new-sorted-deps (vec (concat sorted-deps leaves))
-          new-graph-deps (->> (apply dissoc graph-deps leaves)
-                              (mapv (fn [[k v]] [k (remove (set leaves) v)]))
-                              (into {}))]
-      (if (empty? leaves)
-        (vec new-sorted-deps)
-        (when (< n 10) (recur (inc n) new-sorted-deps new-graph-deps))))))
-
-;; (comment
-;;   (require '[cfg-items :as cfg-items])
-;;   (-> (cfg-items/read-configuration :macos nil)
-;;       (build-from ::cfg-items/graph-deps)
-;;       #_topological-sort)
-;;   ;
-;;   )
+         sorted-nodes []
+         dag dag]
+    (println "dag: " dag)
+    (let [nodes-wo-successors (->> dag
+                                   dag-nodes
+                                   (filter (comp empty? node-edges)))]
+      (if (empty? nodes-wo-successors)
+        (vec sorted-nodes)
+        (when (< n max-iteration)
+          (recur (inc n)
+                 (conj sorted-nodes (node-names nodes-wo-successors))
+                 (-> dag
+                     (remove-nodes nodes-wo-successors)
+                     (remove-successors nodes-wo-successors))))))))

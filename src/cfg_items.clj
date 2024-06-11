@@ -149,11 +149,8 @@
                                configurations
                                (select-keys configurations [cfg-item]))
                            develop-pre-reqs
-                           expand-pre-built)
-        seq-cfg (-> configurations
-                    (deps-graph/build-from ::graph-deps)
-                    deps-graph/topological-sort)]
-    (->> seq-cfg
+                           expand-pre-built)]
+    (->> configurations
          (mapcat (fn [k] [k (get configurations k)]))
          (apply array-map))))
 
@@ -169,11 +166,8 @@
                                                   read-data-as-resource)))
         configurations (-> configurations
                            develop-pre-reqs
-                           expand-pre-built)
-        seq-cfg (-> configurations
-                    (deps-graph/build-from ::graph-deps)
-                    deps-graph/topological-sort)]
-    (->> seq-cfg
+                           expand-pre-built)]
+    (->> configurations
          (mapcat (fn [k] [k (get configurations k)]))
          (apply array-map))))
 

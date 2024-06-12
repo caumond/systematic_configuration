@@ -62,7 +62,8 @@
    :emacs
    {:description
     "# See https://github.com/d12frosted/homebrew-emacs-plus for more details, may be emacs-plus@28 emacs-plus@29",
-    :formula "emacs-plus --with-imagemagick --with-native-comp",
+    :formula "emacs-plus@29",
+    :install-options "--with-imagemagick --with-native-comp"
     :package-manager :brew,
     :pre-reqs {:imagemagick {:formula "imagemagick", :package-manager :brew}},
     :tap "d12frosted/emacs-plus"},
@@ -71,7 +72,13 @@
    :js-beautify {:npm-deps ["js-beautify"], :package-manager :npm},
    :ktlint {:formula "ktlint", :package-manager :brew},
    :openjpeg {:formula "openjpeg", :package-manager :brew},
-   :ripgrep {:formula "ripgrep", :package-manager :brew},
+   :ripgrep {:package-manager :manual
+             :install-cmds [["git" "clone" "https://github.com/BurntSushi/ripgrep" "~/Dev/install"]
+                            ["cd" "~/Dev/install/ripgrep"]
+                            ["cargo" "build" "--release"]]
+             :pre-reqs {:rust {:formula "rust"
+                               :package-manager :brew}}
+             :cfg-version-cmds [["rg --version"]]},
    :shellcheck {:formula "shellcheck", :package-manager :brew},
    :shfmt {:formula "shfmt", :package-manager :brew},
    :stylelint {:npm-deps ["stylelint"], :package-manager :npm},
@@ -80,11 +87,13 @@
    :tidy-html5 {:formula "tidy-html5", :package-manager :brew},
    :zprint {:cfg-files ["~/.zprintrc"],
             :formula "zprint",
+            :cask true
             :package-manager :brew,
             :tmp-dirs [".zprint/urlcache"]}},
   :update-cmds [["doom" "upgrade"]]},
  :ffmpeg {:formula "ffmpeg", :package-manager :brew},
- :gimp {:formula "gimp", :package-manager :brew},
+ :gimp {:formula "gimp", :package-manager :brew
+        :cask true},
  :git {:cfg-files ["~/.gitconfig"],
        :formula "git",
        :package-manager :brew,
@@ -97,6 +106,7 @@
         :package-manager :manual},
  :iterm2 {:cfg-files ["~/Library/Preferences/com.googlecode.iterm2.plist"],
           :formula "iterm2",
+          :cask true
           :package-manager :brew,
           :pre-reqs {:coreutils {:formula "coreutils", :package-manager :brew},
                      :curl {:formula "curl", :package-manager :brew},
@@ -107,7 +117,8 @@
                      :tree {:formula "tree", :package-manager :brew}}},
  :markdown {:formula "markdown", :package-manager :brew},
  :node {:formula "node", :package-manager :brew},
- :obs {:formula "obs", :package-manager :brew},
+ :npm {:cfg-version-cmds [["npm" "version" "-g"]], :package-manager :manual},
+ :obs {:formula "obs", :package-manager :brew :cask true},
  :os {:clean-cmds [["fd" "-H" "-I" "-g" "'**/.DS_Store'" "-x" "rm" "{}"]],
       :package-manager :manual},
  ;; :python-projects {:pre-reqs {:pip {:install-cmds [["python3.12" "-m"
@@ -141,7 +152,7 @@
                                       ["cat" "~/.ssh/id_rsa.pub"]],
                           :package-manager :manual}}},
  :vim {:formula "vim", :package-manager :brew},
- :vlc {:formula "vlc", :package-manager :brew},
+ :vlc {:formula "vlc", :package-manager :brew :cask true},
  :wget {:formula "wget", :package-manager :brew},
  :zsh
  {:formula "zsh",

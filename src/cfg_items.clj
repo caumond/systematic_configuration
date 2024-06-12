@@ -29,6 +29,7 @@
     [:enum :brew]]
    [:cask {:description "Is the formula a cask?", :optional true} :boolean]
    [:formula {:description "`brew` formula to install the `cfg-item`."} :string]
+   [:install-options {:optional true :description "What options to be added when installing the formula."} :string]
    [:tap {:optional true, :description "`brew` tap where to find the formula."}
     :string]])
 
@@ -85,8 +86,6 @@
 
 (def registry (assoc malli-registry ::app assembly))
 
-"One `cfg-item` schema, is one of the package-manager and some global properites available for all of them."
-
 (def cfg-items-schema [:map-of cfg-item-name [:ref ::app]])
 
 (def ^:private cfg-dir "Directory where configuration per os are stored" "os")
@@ -97,16 +96,18 @@
 
 (defn brew-update
   "Create commands for a brew package manager."
-  [{:keys [tap formula package-manager cask], :as _cfg-item}]
+  [{:keys [tap formula package-manager cask install-options], :as _cfg-item}]
   (when (= package-manager :brew)
-    {:cfg-version-cmds [(concat ["brew" "list"] [formula "--versions"])],
+    {:cfg-version-cmds [(vec (concat ["brew" "list"]
+                                     (when cask ["--cask"])
+                                     [formula "--versions"]))],
      :check-cmds [], ;; brew cfg-item is checking all managed cfg-items at
      ;; once.
      :clean-cmds [["brew" "cleanup" formula]],
      :graph-deps [package-manager],
      :init-cmds [], ;; no need
      :install-cmds
-     (->> [(concat ["brew" "install"] (when cask ["--cask"]) [formula "-q"])]
+     (->> [(vec (concat ["brew" "install"] (when cask ["--cask"]) [formula "-q"] [install-options]))]
           (concat (when tap [["brew" "tap" tap]]))
           vec),
      :package-manager package-manager,
@@ -116,7 +117,7 @@
   "Create commands for an npm package manager."
   [{:keys [npm-deps package-manager], :as _cfg-item}]
   (when (= package-manager :npm)
-    {:cfg-version-cmds [["npm" "version" "-g"]],
+    {:cfg-version-cmds [],
      :check-cmds (mapv (fn [npm-dep] ["npm" "doctor" npm-dep]) npm-deps),
      :clean-cmds [], ;; npm cache clean is discouraged by npm.
      :graph-deps [package-manager],
@@ -142,7 +143,7 @@
     cfg-files (assoc :cfg-files cfg-files)
     post-package (assoc :post-package post-package)
     tmp-dirs (update :clean-cmds
-                     conj
+                     (comp vec concat)
                      (->> tmp-dirs
                           (mapv (fn [tmp-dir] ["rm" "-fr" tmp-dir]))))))
 

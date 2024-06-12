@@ -11,13 +11,12 @@
                (apply println "invalid options: " (:errors cli-options))
                (System/exit -1))
              (def cfg-item
-               (-> cli-options
-                   :arguments
-                   first
-                   keyword))
+               (->> cli-options
+                    :arguments
+                    (mapv keyword)))
              (def cfg-items
-               (-> (cond-> (cfg-items/read-configurations os) cfg-item
-                           (cfg-items/limit-configurations [cfg-item]))
+               (-> (cond-> (cfg-items/read-configurations os)
+                     cfg-item (cfg-items/limit-configurations cfg-item))
                    cfg-items/develop-pre-reqs
                    cfg-items/expand))
              (defn execute-all-cmds
@@ -27,10 +26,10 @@
                      :else (let [execution (ncmds/execute-all-cmds cmds)]
                              (if (empty? execution)
                                (println "success.")
-                               (run! println
-                                     (conj
-                                      (mapv :cmd execution)
-                                      "Following commands have failed\n"))))))),
+                               (run! (partial apply println)
+                                     (cons
+                                      "Following commands have failed:\n"
+                                      (mapv :cmd execution)))))))),
          :requires ([cli-opts :as cli-opts]
                     [current-os]
                     [babashka.fs :as fs]

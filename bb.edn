@@ -51,6 +51,10 @@
          install {:doc "Use to install cfg-item",
                   :task (execute-all-cmds (tasks/install cfg-items))},
          nrepl {:doc "Launch the nrepl", :task (nrepl/nrepl)},
+         os {:doc "Display current os" :task (do
+                                               (println (format "os is `%s`, linked to configuration `%s`"
+                                                                (System/getProperty "os.name")
+                                                                os)))}
          save {:doc "Save the current configuration",
                :task (let [files (tasks/save cfg-items)]
                        (fs/delete-tree tasks/backup-dir)
@@ -67,3 +71,14 @@
                            (do (println "Error in the configuration: ")
                                (pp/pprint errors))
                            (println "Is valid configuration file."))}}}
+
+;; ssh -p 24736 91.171.44.225
+
+;;TODO Make the os works on linux
+;;TODO Make sure linux version works
+;;TODO Add computers list
+;;TODO Update SUDOERs
+;;TODO Save /etc/hosts
+;;TODO Save /etc/ssh/ssh_config
+;;TODO  ssh-copy-id fix-computer
+;;TODO sudo usermod -aG sudo anthonycaumond

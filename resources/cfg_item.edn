@@ -157,14 +157,14 @@
  :zsh
  {:formula "zsh",
   :package-manager :brew,
-  :pre-reqs {:oh-my-zsh
-             {:cfg-files ["~/.zshrc"],
-              :install-cmds
-              [["curl" "-fsSL"
-                "https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh"
-                "-o" "ohmyzsh-install.sh"] ["chmod" "+x" "ohmyzsh-install.sh"]
-               ["./ohmyzsh-install.sh"] ["rm" "./ohmyzsh-install.sh"]],
-              :package-manager :manual},
+  :pre-reqs {:oh-my-zsh {:cfg-files ["~/.zshrc"],
+                         :update-cmds [["omz" "update"]]
+                         :cfg-version-cmds [["omz" "version"]]
+                         :install-cmds [["curl" "-fsSL"
+                                         "https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh"
+                                         "-o" "ohmyzsh-install.sh"] ["chmod" "+x" "ohmyzsh-install.sh"]
+                                        ["./ohmyzsh-install.sh"] ["rm" "./ohmyzsh-install.sh"]],
+                         :package-manager :manual},
              :typewritten {:npm-deps ["typewritten"], :package-manager :npm},
              :zsh-completions {:formula "zsh-completions",
                                :package-manager :brew}}},

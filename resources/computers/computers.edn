@@ -1,0 +1,8 @@
+{:ubuntu {:doc "Ubuntu os",
+          :dir "ubuntu"
+          :init-md "pre-init.md"
+          }
+ :macos {:doc "Macos X"
+         :dir "macos"
+         :init-md "pre-init.md"
+         }}

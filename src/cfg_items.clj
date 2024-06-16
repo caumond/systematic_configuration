@@ -204,7 +204,8 @@
 
 (defn read-configurations
   [os]
-  (-> (read-data-as-resource cfg-filename)
+  (cond-> (read-data-as-resource cfg-filename)
+    (some? os)
       (utils/deep-merge (->> os
                              cfg-envs
                              (format "%s/%s.edn" cfg-dir)

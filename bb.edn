@@ -1,84 +1,90 @@
 {:deps {metosin/malli {:mvn/version "0.13.0"},
         org.clojure/tools.cli {:mvn/version "1.0.219"}},
  :paths ["src" "resources"],
- :tasks {:enter {},
-         :init
-         (do (def os (current-os/current-os))
-             (def cli-options (cli-opts/parse *command-line-args*))
-             (cli-opts/do-opts cli-options)
-             (def sandbox? (boolean (get-in cli-options [:options :sandbox])))
-             (when (:errors cli-options)
-               (apply println "invalid options: " (:errors cli-options))
-               (System/exit -1))
-             (def cfg-item
-               (->> cli-options
-                    :arguments
-                    (mapv keyword)))
-             (def cfg-items
-               (-> (cond-> (cfg-items/read-configurations os)
-                     cfg-item (cfg-items/limit-configurations cfg-item))
-                   cfg-items/develop-pre-reqs
-                   cfg-items/expand))
-             (defn execute-all-cmds
-               [cmds]
-               (cond (empty? cmds) (println "nothing to do.")
-                     sandbox? (run! println (map ncmds/to-str cmds))
-                     :else (let [execution (ncmds/execute-all-cmds cmds)]
-                             (if (empty? execution)
-                               (println "success.")
-                               (run! (partial apply println)
-                                     (cons
-                                      "Following commands have failed:\n"
-                                      (mapv :cmd execution)))))))),
-         :requires ([cli-opts :as cli-opts]
-                    [current-os]
-                    [babashka.fs :as fs]
-                    [clojure.pprint :as pp]
-                    [cfg-items]
-                    [ncmds]
-                    [tasks]
-                    [tasks.nrepl :as nrepl]),
-         cfg-version {:doc "Display current version of configuration items.",
-                      :task (execute-all-cmds (tasks/cfg-version cfg-items))},
-         check {:doc "Ask all cfg item to check their consistency",
-                :task (execute-all-cmds (tasks/check cfg-items))},
-         clean {:doc "Clean the setup - remove outdated downloads",
-                :task (execute-all-cmds (tasks/clean cfg-items))},
-         format {:doc "Format all project files",
-                 :task (execute-all-cmds (tasks/format))},
-         init {:doc "Init the setup - to be run only once",
-               :task (execute-all-cmds (tasks/init cfg-items))},
-         install {:doc "Use to install cfg-item",
-                  :task (execute-all-cmds (tasks/install cfg-items))},
-         nrepl {:doc "Launch the nrepl", :task (nrepl/nrepl)},
-         os {:doc "Display current os" :task (do
-                                               (println (format "os is `%s`, linked to configuration `%s`"
-                                                                (System/getProperty "os.name")
-                                                                os)))}
-         save {:doc "Save the current configuration",
-               :task (let [files (tasks/save cfg-items)]
-                       (fs/delete-tree tasks/backup-dir)
-                       (if sandbox?
-                         (run! println files)
-                         (run! (partial apply tasks/copy-file) files)))},
-         show {:doc "Show the detail of an app", :task (pp/pprint cfg-items)},
-         update {:doc "Regularly update you environment",
-                 :task (execute-all-cmds (tasks/update cfg-items))},
-         validate {:doc "validate",
-                   :task (if-let [errors (-> (cfg-items/read-data-as-resource
-                                              cfg-items/cfg-filename)
-                                             cfg-items/validate-cfg)]
-                           (do (println "Error in the configuration: ")
-                               (pp/pprint errors))
-                           (println "Is valid configuration file."))}}}
+ :tasks
+ {:enter {},
+  :init (do (def os (current-os/current-os))
+            (def cli-options (cli-opts/parse *command-line-args*))
+            (cli-opts/do-opts cli-options)
+            (def sandbox? (boolean (get-in cli-options [:options :sandbox])))
+            (when (:errors cli-options)
+              (apply println "invalid options: " (:errors cli-options))
+              (System/exit -1))
+            (def cfg-item
+              (->> cli-options
+                   :arguments
+                   (mapv keyword)))
+            (def cfg-items
+              (-> (cond-> (cfg-items/read-configurations os) cfg-item
+                          (cfg-items/limit-configurations cfg-item))
+                  cfg-items/develop-pre-reqs
+                  cfg-items/expand))
+            (defn execute-all-cmds
+              [cmds]
+              (cond (empty? cmds) (println "nothing to do.")
+                    sandbox? (run! println (map ncmds/to-str cmds))
+                    :else (let [execution (ncmds/execute-all-cmds cmds)]
+                            (if (empty? execution)
+                              (println "success.")
+                              (run! (partial apply println)
+                                    (cons "Following commands have failed:\n"
+                                          (mapv :cmd execution)))))))),
+  :requires ([cli-opts :as cli-opts]
+             [current-os]
+             [babashka.fs :as fs]
+             [clojure.pprint :as pp]
+             [cfg-items]
+             [ncmds]
+             [tasks]
+             [tasks.nrepl :as nrepl]),
+  cfg-version {:doc "Display current version of configuration items.",
+               :task (execute-all-cmds (tasks/cfg-version cfg-items))},
+  check {:doc "Ask all cfg item to check their consistency",
+         :task (execute-all-cmds (tasks/check cfg-items))},
+  clean {:doc "Clean the setup - remove outdated downloads",
+         :task (execute-all-cmds (tasks/clean cfg-items))},
+  deps-graph {:doc "Show cfg-item dependencies.",
+              :task (run! println
+                          (-> (cfg-items/cfg-items-sorted cfg-items)
+                              keys))},
+  format {:doc "Format all project files",
+          :task (execute-all-cmds (tasks/format))},
+  init {:doc "Init the setup - to be run only once",
+        :task (execute-all-cmds (tasks/init cfg-items))},
+  install {:doc "Use to install cfg-item",
+           :task (execute-all-cmds (-> cfg-items
+                                       cfg-items/cfg-items-sorted
+                                       tasks/install))},
+  nrepl {:doc "Launch the nrepl", :task (nrepl/nrepl)},
+  os {:doc "Display current os",
+      :task (do (println (format "os is `%s`, linked to configuration `%s`"
+                                 (System/getProperty "os.name")
+                                 os)))},
+  save {:doc "Save the current configuration",
+        :task (let [files (tasks/save cfg-items)]
+                (fs/delete-tree tasks/backup-dir)
+                (if sandbox?
+                  (run! println files)
+                  (run! (partial apply tasks/copy-file) files)))},
+  show {:doc "Show the detail of an app",
+        :task (let [ordered-cfg-items (-> cfg-items
+                                          cfg-items/cfg-items-sorted)]
+                (spit "tmp/ordered-items.edn" ordered-cfg-items)
+                (pp/pprint ordered-cfg-items))},
+  update {:doc "Regularly update you environment",
+          :task (execute-all-cmds (tasks/update cfg-items))},
+  validate {:doc "validate",
+            :task (if-let [errors (-> (cfg-items/read-data-as-resource
+                                       cfg-items/cfg-filename)
+                                      cfg-items/validate-cfg)]
+                    (do (println "Error in the configuration: ")
+                        (pp/pprint errors))
+                    (println "Is valid configuration file."))}}}
 
 ;; ssh -p 24736 91.171.44.225
 
 ;;TODO Make the os works on linux
-;;TODO Make sure linux version works
 ;;TODO Add computers list
-;;TODO Update SUDOERs
 ;;TODO Save /etc/hosts
 ;;TODO Save /etc/ssh/ssh_config
-;;TODO  ssh-copy-id fix-computer
-;;TODO sudo usermod -aG sudo anthonycaumond
+;;TODO ssh-copy-id fix-computer

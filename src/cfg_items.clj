@@ -29,7 +29,10 @@
     [:enum :brew]]
    [:cask {:description "Is the formula a cask?", :optional true} :boolean]
    [:formula {:description "`brew` formula to install the `cfg-item`."} :string]
-   [:install-options {:optional true :description "What options to be added when installing the formula."} :string]
+   [:install-options
+    {:optional true,
+     :description "What options to be added when installing the formula."}
+    :string]
    [:tap {:optional true, :description "`brew` tap where to find the formula."}
     :string]])
 
@@ -106,10 +109,12 @@
      :clean-cmds [["brew" "cleanup" formula]],
      :graph-deps [package-manager],
      :init-cmds [], ;; no need
-     :install-cmds
-     (->> [(vec (concat ["brew" "install"] (when cask ["--cask"]) [formula "-q"] [install-options]))]
-          (concat (when tap [["brew" "tap" tap]]))
-          vec),
+     :install-cmds (->> [(vec (concat ["brew" "install"]
+                                      (when cask ["--cask"])
+                                      [formula "-q"]
+                                      [install-options]))]
+                        (concat (when tap [["brew" "tap" tap]]))
+                        vec),
      :package-manager package-manager,
      :update-cmds [["brew" "upgrade" formula]]}))
 
@@ -205,11 +210,10 @@
 (defn read-configurations
   [os]
   (cond-> (read-data-as-resource cfg-filename)
-    (some? os)
-      (utils/deep-merge (->> os
-                             cfg-envs
-                             (format "%s/%s.edn" cfg-dir)
-                             read-data-as-resource))))
+    (some? os) (utils/deep-merge (->> os
+                                      cfg-envs
+                                      (format "%s/%s.edn" cfg-dir)
+                                      read-data-as-resource))))
 
 (defn limit-configurations
   [configurations cfg-items]
@@ -217,30 +221,6 @@
 
 (defn cfg-items-sorted
   [cfg-items]
-  (deps-graph/topological-layers cfg-items deps-graph.map/simple 10))
+  (->> (deps-graph/topological-layers cfg-items deps-graph.map/simple 10)
+       (deps-graph/ordered-nodes cfg-items)))
 
-;; (defn validate-data
-;;   "Return true if the data is matching the schema
-;;   Params:
-;;   * `schema` schema to match
-;;   * `data` data to check appliance to schema"
-;;   [schema data]
-;;   (-> schema
-;;       (malli/schema {:registry registry})
-;;       (malli/validate data)))
-
-;; (defn validate-data-humanize
-;;   "Returns nil if valid, the error message otherwise.
-
-;;   Params:
-;;   * `schema` schema to match
-;;   * `data` data to check appliance to schema"
-;;   [schema data]
-;;   (when-not (-> schema
-;;                 (malli/schema {:registry registry})
-;;                 (validate-data data))
-;;     {:error (-> (malli/explain schema data)
-;;                 malli-error/with-spell-checking
-;;                 malli-error/humanize)
-;;      :schema schema
-;;      :data data}))

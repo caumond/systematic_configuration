@@ -17,8 +17,7 @@
                cmd)]
     (when-not (zero? exit)
       (println "Error during execution: Exit-code " exit)
-      (println    "      " cmd))
-
+      (println "      " cmd))
     res))
 
 (defn execute-as-string

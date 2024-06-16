@@ -63,7 +63,7 @@
    {:description
     "# See https://github.com/d12frosted/homebrew-emacs-plus for more details, may be emacs-plus@28 emacs-plus@29",
     :formula "emacs-plus@29",
-    :install-options "--with-imagemagick --with-native-comp"
+    :install-options "--with-imagemagick --with-native-comp",
     :package-manager :brew,
     :pre-reqs {:imagemagick {:formula "imagemagick", :package-manager :brew}},
     :tap "d12frosted/emacs-plus"},
@@ -72,28 +72,27 @@
    :js-beautify {:npm-deps ["js-beautify"], :package-manager :npm},
    :ktlint {:formula "ktlint", :package-manager :brew},
    :openjpeg {:formula "openjpeg", :package-manager :brew},
-   :ripgrep {:package-manager :manual
-             :install-cmds [["git" "clone" "https://github.com/BurntSushi/ripgrep" "~/Dev/install"]
-                            ["cd" "~/Dev/install/ripgrep"]
-                            ["cargo" "build" "--release"]]
-             :pre-reqs {:rust {:formula "rust"
-                               :package-manager :brew}}
-             :cfg-version-cmds [["rg --version"]]},
+   :ripgrep {:cfg-version-cmds [["rg --version"]],
+             :install-cmds [["git" "clone"
+                             "https://github.com/BurntSushi/ripgrep"
+                             "~/Dev/install"] ["cd" "~/Dev/install/ripgrep"]
+                            ["cargo" "build" "--release"]],
+             :package-manager :manual,
+             :pre-reqs {:rust {:formula "rust", :package-manager :brew}}},
    :shellcheck {:formula "shellcheck", :package-manager :brew},
    :shfmt {:formula "shfmt", :package-manager :brew},
    :stylelint {:npm-deps ["stylelint"], :package-manager :npm},
    :stylelint-config-standard {:npm-deps ["stylelint-config-standard"],
                                :package-manager :npm},
    :tidy-html5 {:formula "tidy-html5", :package-manager :brew},
-   :zprint {:cfg-files ["~/.zprintrc"],
+   :zprint {:cask true,
+            :cfg-files ["~/.zprintrc"],
             :formula "zprint",
-            :cask true
             :package-manager :brew,
             :tmp-dirs [".zprint/urlcache"]}},
   :update-cmds [["doom" "upgrade"]]},
  :ffmpeg {:formula "ffmpeg", :package-manager :brew},
- :gimp {:formula "gimp", :package-manager :brew
-        :cask true},
+ :gimp {:cask true, :formula "gimp", :package-manager :brew},
  :git {:cfg-files ["~/.gitconfig"],
        :formula "git",
        :package-manager :brew,
@@ -104,9 +103,9 @@
                         "tar -xvzf glpk-5.0.tar.gz" "cd glpk-5.0"
                         "./configure"]],
         :package-manager :manual},
- :iterm2 {:cfg-files ["~/Library/Preferences/com.googlecode.iterm2.plist"],
+ :iterm2 {:cask true,
+          :cfg-files ["~/Library/Preferences/com.googlecode.iterm2.plist"],
           :formula "iterm2",
-          :cask true
           :package-manager :brew,
           :pre-reqs {:coreutils {:formula "coreutils", :package-manager :brew},
                      :curl {:formula "curl", :package-manager :brew},
@@ -118,7 +117,7 @@
  :markdown {:formula "markdown", :package-manager :brew},
  :node {:formula "node", :package-manager :brew},
  :npm {:cfg-version-cmds [["npm" "version" "-g"]], :package-manager :manual},
- :obs {:formula "obs", :package-manager :brew :cask true},
+ :obs {:cask true, :formula "obs", :package-manager :brew},
  :os {:clean-cmds [["fd" "-H" "-I" "-g" "'**/.DS_Store'" "-x" "rm" "{}"]],
       :package-manager :manual},
  ;; :python-projects {:pre-reqs {:pip {:install-cmds [["python3.12" "-m"
@@ -152,19 +151,21 @@
                                       ["cat" "~/.ssh/id_rsa.pub"]],
                           :package-manager :manual}}},
  :vim {:formula "vim", :package-manager :brew},
- :vlc {:formula "vlc", :package-manager :brew :cask true},
+ :vlc {:cask true, :formula "vlc", :package-manager :brew},
  :wget {:formula "wget", :package-manager :brew},
  :zsh
  {:formula "zsh",
   :package-manager :brew,
-  :pre-reqs {:oh-my-zsh {:cfg-files ["~/.zshrc"],
-                         :update-cmds [["omz" "update"]]
-                         :cfg-version-cmds [["omz" "version"]]
-                         :install-cmds [["curl" "-fsSL"
-                                         "https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh"
-                                         "-o" "ohmyzsh-install.sh"] ["chmod" "+x" "ohmyzsh-install.sh"]
-                                        ["./ohmyzsh-install.sh"] ["rm" "./ohmyzsh-install.sh"]],
-                         :package-manager :manual},
+  :pre-reqs {:oh-my-zsh
+             {:cfg-files ["~/.zshrc"],
+              :cfg-version-cmds [["omz" "version"]],
+              :install-cmds
+              [["curl" "-fsSL"
+                "https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh"
+                "-o" "ohmyzsh-install.sh"] ["chmod" "+x" "ohmyzsh-install.sh"]
+               ["./ohmyzsh-install.sh"] ["rm" "./ohmyzsh-install.sh"]],
+              :package-manager :manual,
+              :update-cmds [["omz" "update"]]},
              :typewritten {:npm-deps ["typewritten"], :package-manager :npm},
              :zsh-completions {:formula "zsh-completions",
                                :package-manager :brew}}},

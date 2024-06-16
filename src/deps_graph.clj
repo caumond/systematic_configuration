@@ -1,27 +1,48 @@
-(ns deps-graph "Dependency graph.")
+(ns deps-graph
+  "Dependency graph."
+  (:require [deps-graph.map :as graph-map]))
 
 (defn topological-layers
-  "Sort the graph topologically, so nodes are grouped in an ordered collection of node-name, in such a way that a node in layer number `n` has no successor in layers after `n`.
+  "Returns the topoligical layers of graph `dag`.
 
-  The graph is assumed to be a direct acyclic graph, with oriented edges. It is accessed through the graph manipulation functions.
+  Let's consider the following `dag`:
+  ```clojure
+  {:c {:edges [:d]},
+   :d {:edges []},
+   :a {:edges [:b :c]},
+   :b {:edges [:c]},
+   :h {:edges [:c]}}
+  ```
+  The topological layers is an ordered list of set of node names:
+  ```clojure
+  [#{:d} #{:c} #{:h :b} #{:a}]
+  ```
 
-  The iterations are limited to `max-iteration` to limit endless loops.
+  The first element contains the names of the nodes with no successor. Here it means `:d` is the only node with no successor in the graph.
 
-  Use flatten on it to turn it into a topologically ordered list of nodes."
-  [dag {:keys [dag-nodes node-names node-edges remove-nodes remove-successors]}
-   max-iteration]
+  The graph is assumed to be a direct acyclic graph, with oriented edges. It is accessed through the `graph-manipulator` functions.
+
+  In case the graph is by mistake cyclic, the iterations are limited to `max-iteration` to limit endless loops."
+  [dag
+   {:keys [dag-nodes node-names node-edges remove-nodes remove-successors],
+    :as _graph-manipulator} max-iteration]
   (loop [n 0
          sorted-nodes []
          dag dag]
-    (println "dag: " dag)
     (let [nodes-wo-successors (->> dag
                                    dag-nodes
-                                   (filter (comp empty? node-edges)))]
+                                   (filter (comp empty? node-edges)))
+          nodes-wo-successors-names (node-names nodes-wo-successors)]
       (if (empty? nodes-wo-successors)
         (vec sorted-nodes)
         (when (< n max-iteration)
           (recur (inc n)
-                 (conj sorted-nodes (node-names nodes-wo-successors))
+                 (conj sorted-nodes nodes-wo-successors-names)
                  (-> dag
-                     (remove-nodes nodes-wo-successors)
-                     (remove-successors nodes-wo-successors))))))))
+                     (remove-nodes nodes-wo-successors-names)
+                     (remove-successors nodes-wo-successors-names))))))))
+
+(defn ordered-nodes
+  "Turns a topological layers into an ordered list of nodes"
+  [dag topological-layers]
+  (select-keys dag (vec (flatten (map vec topological-layers)))))

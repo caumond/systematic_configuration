@@ -1,6 +1,5 @@
-(ns deps-graph
-  "Dependency graph."
-  (:require [deps-graph.map :as graph-map]))
+(ns dag
+  "Direct Acyclic Graph.")
 
 (defn topological-layers
   "Returns the topoligical layers of graph `dag`.
@@ -33,14 +32,17 @@
                                    dag-nodes
                                    (filter (comp empty? node-edges)))
           nodes-wo-successors-names (node-names nodes-wo-successors)]
-      (if (empty? nodes-wo-successors)
-        (vec sorted-nodes)
-        (when (< n max-iteration)
-          (recur (inc n)
-                 (conj sorted-nodes nodes-wo-successors-names)
-                 (-> dag
-                     (remove-nodes nodes-wo-successors-names)
-                     (remove-successors nodes-wo-successors-names))))))))
+      (cond (empty? dag) (vec sorted-nodes)
+            (empty? nodes-wo-successors) {:cycle-detected true,
+                                          :sorted (vec sorted-nodes),
+                                          :subgraph-with-cycle dag}
+            :else (when (< n max-iteration)
+                    (recur (inc n)
+                           (conj sorted-nodes nodes-wo-successors-names)
+                           (-> dag
+                               (remove-nodes nodes-wo-successors-names)
+                               (remove-successors
+                                nodes-wo-successors-names))))))))
 
 (defn ordered-nodes
   "Turns a topological layers into an ordered list of nodes"

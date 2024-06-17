@@ -1,4 +1,4 @@
-(ns deps-graph.map
+(ns dag.map
   "A map deps graph has one key for each node (`:a, :c` in the example below). For a node `n`, the value is a map where the key `:edges` is containing the list of following nodes.
 
   ```clojure
@@ -15,10 +15,10 @@
 
 (defn node-edges
   "Returns a set the edges of `node`."
-  [node]
+  [kw node]
   (-> node
       second
-      :edges
+      kw
       set))
 
 (defn- humanize
@@ -28,10 +28,10 @@
       me/humanize))
 
 (defn validate-simple
-  [dag]
+  [edge-kw dag]
   (->> dag
        (humanize [:map-of :keyword
-                  [:map {:closed false} [:edges [:sequential :any]]]])))
+                  [:map {:closed false} [edge-kw [:sequential :any]]]])))
 
 (defn node-names
   "With a graph or subgraph called `dag`, the names are the keys of it."
@@ -47,21 +47,23 @@
 
 (defn remove-successors
   "Remove nodes from the list of "
-  [dag node-names]
+  [edge-kw dag node-names]
   (-> dag
-      (update-vals (fn [x]
-                     (update x
-                             :edges
-                             (fn [edge]
-                               (->> edge
-                                    (remove (set node-names))
-                                    vec)))))))
+      (update-vals
+       (fn [x]
+         (update x
+                 edge-kw
+                 (fn [edge]
+                   (->> edge
+                        (remove (set node-names))
+                        vec)))))))
 
-(def simple
+(defn simple
   "For a dag which is a map, "
+  [edge-kw]
   {:dag-nodes dag-nodes,
-   :node-edges node-edges,
+   :node-edges (partial node-edges edge-kw)
    :node-names node-names,
-   :valid validate-simple,
+   :valid (partial validate-simple edge-kw)
    :remove-nodes remove-nodes,
-   :remove-successors remove-successors})
+   :remove-successors (partial remove-successors edge-kw)})

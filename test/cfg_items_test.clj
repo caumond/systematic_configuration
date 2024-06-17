@@ -27,21 +27,14 @@
                                            {:formula "aspell",
                                             :package-manager :brow})))
         "Wrong package manager is rejected.")
-    (is (= {:version-cmds [["brew" "list" "aspell" "--versions"]],
+    (is (= {:cfg-version-cmds [["brew" "list" "aspell" "--versions"]],
             :check-cmds [],
+            :cfg-item-deps [:brew]
             :clean-cmds [["brew" "cleanup" "aspell"]],
             :init-cmds [],
             :install-cmds [["brew" "install" "aspell" "-q"]],
-            :update-cmds [["brew" "upgrade" "aspell"]],
-            :graph-deps [:brew]}
+            :update-cmds [["brew" "upgrade" "aspell"]]}
            (sut/brew-update {:formula "aspell", :package-manager :brew}))))
-  (comment
-    ;; With command
-    (-> (sut/brew-update {:formula "aspell", :package-manager :brew})
-        :version-cmds
-        [ncmds/execute-cmd])
-    ;
-  )
   (testing "Formula with a tap."
     (is (= nil
            (humanize sut/brew-package-manager
@@ -49,15 +42,14 @@
                       :formula "aspell",
                       :tap "d12frosted/emacs-plus"}))
         "The schema of formula and tap is accepted.")
-    (is (= {:version-cmds ["brew" "list" "aspell" "--versions"],
+    (is (= {:cfg-version-cmds [["brew" "list" "aspell" "--versions"]]
             :check-cmds [],
             :clean-cmds [["brew" "cleanup" "aspell"]],
+            :cfg-item-deps [:brew]
             :init-cmds [],
             :install-cmds [["brew" "tap" "d12frosted/emacs-plus"]
                            ["brew" "install" "aspell" "-q"]],
-            :package-manager :brew,
-            :update-cmds [["brew" "upgrade" "aspell"]],
-            :graph-deps [:brew]}
+            :update-cmds [["brew" "upgrade" "aspell"]]}
            (sut/brew-update {:package-manager :brew,
                              :formula "aspell",
                              :tap "d12frosted/emacs-plus"}))
@@ -73,31 +65,17 @@
                                            {:package-manager :npm-old,
                                             :npm-deps ["typewritten"]})))
         "Wrong package manager is rejected")
-    (is (= {:version-cmds ["npm" "version" "-g"],
-            :check-cmds [],
+    (is (= {:cfg-version-cmds []
+            :cfg-item-deps [:npm]
+            :check-cmds [["npm" "doctor" "typewritten"]],
             :clean-cmds [],
             :init-cmds [],
             :install-cmds [["npm" "install" "-g" "typewritten"]],
-            :package-manager :npm,
-            :update-cmds [["npm" "update" "-g" "typewritten"]],
-            :graph-deps [:npm]}
-           (sut/npm-update {:npm-dep "typewritten", :package-manager :npm}))
-        "Valid formula return expected commands."))
-  (comment
-    ;; with command
-    (-> (sut/npm-update {:formula "typewritten", :package-manager :npm})
-        :version
-        ncmds/execute-cmd)
-    ;; With commands
-    (-> (sut/npm-update {:formula "typewritten", :package-manager :npm})
-        :version
-        ncmds/execute-cmds)
-    ;
-  ))
+            :update-cmds [["npm" "update" "-g" "typewritten"]]}
+           (sut/npm-update {:npm-deps ["typewritten"] :package-manager :npm}))
+        "Valid formula return expected commands.")))
 
 (deftest manual-update-test
-  (is (some? (humanize sut/manual-package-manager {:package-manager :manual}))
-      "Missing installer is an error.")
   (is (= nil
          (humanize sut/manual-package-manager
                    {:package-manager :manual, :install-cmds [["pwd"]]}))
@@ -106,17 +84,23 @@
                                          {:package-manager :manuel,
                                           :install-cmds [["pwd"]]})))
       "Invalid package manager is rejected")
-  (comment
-    (-> (sut/manual-update {:package-manager :manual, :install-cmds [["pwd"]]})
-        :install-cmds)))
+  (is (= {:cfg-version-cmds ["ls" "-la"]}
+         (sut/manual-update {:package-manager :manual
+                             :cfg-version-cmds ["ls" "-la"]}))
+      "A manual package is cleaned from post-package, deps, pre-reqs, cfg-files tmp-files tmp-dirs and package-manager"))
 
 (deftest common-update-test
-  (is (= {} (sut/common-update {})) "No common parameter is possible.")
-  (is (= {:clean-cmds []} (sut/common-update {:tmp-files [], :clean-cmds []}))
+  (is (= {} (sut/common-update {})) "It is possible to have no common parameter.")
+  (is (= {:clean-cmds []}
+         (sut/common-update {:tmp-files [], :clean-cmds []}))
       "No files deletions is ok.")
-  (is (= {:clean-cmds [["rm" "-f" "a"] ["rm" "-f" "b"]]}
-         (sut/common-update {:tmp-files ["a" "b"], :clean-cmds []}))
-      "File deletion commands are ok."))
+  (is (= {:clean-cmds [["rm" "-f" "a"] ["rm" "-f" "b"] ["clean" "clean"]]}
+         (sut/common-update {:tmp-files ["a" "b"], :clean-cmds [["clean" "clean"]]}))
+      "File deletion and commands deletion are ok.")
+  (is (= {:cfg-files ["a" "b"]}
+         (sut/common-update {:cfg-files ["a" "b"]}))
+      "Configuration files are copied"))
+;;TODO Add tests for pre-reqs deps and tmp-dirs
 
 (deftest tmp-files-update-test
   (is (= {:tmp-files ["a" "b" "cd"],

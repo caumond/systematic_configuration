@@ -1,5 +1,5 @@
 (ns deps-graph-test
-  (:require [deps-graph :as sut]
+  (:require [dag :as sut]
             [deps-graph.map :as graph-map]
             [clojure.test :refer [deftest is]]))
 
@@ -17,17 +17,17 @@
   (is
    (= [#{:a :c}]
       (sut/topological-layers {:c {:edges []}, :a {:edges []}}
-                              graph-map/simple
+                              ((graph-map/simple :edges) :edges)
                               1))
    "When no edge has a successor, the nodes names are all returned, ordered.")
   (is (= [#{:d} #{:c}]
          (sut/topological-layers {:c {:edges [:d]}, :d {:edges []}}
-                                 graph-map/simple
+                                 (graph-map/simple :edges)
                                  3))
       "Simple layers are found")
   (is (= nil
          (sut/topological-layers {:c {:edges [:a]}, :a {:edges []}}
-                                 graph-map/simple
+                                 (graph-map/simple :edges)
                                  1))
       "Return nil if maximum iteration is reached first.")
   (is (= [#{:d} #{:c} #{:h :b} #{:a}]
@@ -36,7 +36,7 @@
                                   :a {:edges [:b :c]},
                                   :b {:edges [:c]},
                                   :h {:edges [:c]}}
-                                 graph-map/simple
+                                 (graph-map/simple :edges)
                                  8))
       "Complex layers are found.")
   (is (= [#{:d} #{:c} #{:h :b} #{:a}]
@@ -45,7 +45,7 @@
                                   :a {:edges [:b :c]},
                                   :b {:edges [:c]},
                                   :h {:edges [:c]}}
-                                 graph-map/simple
+                                 (graph-map/simple :edges)
                                  8))
       "Complex layers are found."))
 

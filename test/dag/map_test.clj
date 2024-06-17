@@ -1,5 +1,5 @@
-(ns deps-graph.map-test
-  (:require [deps-graph.map :as sut]
+(ns dag.map-test
+  (:require [dag.map :as sut]
             [clojure.test :refer [deftest is]]))
 
 (deftest dag-nodes-test
@@ -10,15 +10,15 @@
 
 (deftest node-edges-test
   (is (= #{:d}
-         (-> {:c {:edges [:d]}, :a {:edges []}}
-             first
-             sut/node-edges))
+         (->> {:c {:edges [:d]}, :a {:edges []}}
+              first
+              (sut/node-edges :edges)))
       "Node names are returned into a set."))
 
 (deftest validate-simple-test
-  (is (= nil (sut/validate-simple {:dd {:edges [{:foo :bar}]}})))
-  (is (some? (sut/validate-simple {"dd" 12})))
-  (is (some? (sut/validate-simple []))))
+  (is (= nil (sut/validate-simple :edges {:dd {:edges [{:foo :bar}]}})))
+  (is (some? (sut/validate-simple :edges {"dd" 12})))
+  (is (some? (sut/validate-simple :edges []))))
 
 (deftest remove-nodes-test
   (is (= {:c {:edges [:d]}}
@@ -27,21 +27,28 @@
 
 (deftest remove-successors-test
   (is (= {:c {:edges [:q :d]}, :b {:edges [:d]}, :a {:edges []}}
-         (-> {:c {:edges [:q :d :a]}, :b {:edges [:d :a]}, :a {:edges []}}
-             (sut/remove-successors [:a])))
+         (sut/remove-successors :edges
+                                {:c {:edges [:q :d :a]}, :b {:edges [:d :a]}, :a {:edges []}}
+                                [:a]))
       "Node names are returned into a set."))
+
+(sut/remove-nodes  {:c {:edges [:d]}, :a {:edges []}}
+                   (-> {:c {:edges [:d]}, :a {:edges []}}
+                       sut/dag-nodes
+                       sut/node-names))
 
 (deftest assembly-test
   (let [dag {:c {:edges [:d]}, :a {:edges []}}
         nodes (-> dag
-                  sut/dag-nodes)]
+                  sut/dag-nodes
+                  sut/node-names)]
     (is (= {} (sut/remove-nodes dag nodes))
         "Removing nodes through nodes is ok."))
   (let [dag {:c {:edges [:d]}, :a {:edges []}}
         nodes (-> dag
-                  sut/dag-nodes)]
+                  sut/dag-nodes
+                  sut/node-names)]
     (is (= {}
-           (-> dag
-               (sut/remove-nodes nodes)
-               (sut/remove-successors nodes)))
+           (as-> (sut/remove-nodes dag nodes) dag
+                (sut/remove-successors :edges dag nodes)))
         "Removing nodes through nodes is ok.")))

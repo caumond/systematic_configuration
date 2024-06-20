@@ -29,15 +29,22 @@
 
 (defn- copy-file
   [cfg-file dst-file]
-  (when (fs/exists? (fs/expand-home cfg-file))
-    (if (fs/directory? (fs/expand-home cfg-file))
-      (do (fs/create-dirs (-> dst-file
-                              str))
-          (fs/copy-tree (fs/expand-home cfg-file) dst-file))
-      (do (fs/create-dirs (-> dst-file
-                              fs/parent
-                              str))
-          (fs/copy (fs/expand-home cfg-file) dst-file)))))
+  (let [cfg-file (fs/expand-home cfg-file)
+        dst-file (fs/expand-home dst-file)]
+    (when (fs/exists? cfg-file)
+      (if (fs/directory? cfg-file)
+        (do (fs/create-dirs (fs/expand-home (str dst-file)))
+            (fs/copy-tree cfg-file
+                          dst-file
+                          {:replace-existing true
+                           :nofollow-links false
+                           :copy-attributes true}))
+        (do (fs/create-dirs (fs/expand-home (str (fs/parent dst-file))))
+            (fs/copy cfg-file
+                     dst-file
+                     {:replace-existing true
+                      :nofollow-links false
+                      :copy-attributes true}))))))
 
 (defn- parsed-cli-opts
   "Parse the `cli-opts` defined in this parameter and return it, except if an error occurs, so `(on-error-code err-code)` is called with `err-code` the exit code."
@@ -50,7 +57,7 @@
       (println "   Options: "
                (get-in parsed-cli-opts [:parsed-cli-opts :options])))
     (if-let [error-code (:error-code parsed-cli-opts)]
-      (do (on-error-code error-code) nil)
+      (do (on-error-code error-code 3) nil)
       parsed-cli-opts)))
 
 (defn- run-cmds
@@ -86,7 +93,8 @@
                                     (cli-opts/get parsed-cli-opts :exception)))
     (catch Exception e
       (when (:exception parsed-cli-opts)
-        (on-error-code (str "Exception: \n" (with-out-str (pp/pprint e))))))))
+        (on-error-code (str "Exception: \n" (with-out-str (pp/pprint e)))
+                       4)))))
 
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn ci-check
@@ -116,28 +124,75 @@
   (run-cmds cli-args on-error-code :install-cmds identity))
 
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
-;;TODO check
 (defn ci-save
   [cli-args on-error-code]
   (try (fs/delete-tree backup-dir)
        (catch Exception e
-         (on-error-code (clojure.core/format
-                         "Error during deletion of directory %s"
-                         backup-dir)
-                        e)))
+         (on-error-code (str (clojure.core/format
+                              "Error during deletion of directory %s"
+                              backup-dir)
+                             e)
+                        4)))
   (let [task-cli-opts [sandbox-cli-opt cmd-execution-cli-opt]
         parsed-cli-opts (parsed-cli-opts cli-args task-cli-opts stop)
-        cfg-items (cfg-items parsed-cli-opts)]
-    (->> cfg-items
-         (mapcat (fn [[cfg-item-name {:keys [cfg-files]}]]
-                   (->> cfg-files
-                        (map (fn [cfg-file] [cfg-file
-                                             (clojure.core/format
-                                              "%s/%s/%s"
-                                              backup-dir
-                                              (name cfg-item-name)
-                                              (fs/file-name cfg-file))])))))
-         (filterv some?))))
+        cfg-items (cfg-items parsed-cli-opts)
+        verbose? (cli-opts/get parsed-cli-opts :verbose)
+        sandbox? (cli-opts/get parsed-cli-opts :sandbox)
+        files (->> cfg-items
+                   (mapcat (fn [[cfg-item-name {:keys [cfg-files]}]]
+                             (->> cfg-files
+                                  (map (fn [cfg-file] [cfg-file
+                                                       (clojure.core/format
+                                                        "%s/%s/%s"
+                                                        backup-dir
+                                                        (name cfg-item-name)
+                                                        (fs/file-name cfg-file))])))))
+                   (filterv some?))]
+    (run! (fn [[src dst]]
+            (when (or sandbox? verbose?)
+              (println src "->" dst))
+            (try
+              (when-not sandbox?
+                (copy-file src dst))
+              (catch Exception e
+                (on-error-code (str (clojure.core/format
+                                     "Error during copy of `%s` to `%s`"
+                                     src dst)
+                                    e)
+                               9))))
+          files)))
+
+#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
+(defn ci-restore
+  [cli-args on-error-code]
+  (let [task-cli-opts [sandbox-cli-opt cmd-execution-cli-opt]
+        parsed-cli-opts (parsed-cli-opts cli-args task-cli-opts stop)
+        cfg-items (cfg-items parsed-cli-opts)
+        verbose? (cli-opts/get parsed-cli-opts :verbose)
+        sandbox? (cli-opts/get parsed-cli-opts :sandbox)
+        files (->> cfg-items
+                   (mapcat (fn [[cfg-item-name {:keys [cfg-files]}]]
+                             (->> cfg-files
+                                  (map (fn [cfg-file] [cfg-file
+                                                       (clojure.core/format
+                                                        "%s/%s/%s"
+                                                        backup-dir
+                                                        (name cfg-item-name)
+                                                        (fs/file-name cfg-file))])))))
+                   (filterv some?))]
+    (run! (fn [[dst src]]
+            (when (or sandbox? verbose?)
+              (println src "->" dst))
+            (try
+              (when-not sandbox?
+                (copy-file src dst))
+              (catch Exception e
+                (on-error-code (str (clojure.core/format
+                                     "Error during copy of `%s` to `%s`"
+                                     src dst)
+                                    e)
+                               3))))
+          files)))
 
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn ci-update
@@ -146,9 +201,9 @@
             on-error-code
             :update-cmds
             #(->
-               %
-               (ncmds/merge-cmds ["brew" "upgrade"] [] (constantly true))
-               (ncmds/merge-cmds ["npm" "update" "-g"] [] (constantly true)))))
+              %
+              (ncmds/merge-cmds ["brew" "upgrade"] [] (constantly true))
+              (ncmds/merge-cmds ["npm" "update" "-g"] [] (constantly true)))))
 
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn ci-version
@@ -178,9 +233,11 @@
                              (cli-opts/get parsed-cli-opts :verbose)
                              (println "Executing: " %)),
           :sandbox? (cli-opts/get parsed-cli-opts :sandbox),
-          :post-cmd-fn (fn [_ error-map]
+          :post-cmd-fn (fn [cmd error-map]
                          (when-let [error-code (:error-code error-map)]
-                           (on-error-code error-code)))})]
+                           (on-error-code (format "Command `%s` with error "
+                                                  cmd)
+                                          error-code)))})]
     (ncmds/println-summary-errors error-maps
                                   (cli-opts/get parsed-cli-opts :exception))))
 

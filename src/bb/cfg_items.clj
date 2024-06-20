@@ -98,18 +98,20 @@
 
 (defn brew-update
   "Create commands for a brew package manager."
-  [{:keys [tap formula package-manager cask install-options], :as _cfg-item}]
+  [{:keys [tap formula package-manager cask install-options], :as _cfg-item} os]
   (when (= package-manager :brew)
     {:cfg-version-cmds [(vec (concat ["brew" "list"]
-                                     (when cask ["--cask"])
+                                     (when (and (= os :macos)
+                                                cask) ["--cask"])
                                      [formula "--versions"]))],
      :check-cmds [], ;; brew cfg-item is checking all managed cfg-items at
      ;; once.
      :clean-cmds [["brew" "cleanup" formula]],
      :cfg-item-deps [package-manager],
      :init-cmds [], ;; no need
-     :install-cmds (->> [(vec (concat ["brew" "install"]
-                                      (when cask ["--cask"])
+     :install-cmds (->> [(vec (concat ["brew" "reinstall"]
+                                      (when (and (= os :macos)
+                                                 cask) ["--cask"])
                                       [formula "-q"]
                                       (when install-options install-options)))]
                         (concat (when tap [["brew" "tap" tap]]))
@@ -118,7 +120,7 @@
 
 (defn npm-update
   "Create commands for an npm package manager."
-  [{:keys [npm-deps package-manager], :as _cfg-item}]
+  [{:keys [npm-deps package-manager], :as _cfg-item} _os]
   (when (= package-manager :npm)
     {:cfg-version-cmds [],
      :check-cmds (mapv (fn [npm-dep] ["npm" "doctor" npm-dep]) npm-deps),
@@ -132,7 +134,7 @@
 
 (defn manual-update
   "Create commands for the manual package manager."
-  [{:keys [package-manager], :as cfg-item}]
+  [{:keys [package-manager], :as cfg-item} _os]
   (when (= package-manager :manual)
     (select-keys cfg-item
                  [:cfg-version-cmds :check-cmds :clean-cmds :init-cmds
@@ -141,7 +143,7 @@
 (defn common-update
   "Create common commands for the package manager."
   [{:keys [tmp-files clean-cmds pre-reqs deps tmp-dirs post-package cfg-files],
-    :as _cfg-item}]
+    :as _cfg-item} _os]
   (cond-> {}
     (seq clean-cmds) (assoc :clean-cmds (vec clean-cmds))
     (seq tmp-files) (update :clean-cmds
@@ -158,12 +160,12 @@
     deps (update :cfg-item-deps (comp vec dedupe sort vec concat) deps)))
 
 (defn expand-package-managers
-  [cfg-items]
+  [cfg-items os]
   (->> cfg-items
        (mapv (fn [[cfg-item-name cfg-item]]
                [cfg-item-name
                 (->> ((juxt brew-update npm-update manual-update common-update)
-                      cfg-item)
+                      cfg-item os)
                      (apply merge))]))
        (into {})))
 
@@ -190,7 +192,6 @@
                            (:pre-reqs cfg-item-val)))))
        (into {})))
 
-#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn develop-pre-reqs
   [cfg-items]
   (loop [cfg-items cfg-items
@@ -202,7 +203,6 @@
           (recur updated-cfg-items (dec max-loops))
           updated-cfg-items)))))
 
-#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn validate-cfg
   [file-content]
   (when-not (m/validate cfg-items-schema file-content {:registry registry})
@@ -213,7 +213,6 @@
 
 (def cfg-filename "cfg_item.edn")
 
-#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn read-configurations
   [os]
   (cond-> (read-data-as-resource cfg-filename)
@@ -222,17 +221,14 @@
                                       (format "%s/%s.edn" cfg-dir)
                                       read-data-as-resource))))
 
-#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn limit-configurations
   [configurations cfg-items]
   (cond-> configurations (seq cfg-items) (select-keys cfg-items)))
 
-#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn cfg-items-by-layers
   [cfg-items]
   (dag/topological-layers cfg-items (dag.map/simple :cfg-item-deps) 10))
 
-#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn cfg-items-sorted
   [cfg-items]
   (->> (dag/topological-layers cfg-items (dag.map/simple :cfg-item-deps) 10)
@@ -245,7 +241,7 @@
   (-> (cond-> (cfg-items/read-configurations os) (seq cfg-item-names)
               (cfg-items/limit-configurations cfg-item-names))
       cfg-items/develop-pre-reqs
-      cfg-items/expand-package-managers))
+      (cfg-items/expand-package-managers os)))
 
 (defn ordered-cfg-items
   [cfg-items cfg-items-by-layers]

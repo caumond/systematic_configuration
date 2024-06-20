@@ -42,7 +42,7 @@
 (defn execute-all-cmds
   "Execute all processes, return a sequence of map with the error if it is failing, `nil` if success."
   ([cmds] (execute-all-cmds cmds {}))
-  ([cmds {:keys [sandbox? pre-cmd-fn post-cmd-fn exception], :as _params}]
+  ([cmds {:keys [sandbox? pre-cmd-fn post-cmd-fn], :as _params}]
    (cond (empty? cmds) (println "nothing to do.")
          sandbox? (run! println (map ncmds/to-str cmds))
          :else
@@ -61,7 +61,7 @@
 (defn println-summary-errors
   [error-maps exception?]
   (when-not (empty? error-maps)
-    (let [n (count error-maps)]
+    (let [n (count (map :cmd error-maps))]
       (if (= 1 n)
         (println "One command has failed.")
         (println (format "%s commands have failed." n)))

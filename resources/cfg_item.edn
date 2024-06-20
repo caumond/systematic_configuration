@@ -5,16 +5,19 @@
         :deps [:curl],
         :description "Brew installation and global tasks",
         :install-cmds
-        [["curl" "-fsSL"
-          "https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
-          "-o" "brew-install.sh"] ["chmod" "+x" "brew-install.sh"]
+        [["mkdir" "-p" "tmp/brew"]
+         ["curl" "-fsSL" "https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh" "-o" "tmp/brew/brew-install.sh"]
+         ["chmod" "+x" "tmp/brew/brew-install.sh"]
          ["echo" "You need to connect as admin to install brew"]
-         ["./brew-install.sh"] ["rm" "./brew-install.sh"]],
+         ["tmp/brew/brew-install.sh"]],
         :package-manager :manual,
         :update-cmds [["brew" "update"]]},
  :c-project {:package-manager :manual,
              :pre-reqs {:gcc {:formula "gcc", :package-manager :brew}}},
- :github {:document ""
+ :go {:package-manager :brew
+      :formula "go"}
+ :github {:description "Github cli"
+          :package-manager :manual
           :cfg-files ["~/.config/gh/hosts.yml" "~/.config/gh/config.yml"]}
  :clever {:cfg-files ["~/.config/clever-cloud/clever-tools.json"],
           :formula "clever-tools",
@@ -40,7 +43,10 @@
                              :package-manager :brew},
              :tree-sitter {:formula "tree-sitter", :package-manager :brew}}},
  :docker {:package-manager :manual,
-          :pre-reqs {:dockutil {:formula "dockutil", :package-manager :brew}}},
+          :pre-reqs {:dockutil {:formula "dockutil", :package-manager :brew}
+                     :dockfmt  {:install-cmds [["go" "install" "github.com/jessfraz/dockfmt@latest"]]
+                                :deps [:go]
+                                :package-manager :manual}}},
  :doom
  {:cfg-files ["~/.config/doom/config.el" "~/.config/doom/custom.el"
               "~/.config/doom/init.el" "~/.config/doom/packages.el"
@@ -77,9 +83,8 @@
    :ktlint {:formula "ktlint", :package-manager :brew},
    :openjpeg {:formula "openjpeg", :package-manager :brew},
    :ripgrep {:cfg-version-cmds [["rg --version"]],
-             :install-cmds [["git" "clone" "https://github.com/BurntSushi/ripgrep"
-                             "~/Dev/install"] ["cd" "~/Dev/install/ripgrep"]
-                            ["cargo" "build" "--release"]],
+             :install-cmds [["git" "clone" "https://github.com/BurntSushi/ripgrep" "tmp/rg"]
+                            ["cargo" "-C" "tmp/rg" "build" "--release"]],
              :package-manager :manual,
              :pre-reqs {:rust {:formula "rust", :package-manager :brew}}},
    :shellcheck {:formula "shellcheck", :package-manager :brew},
@@ -101,12 +106,10 @@
        :package-manager :brew,
        :pre-reqs {:gd {:formula "gd", :package-manager :brew},
                   :git-lfs {:formula "git-lfs", :package-manager :brew}}},
- :glpk {:install-cmds [["mkdir" "-p" "~/Dev/install" ]
-                       ["cd" "~/Dev/install"]
-                       ["wget" "http://ftp.gnu.org/gnu/glpk/glpk-5.0.tar.gz"]
-                       ["tar" "-xvzf" "glpk-5.0.tar.gz"]
-                       ["cd" "glpk-5.0"]
-                       ["./configure"]],
+ :glpk {:install-cmds [["mkdir" "-p" "tmp/glpk"]
+                       ["wget" "http://ftp.gnu.org/gnu/glpk/glpk-5.0.tar.gz" "-P" "tmp/glpk"]
+                       ["tar" "-xzf" "tmp/glpk/glpk-5.0.tar.gz" "-C" "tmp/glpk"]
+                       ["tmp/glpk/glpk-5.0/configure"]],
         :package-manager :manual},
  :curl {:package-manager :manual},
  :iterm2 {:cask true,
@@ -123,13 +126,10 @@
  :node {:formula "node", :package-manager :brew},
  :npm {:formula "npm", :package-manager :brew},
  :obs {:cask true, :formula "obs", :package-manager :brew},
+ :python {:package-manager :brew :formula "python-setuptools"}
  :os {:package-manager :manual},
- ;; :python-projects {:pre-reqs {:pip {:install-cmds [["python3.12" "-m"
- ;; "pip" "install"
- ;;                                                    "--upgrade" "pip"]],
- ;;                                    :update-cmds [["python3.11" "-m"
- ;;                                    "pip" "install"
- ;;                                                   "--upgrade" "pip"]]
+ ;; :python-projects {:pre-reqs {:pip {:install-cmds [["python3.12" "-m" "pip" "install" "--upgrade" "pip"]],
+ ;;                                    :update-cmds [["python3.11" "-m" "pip" "install" "--upgrade" "pip"]]
  ;;                                    :package-manager :manual},
  ;;                              :pipenv {:package "pipenv"},
  ;;                              :pyflakes {:package "pyflakes"},
@@ -163,10 +163,9 @@
              :cfg-version-cmds [["omz" "version"]],
              :deps [:curl],
              :install-cmds
-             [["curl" "-fsSL"
-               "https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh"
-               "-o" "ohmyzsh-install.sh"] ["chmod" "+x" "ohmyzsh-install.sh"]
-              ["./ohmyzsh-install.sh"] ["rm" "./ohmyzsh-install.sh"]],
+             [["curl" "-fsSL" "https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh" "-o" "tmp/ohmyzsh-install.sh"]
+              ["chmod" "+x" "tmp/ohmyzsh-install.sh"]
+              ["tmp/ohmyzsh-install.sh"]],
              :package-manager :manual,
              :pre-reqs
              {:zsh {:formula "zsh",

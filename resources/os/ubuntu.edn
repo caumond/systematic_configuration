@@ -4,4 +4,5 @@
        :init-cmds [],
        :install-cmds [],
        :package-manager :manual,
-       :update-cmds [["sudo" "apt" "update"] ["sudo" "apt" "full-upgrade"]]}}
+       :update-cmds [["sudo" "apt" "update"] ["sudo" "apt" "full-upgrade"]]}
+ }

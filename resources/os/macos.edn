@@ -1,1 +1,6 @@
-{}
+{:macos {:clean-cmds [["fd" "-H" "-I" "-g" "'**/.DS_Store'" "-x" "rm" "{}"]]}
+ :os-network {:package-manager :manual
+              :description "System network"
+              :cfg-files ["/etc/hosts"
+                          "/etc/ssh/ssh_config"
+                          "/etc/ssh/sshd_config"]}}

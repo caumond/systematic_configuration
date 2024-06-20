@@ -14,6 +14,8 @@
         :update-cmds [["brew" "update"]]},
  :c-project {:package-manager :manual,
              :pre-reqs {:gcc {:formula "gcc", :package-manager :brew}}},
+ :github {:document ""
+          :cfg-files ["~/.config/gh/hosts.yml" "~/.config/gh/config.yml"]}
  :clever {:cfg-files ["~/.config/clever-cloud/clever-tools.json"],
           :formula "clever-tools",
           :package-manager :brew},
@@ -59,13 +61,13 @@
                         :package-manager :brew,
                         :tmp-dirs [".clojure/.lsp/.cache"
                                    ".cache/clojure-lsp"]},
-   :cmake {:formula "cmake", :package-manager :brew},
+   :cmake {:formula "cmake", :cask true :package-manager :brew},
    :cmake-docs {:formula "cmake-docs", :package-manager :brew},
    :emacs
    {:description
     "# See https://github.com/d12frosted/homebrew-emacs-plus for more details, may be emacs-plus@28 emacs-plus@29",
     :formula "emacs-plus@29",
-    :install-options "--with-imagemagick --with-native-comp",
+    :install-options ["--with-imagemagick --with-native-comp"],
     :package-manager :brew,
     :pre-reqs {:imagemagick {:formula "imagemagick", :package-manager :brew}},
     :tap "d12frosted/emacs-plus"},
@@ -75,8 +77,7 @@
    :ktlint {:formula "ktlint", :package-manager :brew},
    :openjpeg {:formula "openjpeg", :package-manager :brew},
    :ripgrep {:cfg-version-cmds [["rg --version"]],
-             :install-cmds [["git" "clone"
-                             "https://github.com/BurntSushi/ripgrep"
+             :install-cmds [["git" "clone" "https://github.com/BurntSushi/ripgrep"
                              "~/Dev/install"] ["cd" "~/Dev/install/ripgrep"]
                             ["cargo" "build" "--release"]],
              :package-manager :manual,
@@ -100,10 +101,12 @@
        :package-manager :brew,
        :pre-reqs {:gd {:formula "gd", :package-manager :brew},
                   :git-lfs {:formula "git-lfs", :package-manager :brew}}},
- :glpk {:install-cmds [["mkdir -p ~/Dev/install" "cd ~/Dev/install"
-                        "wget http://ftp.gnu.org/gnu/glpk/glpk-5.0.tar.gz"
-                        "tar -xvzf glpk-5.0.tar.gz" "cd glpk-5.0"
-                        "./configure"]],
+ :glpk {:install-cmds [["mkdir" "-p" "~/Dev/install" ]
+                       ["cd" "~/Dev/install"]
+                       ["wget" "http://ftp.gnu.org/gnu/glpk/glpk-5.0.tar.gz"]
+                       ["tar" "-xvzf" "glpk-5.0.tar.gz"]
+                       ["cd" "glpk-5.0"]
+                       ["./configure"]],
         :package-manager :manual},
  :curl {:package-manager :manual},
  :iterm2 {:cask true,
@@ -114,16 +117,13 @@
           :pre-reqs {:coreutils {:formula "coreutils", :package-manager :brew},
                      :grep {:formula "grep", :package-manager :brew},
                      :htop {:formula "htop", :package-manager :brew},
-                     :nano {:formula "nano", :package-manager :brew},
                      :tmux {:formula "tmux", :package-manager :brew},
                      :tree {:formula "tree", :package-manager :brew}}},
  :markdown {:formula "markdown", :package-manager :brew},
  :node {:formula "node", :package-manager :brew},
- ;;TODO npm installation
- :npm {:cfg-version-cmds [["npm" "version" "-g"]], :package-manager :manual},
+ :npm {:formula "npm", :package-manager :brew},
  :obs {:cask true, :formula "obs", :package-manager :brew},
- :os {:clean-cmds [["fd" "-H" "-I" "-g" "'**/.DS_Store'" "-x" "rm" "{}"]],
-      :package-manager :manual},
+ :os {:package-manager :manual},
  ;; :python-projects {:pre-reqs {:pip {:install-cmds [["python3.12" "-m"
  ;; "pip" "install"
  ;;                                                    "--upgrade" "pip"]],
@@ -152,7 +152,9 @@
   :pre-reqs {:gnupg {:formula "gnupg", :package-manager :brew},
              :ssh-keygen {:init-cmds [["ssh-keygen" "-t" "rsa" "-b" "4096" "-C"
                                        "anthony@caumond.com"]
-                                      ["cat" "~/.ssh/id_rsa.pub"]],
+                                      ["cat" "~/.ssh/id_rsa.pub"]
+                                      ["ssh-copy-id" "anthony@fix-computer -p 24736"]],
+                          :cfg-files ["/etc/ssh/ssh_config"]
                           :package-manager :manual}}},
  :vim {:formula "vim", :package-manager :brew},
  :vlc {:cask true, :formula "vlc", :package-manager :brew},

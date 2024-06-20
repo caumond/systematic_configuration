@@ -14,8 +14,9 @@
 (deftest cfg-item-schema-test
   (is (m/schema sut/cfg-items-schema {:registry sut/registry})
       "Raise an exception if schema is invalid.")
-  (is (-> (m/schema sut/cfg-items-schema {:registry sut/registry})
-          (humanize {:foo {}}))))
+  (is (= nil
+         (-> (m/schema sut/cfg-items-schema {:registry sut/registry})
+             (humanize {})))))
 
 (deftest brew-update-test
   (testing "Formula without tap."
@@ -131,21 +132,20 @@
 (deftest expand-test
   (is (= {:test {:clean-cmds [["rm" "-f" "a"] ["rm" "-f" "b"]
                               ["rm" "-f" "cd"]]}}
-         (sut/expand {:test {:tmp-files ["a" "b" "cd"]}})))
+         (sut/expand-package-managers {:test {:tmp-files ["a" "b" "cd"]}})))
   (is (=
        {:test {:clean-cmds [["rm" "-f" "a"] ["rm" "-f" "b"] ["rm" "-f" "cd"]]},
-        :test2 {:version-cmds ["brew" "list" "black" "--versions"],
+        :test2 {:cfg-version-cmds [["brew" "list" "black" "--versions"]],
                 :check-cmds [],
                 :clean-cmds [["rm" "-f" "a"] ["rm" "-f" "b"] ["rm" "-f" "cd"]],
+                :cfg-item-deps [:brew],
                 :init-cmds [],
                 :install-cmds [["brew" "install" "black" "-q"]],
-                :package-manager :brew,
-                :update-cmds [["brew" "upgrade" "black"]],
-                :graph-deps [:brew]}}
-       (sut/expand {:test {:tmp-files ["a" "b" "cd"]},
-                    :test2 {:tmp-files ["a" "b" "cd"],
-                            :package-manager :brew,
-                            :formula "black"}}))))
+                :update-cmds [["brew" "upgrade" "black"]]}}
+       (sut/expand-package-managers {:test {:tmp-files ["a" "b" "cd"]},
+                                     :test2 {:tmp-files ["a" "b" "cd"],
+                                             :package-manager :brew,
+                                             :formula "black"}}))))
 
 (deftest read-configurations-test
   (is (< 20 (count (sut/read-configurations :linux)))
@@ -167,20 +167,42 @@
       "If not found, it returns empty maps."))
 
 (deftest cfg-items-sorted-test
-  (is (= [:docker :docker-1 :docker-2]
-         (sut/cfg-items-sorted {:docker-2 {:pre-reqs {:docker-3 true}},
-                                :docker {:pre-reqs {:docker-1 true}},
-                                :docker-1 {:pre-reqs {:docker-2 true}}}))
+  (is (= [:docker-3 :docker-2 :docker-1 :docker]
+         (->> {:docker-3 {},
+               :docker-2 {:cfg-item-deps [:docker-3]},
+               :docker {:cfg-item-deps [:docker-1]},
+               :docker-1 {:cfg-item-deps [:docker-2]}}
+              sut/cfg-items-sorted
+              :sorted
+              (apply concat)
+              vec))
       "Sort cfg-item according to their `:pre-reqs` dependency graph."))
 
-(is (< 15
-       (-> (sut/read-configurations :macos)
-           (sut/limit-configurations [:doom])
-           sut/develop-pre-reqs
-           keys
-           count)))
-(is (< 15
-       (-> (sut/read-configurations :macos)
-           (sut/limit-configurations [:doom])
-           sut/develop-pre-reqs
-           sut/expand)))
+(deftest cfg-test
+  (is (< 15
+         (-> (sut/read-configurations :macos)
+             (sut/limit-configurations [:doom])
+             sut/develop-pre-reqs
+             keys
+             count)))
+  (is (< 15
+         (-> (sut/read-configurations :macos)
+             (sut/limit-configurations [:doom])
+             sut/develop-pre-reqs
+             sut/expand-package-managers))))
+
+(deftest ordered-cfg-items-test
+  (is (= ((juxt identity keys)
+          {:docker-3 {:id 3},
+           :docker-2 {:cfg-item-deps [:docker-3], :id 2},
+           :docker-1 {:cfg-item-deps [:docker-2], :id 1},
+           :docker {:cfg-item-deps [:docker-1], :id :none}})
+         (let [cfg-items {:docker-3 {:id 3},
+                          :docker-2 {:cfg-item-deps [:docker-3], :id 2},
+                          :docker {:cfg-item-deps [:docker-1], :id :none},
+                          :docker-1 {:cfg-item-deps [:docker-2], :id 1}}]
+           ((juxt identity keys)
+            (->> (sut/cfg-items-by-layers cfg-items)
+                 (sut/ordered-cfg-items cfg-items)))))))
+
+(apply sorted-map [:b 1 :a 2])

@@ -12,9 +12,7 @@
 
 (defn- stop [n] (System/exit (or n 0)))
 
-(def ^:private separator
-  (apply str (conj (vec (repeat 10 "*"))
-                   "\n")))
+(def ^:private separator (apply str (conj (vec (repeat 10 "*")) "\n")))
 
 (def sandbox-cli-opt
   ["-s" "--sandbox"
@@ -47,124 +45,88 @@
   (let [parsed-cli-opts (cli-opts/validate-task cli-args task-cli-opts)]
     (when (cli-opts/get parsed-cli-opts :verbose)
       (println "Verbose mode: ")
-      (println "   Arguments: " (get-in parsed-cli-opts
-                                        [:parsed-cli-opts :arguments]))
-      (println "   Options: " (get-in parsed-cli-opts
-                                      [:parsed-cli-opts :options])))
+      (println "   Arguments: "
+               (get-in parsed-cli-opts [:parsed-cli-opts :arguments]))
+      (println "   Options: "
+               (get-in parsed-cli-opts [:parsed-cli-opts :options])))
     (if-let [error-code (:error-code parsed-cli-opts)]
       (do (on-error-code error-code) nil)
       parsed-cli-opts)))
+
+(defn- run-cmds
+  [cli-args on-error-code cmd-kw merging-fn]
+  (try
+    (let [task-cli-opts [sandbox-cli-opt cmd-execution-cli-opt]
+          parsed-cli-opts (parsed-cli-opts cli-args task-cli-opts stop)
+          cfg-items (cfg-items parsed-cli-opts)
+          ordered-cfg-items (->> cfg-items
+                                 cfg-items/cfg-items-by-layers
+                                 (cfg-items/ordered-cfg-items cfg-items)
+                                 (map vec))
+          error-maps
+          (-> (mapcat (fn [[_ check-cmd]] (get check-cmd cmd-kw))
+                      ordered-cfg-items)
+              merging-fn
+              (ncmds/execute-all-cmds
+               (cond-> {:pre-cmd-fn
+                        #(cond (cli-opts/get parsed-cli-opts :sandbox)
+                               (println (clojure.core/format "-> : \"%s\""
+                                                             (str/join " " %)))
+                               (cli-opts/get parsed-cli-opts :verbose)
+                               (println "Executing: " %)),
+                        :sandbox? (cli-opts/get parsed-cli-opts :sandbox),
+                        :post-cmd-fn
+                        (fn [_ error-map]
+                          (when-let [error-code (:error-code error-map)]
+                            (on-error-code "Post command execution failed: "
+                                           error-code)))}
+                 (:exception parsed-cli-opts)
+                 (assoc :exception (:exception parsed-cli-opts)))))]
+      (ncmds/println-summary-errors error-maps
+                                    (cli-opts/get parsed-cli-opts :exception)))
+    (catch Exception e
+      (when (:exception parsed-cli-opts)
+        (on-error-code (str "Exception: \n" (with-out-str (pp/pprint e))))))))
 
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn ci-check
   "Call the check of cfg-items."
   [cli-args on-error-code]
-  (let [task-cli-opts [sandbox-cli-opt
-                       cmd-execution-cli-opt]
-        parsed-cli-opts (parsed-cli-opts cli-args
-                                         task-cli-opts stop)
-        cfg-items (cfg-items parsed-cli-opts)
-        error-maps
-        (-> (mapcat (fn [[_ {:keys [check-cmds]}]] check-cmds)
-                    cfg-items)
-            (ncmds/execute-all-cmds
-             {:pre-cmd-fn #(cond (cli-opts/get parsed-cli-opts :sandbox)
-                                 (println (clojure.core/format "-> : \"%s\"" (str/join " " %)))
-                                 (cli-opts/get parsed-cli-opts :verbose)
-                                 (println "Executing: " %)),
-              :sandbox? (cli-opts/get parsed-cli-opts :sandbox)
-              :post-cmd-fn (fn [_ error-map]
-                             (when-let [error-code (:error-code error-map)]
-                               (on-error-code error-code)))}))]
-    (ncmds/println-summary-errors error-maps
-                                  (cli-opts/get parsed-cli-opts :exception))))
+  (run-cmds cli-args
+            on-error-code
+            :check-cmds
+            #(ncmds/merge-cmds % ["npm" "doctor"] [] (constantly true))))
 
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn ci-clean
   [cli-args on-error-code]
-  (let [task-cli-opts [sandbox-cli-opt
-                       cmd-execution-cli-opt]
-        parsed-cli-opts (parsed-cli-opts cli-args
-                                         task-cli-opts stop)
-        cfg-items (cfg-items parsed-cli-opts)
-        error-maps
-        (-> (mapcat (fn [[_ {:keys [clean-cmds]}]] clean-cmds)
-                    cfg-items)
-            (ncmds/merge-cmds ["brew" "cleanup"]
-                              []
-                              (constantly true))
-            (ncmds/execute-all-cmds
-             {:pre-cmd-fn #(cond (cli-opts/get parsed-cli-opts :sandbox)
-                                 (println (clojure.core/format "-> : \"%s\"" (str/join " " %)))
-                                 (cli-opts/get parsed-cli-opts :verbose)
-                                 (println "Executing: " %)),
-              :sandbox? (cli-opts/get parsed-cli-opts :sandbox)
-              :post-cmd-fn (fn [_ error-map]
-                             (when-let [error-code (:error-code error-map)]
-                               (on-error-code error-code)))}))]
-    (ncmds/println-summary-errors error-maps
-                                  (cli-opts/get parsed-cli-opts :exception))))
+  (run-cmds cli-args
+            on-error-code
+            :clean-cmds
+            #(ncmds/merge-cmds % ["brew" "cleanup"] [] (constantly true))))
 
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn ci-init
   [cli-args on-error-code]
-  (let [task-cli-opts [sandbox-cli-opt
-                       cmd-execution-cli-opt]
-        parsed-cli-opts (parsed-cli-opts cli-args
-                                         task-cli-opts stop)
-        cfg-items (cfg-items parsed-cli-opts)
-        error-maps
-        (-> (mapcat (fn [[_ {:keys [init-cmds]}]] init-cmds)
-                    cfg-items)
-            (ncmds/execute-all-cmds
-             {:pre-cmd-fn #(cond (cli-opts/get parsed-cli-opts :sandbox)
-                                 (println (clojure.core/format "-> : \"%s\"" (str/join " " %)))
-                                 (cli-opts/get parsed-cli-opts :verbose)
-                                 (println "Executing: " %)),
-              :sandbox? (cli-opts/get parsed-cli-opts :sandbox)
-              :post-cmd-fn (fn [_ error-map]
-                             (when-let [error-code (:error-code error-map)]
-                               (on-error-code error-code)))}))]
-    (ncmds/println-summary-errors error-maps
-                                  (cli-opts/get parsed-cli-opts :exception))))
+  (run-cmds cli-args on-error-code :init-cmds identity))
 
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn ci-install
   [cli-args on-error-code]
-  (let [task-cli-opts [sandbox-cli-opt
-                       cmd-execution-cli-opt]
-        parsed-cli-opts (parsed-cli-opts cli-args
-                                         task-cli-opts stop)
-        cfg-items (cfg-items parsed-cli-opts)
-        error-maps
-        (-> (mapcat (fn [[_ {:keys [install-cmds]}]] install-cmds)
-                    cfg-items)
-            ;;TODO merge- to work on,
-            ;;TODO install should work in the right order
-            (ncmds/merge-cmds ["brew" "cleanup"]
-                              []
-                              (constantly true))
-            (ncmds/execute-all-cmds
-             {:pre-cmd-fn #(cond (cli-opts/get parsed-cli-opts :sandbox)
-                                 (println (clojure.core/format "-> : \"%s\"" (str/join " " %)))
-                                 (cli-opts/get parsed-cli-opts :verbose)
-                                 (println "Executing: " %)),
-              :sandbox? (cli-opts/get parsed-cli-opts :sandbox)
-              :post-cmd-fn (fn [_ error-map]
-                             (when-let [error-code (:error-code error-map)]
-                               (on-error-code error-code)))}))]
-    (ncmds/println-summary-errors error-maps
-                                  (cli-opts/get parsed-cli-opts :exception))))
+  (run-cmds cli-args on-error-code :install-cmds identity))
 
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 ;;TODO check
 (defn ci-save
   [cli-args on-error-code]
-  (fs/delete-tree backup-dir)
+  (try (fs/delete-tree backup-dir)
+       (catch Exception e
+         (on-error-code (clojure.core/format
+                         "Error during deletion of directory %s"
+                         backup-dir)
+                        e)))
   (let [task-cli-opts [sandbox-cli-opt cmd-execution-cli-opt]
-        parsed-cli-opts (parsed-cli-opts cli-args
-                                         task-cli-opts
-                                         stop)
+        parsed-cli-opts (parsed-cli-opts cli-args task-cli-opts stop)
         cfg-items (cfg-items parsed-cli-opts)]
     (->> cfg-items
          (mapcat (fn [[cfg-item-name {:keys [cfg-files]}]]
@@ -180,60 +142,28 @@
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn ci-update
   [cli-args on-error-code]
-  (let [task-cli-opts [sandbox-cli-opt cmd-execution-cli-opt]
-        parsed-cli-opts (parsed-cli-opts cli-args
-                                         task-cli-opts
-                                         stop)
-        cfg-items (cfg-items parsed-cli-opts)
-        error-maps (-> (mapcat (fn [[_ {:keys [update-cmds]}]] update-cmds)
-                               cfg-items)
-                       (ncmds/merge-cmds ["brew" "upgrade"]
-                              []
-                              (constantly true))
-                       (ncmds/merge-cmds ["npm" "update" "-g"]
-                              []
-                              (constantly true))
-                       (ncmds/execute-all-cmds
-                        {:pre-cmd-fn #(cond (cli-opts/get parsed-cli-opts :sandbox)
-                                            (println (clojure.core/format "-> : \"%s\"" (str/join " " %)))
-                                            (cli-opts/get parsed-cli-opts :verbose)
-                                            (println "Executing: " %)),
-                         :sandbox? (cli-opts/get parsed-cli-opts :sandbox)
-                         :post-cmd-fn (fn [_ error-map]
-                                        (when-let [error-code (:error-code error-map)]
-                                          (on-error-code error-code)))}))]
-    (ncmds/println-summary-errors error-maps
-                                  (cli-opts/get parsed-cli-opts :exception))))
+  (run-cmds cli-args
+            on-error-code
+            :update-cmds
+            #(->
+               %
+               (ncmds/merge-cmds ["brew" "upgrade"] [] (constantly true))
+               (ncmds/merge-cmds ["npm" "update" "-g"] [] (constantly true)))))
 
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn ci-version
   [cli-args on-error-code]
-  (let [task-cli-opts [sandbox-cli-opt
-                       cmd-execution-cli-opt]
-        parsed-cli-opts (parsed-cli-opts cli-args
-                                         task-cli-opts
-                                         stop)
-        cfg-items (cfg-items parsed-cli-opts)
-        error-maps
-        (-> (mapcat (fn [[_ {:keys [cfg-version-cmds]}]] cfg-version-cmds)
-                    cfg-items)
-            (ncmds/merge-cmds ["brew" "list" "--cask"]
-                              ["--versions"]
-                              (constantly true))
-            (ncmds/merge-cmds ["brew" "list"]
-                              ["--versions"]
-                              #(not (contains? (set %) "--cask")))
-            (ncmds/execute-all-cmds
-             {:pre-cmd-fn #(cond (cli-opts/get parsed-cli-opts :sandbox)
-                                 (println (clojure.core/format "-> : \"%s\"" (str/join " " %)))
-                                 (cli-opts/get parsed-cli-opts :verbose)
-                                 (println "Executing: " %)),
-              :sandbox? (cli-opts/get parsed-cli-opts :sandbox)
-              :post-cmd-fn (fn [_ error-map]
-                             (when-let [error-code (:error-code error-map)]
-                               (on-error-code error-code)))}))]
-    (ncmds/println-summary-errors error-maps
-                                  (cli-opts/get parsed-cli-opts :exception))))
+  (run-cmds cli-args
+            on-error-code
+            :cfg-version-cmds
+            (fn [cfg-versions]
+              (-> cfg-versions
+                  (ncmds/merge-cmds ["brew" "list" "--cask"]
+                                    ["--versions"]
+                                    (constantly true))
+                  (ncmds/merge-cmds ["brew" "list"]
+                                    ["--versions"]
+                                    #(not (contains? (set %) "--cask")))))))
 
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn format
@@ -247,6 +177,7 @@
                              (println "Cmd : " %)
                              (cli-opts/get parsed-cli-opts :verbose)
                              (println "Executing: " %)),
+          :sandbox? (cli-opts/get parsed-cli-opts :sandbox),
           :post-cmd-fn (fn [_ error-map]
                          (when-let [error-code (:error-code error-map)]
                            (on-error-code error-code)))})]
@@ -255,12 +186,10 @@
 
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn show
-  [cli-args on-error-code]
+  [cli-args]
   (let [task-cli-opts []]
-    (when-let [parsed-cli-opts
-               (parsed-cli-opts cli-args task-cli-opts stop)]
+    (when-let [parsed-cli-opts (parsed-cli-opts cli-args task-cli-opts stop)]
       (let [cfg-items (cfg-items parsed-cli-opts)]
-        ;;TODO Check the ordering
         (when (cli-opts/get parsed-cli-opts :verbose)
           (println "List of cfg-items :")
           (pp/pprint cfg-items))
@@ -271,8 +200,22 @@
             (do (println "Setup is invalid - a cycle has been detected.")
                 (println "subgraph-with-cycle: " (keys subgraph-with-cycle))
                 (println "sorted: " sorted))
-            (run! println
-                  (->> (interleave (range) (:sorted cfg-items-by-layers))
-                       (partition 2)
-                       (map (partial str/join " -> "))))))
+            (do (run! println
+                      (->> (interleave (range) sorted)
+                           (partition 2)
+                           (map (partial str/join " -> "))))
+                (when (cli-opts/get parsed-cli-opts :verbose)
+                  (println "Sorted:")
+                  (pp/pprint (cfg-items/ordered-cfg-items
+                              cfg-items
+                              cfg-items-by-layers))))))
         nil))))
+
+#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
+(defn validate
+  []
+  (if-let [errors (-> cfg-items/cfg-filename
+                      cfg-items/read-data-as-resource
+                      cfg-items/validate-cfg)]
+    (do (println "Error in the configuration: ") (pp/pprint errors))
+    (println "Is valid configuration file.")))

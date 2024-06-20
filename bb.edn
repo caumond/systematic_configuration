@@ -1,62 +1,53 @@
 {:deps {metosin/malli {:mvn/version "0.13.0"},
         org.clojure/tools.cli {:mvn/version "1.0.219"}},
  :paths ["src/bb" "resources"],
- :tasks {:enter {},
-         :init (do
-                 (defn stop [n] (System/exit (or n 0)))
-                 (defn println [n]
-                   (when-not (zero? n)
-                     (clojure.core/println "Command has failed with exit code: " n))))
-         :requires [],
-         ci-check {:doc "Ask all cfg item to check their consistency",
-                   :requires [[core]],
-                   :task (core/ci-check *command-line-args* println)},
-         ci-clean {:doc "Clean the setup - remove outdated downloads",
-                   :requires [[core]],
-                   :task (core/ci-clean *command-line-args* println)},
-         ci-init {:doc "Init the setup - to be run only once",
-                  :requires [[core]],
-                  :task (core/ci-init *command-line-args* stop)},
-         ci-install {:doc "Use to install cfg-item",
-                     :requires [[core]],
-                     :task (core/ci-install *command-line-args* stop)},
-         ci-save {:doc "Save the current configuration",
-                  :requires [[core]],
-                  :task (core/ci-save *command-line-args* println)},
-         ci-update {:doc "Regularly update you environment",
-                    :requires [[core]],
-                    :task (core/ci-update *command-line-args* println)},
-         ci-validate {:doc "Check the validity of your configuration file.",
-                      :requires [[core]],
-                      :task (if-let [errors (-> cfg-items/cfg-filename
-                                                cfg-items/read-data-as-resource
-                                                cfg-items/validate-cfg)]
-                              (do (println "Error in the configuration: ")
-                                  (pp/pprint errors))
-                              (println "Is valid configuration file."))},
-         ci-version {:doc "Display current version of configuration items.",
-                     :requires [[core]],
-                     :task (core/ci-version *command-line-args* stop)},
-         format {:doc "Format all project files",
-                 :requires [[core]],
-                 :task (core/format *command-line-args* stop)},
-         nrepl {:doc "Launch the nrepl",
-                :requires [[tasks.nrepl]],
-                :task (tasks.nrepl/nrepl *command-line-args*)},
-         os {:doc "Display current os",
-             :requires [[current-os]],
-             :task (do (println (format
-                                 "os is `%s`, linked to configuration `%s`"
-                                 (System/getProperty "os.name")
-                                 (current-os/current-os))))},
-         show {:doc "Show cfg-item dependencies.",
-               :requires [[core]],
-               :task (core/show *command-line-args* stop)}}}
-
-;; ssh -p 24736 91.171.44.225
+ :tasks
+ {:enter {},
+  :init (do
+          (defn stop [msg n] (clojure.core/println msg) (System/exit (or n 0)))
+          (defn print-error-code
+            [msg n]
+            (when-not (zero? n)
+              (clojure.core/println msg)
+              (clojure.core/println "Command has failed with exit code: " n)))),
+  :requires [],
+  ci-check {:doc "Ask all cfg item to check their consistency",
+            :requires [[core]],
+            :task (core/ci-check *command-line-args* print-error-code)},
+  ci-clean {:doc "Clean the setup - remove outdated downloads",
+            :requires [[core]],
+            :task (core/ci-clean *command-line-args* print-error-code)},
+  ci-init {:doc "Init the setup - to be run only once",
+           :requires [[core]],
+           :task (core/ci-init *command-line-args* stop)},
+  ci-install {:doc "Use to install cfg-item",
+              :requires [[core]],
+              :task (core/ci-install *command-line-args* stop)},
+  ci-save {:doc "Save the current configuration",
+           :requires [[core]],
+           :task (core/ci-save *command-line-args* print-error-code)},
+  ci-update {:doc "Regularly update you environment",
+             :requires [[core]],
+             :task (core/ci-update *command-line-args* print-error-code)},
+  ci-version {:doc "Display current version of configuration items.",
+              :requires [[core]],
+              :task (core/ci-version *command-line-args* stop)},
+  format {:doc "Format all project files",
+          :requires [[core]],
+          :task (core/format *command-line-args* stop)},
+  nrepl {:doc "Launch the nrepl",
+         :requires [[tasks.nrepl]],
+         :task (tasks.nrepl/nrepl *command-line-args*)},
+  os {:doc "Display current os",
+      :requires [[current-os]],
+      :task (println (format "os is `%s`, linked to configuration `%s`"
+                             (System/getProperty "os.name")
+                             (current-os/current-os)))},
+  show {:doc "Show cfg-item dependencies.",
+        :requires [[core]],
+        :task (core/show *command-line-args*)},
+  validate {:doc "Check the validity of your configuration file.",
+            :requires [[core]],
+            :task (core/validate)}}}
 
 ;;TODO Make the os works on linux
-;;TODO Add computers list
-;;TODO Save /etc/hosts
-;;TODO Save /etc/ssh/ssh_config
-;;TODO ssh-copy-id fix-computer

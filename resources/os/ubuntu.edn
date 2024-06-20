@@ -1,1 +1,7 @@
-{}
+{:apt {:cfg-version-cmds [],
+       :check-cmds [],
+       :clean-cmds [["sudo" "apt" "autoremove"]],
+       :init-cmds [],
+       :install-cmds [],
+       :package-manager :manual,
+       :update-cmds [["sudo" "apt" "update"] ["sudo" "apt" "full-upgrade"]]}}

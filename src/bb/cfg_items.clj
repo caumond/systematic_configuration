@@ -27,7 +27,7 @@
    [:install-options
     {:optional true,
      :description "What options to be added when installing the formula."}
-    :string]
+    [:vector :string]]
    [:tap {:optional true, :description "`brew` tap where to find the formula."}
     :string]])
 
@@ -110,8 +110,8 @@
      :init-cmds [], ;; no need
      :install-cmds (->> [(vec (concat ["brew" "install"]
                                       (when cask ["--cask"])
-                                      [formula "-q"]))]
-                        (concat (when install-options [install-options]))
+                                      [formula "-q"]
+                                      (when install-options install-options)))]
                         (concat (when tap [["brew" "tap" tap]]))
                         vec),
      :update-cmds [["brew" "upgrade" formula]]}))
@@ -155,7 +155,7 @@
     cfg-files (assoc :cfg-files (vec cfg-files))
     post-package (assoc :post-package post-package)
     pre-reqs (update :cfg-item-deps (comp vec concat) (keys pre-reqs))
-    deps (update :cfg-item-deps (comp dedupe sort vec concat) deps)))
+    deps (update :cfg-item-deps (comp vec dedupe sort vec concat) deps)))
 
 (defn expand-package-managers
   [cfg-items]
@@ -236,7 +236,7 @@
 (defn cfg-items-sorted
   [cfg-items]
   (->> (dag/topological-layers cfg-items (dag.map/simple :cfg-item-deps) 10)
-       (dag/ordered-nodes cfg-items)))
+       #_(dag/ordered-nodes cfg-items)))
 
 (defn prepare
   "Build a configuration items for `os` and limited to the names in `cfg-item-names`.
@@ -246,3 +246,11 @@
               (cfg-items/limit-configurations cfg-item-names))
       cfg-items/develop-pre-reqs
       cfg-items/expand-package-managers))
+
+(defn ordered-cfg-items
+  [cfg-items cfg-items-by-layers]
+  (->> cfg-items-by-layers
+       :sorted
+       (apply concat)
+       (mapcat #(vector % (get cfg-items %)))
+       (apply array-map)))

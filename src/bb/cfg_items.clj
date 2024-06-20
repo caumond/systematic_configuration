@@ -1,14 +1,13 @@
 (ns cfg-items
   "`cfg-items` stands for configuration items."
-  (:require
-   [clojure.edn :as edn]
-   [clojure.java.io :as io]
-   [dag]
-   [dag.map]
-   [malli.core :as m]
-   [malli.error :as me]
-   [malli.util :as mu]
-   [utils]))
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
+            [dag]
+            [dag.map]
+            [malli.core :as m]
+            [malli.error :as me]
+            [malli.util :as mu]
+            [utils]))
 
 (def malli-registry (merge (m/default-schemas) (mu/schemas)))
 
@@ -133,39 +132,39 @@
 
 (defn manual-update
   "Create commands for the manual package manager."
-  [{:keys [package-manager pre-reqs], :as cfg-item}]
+  [{:keys [package-manager], :as cfg-item}]
   (when (= package-manager :manual)
     (select-keys cfg-item
-                 [:cfg-version-cmds :check-cmds :clean-cmds :init-cmds :install-cmds :update-cmds])))
+                 [:cfg-version-cmds :check-cmds :clean-cmds :init-cmds
+                  :install-cmds :update-cmds])))
 
 (defn common-update
   "Create common commands for the package manager."
   [{:keys [tmp-files clean-cmds pre-reqs deps tmp-dirs post-package cfg-files],
     :as _cfg-item}]
   (cond-> {}
-    tmp-files (assoc :clean-cmds
-                     (concat (->> tmp-files
-                                  (mapv (fn [tmp-file] ["rm" "-f" tmp-file])))
-                             clean-cmds))
-    cfg-files (assoc :cfg-files cfg-files)
+    (seq clean-cmds) (assoc :clean-cmds (vec clean-cmds))
+    (seq tmp-files) (update :clean-cmds
+                            concat
+                            (->> tmp-files
+                                 (mapv (fn [tmp-file] ["rm" "-f" tmp-file]))))
+    (seq tmp-dirs) (update :clean-cmds
+                           (comp vec concat)
+                           (->> tmp-dirs
+                                (mapv (fn [tmp-dir] ["rm" "-fr" tmp-dir]))))
+    cfg-files (assoc :cfg-files (vec cfg-files))
     post-package (assoc :post-package post-package)
-    pre-reqs (update :cfg-item-deps concat (keys pre-reqs))
-    deps #(vec (update % :cfg-item-deps concat (keys deps)))
-    tmp-dirs (update :clean-cmds
-                     (comp vec concat)
-                     (->> tmp-dirs
-                          (mapv (fn [tmp-dir] ["rm" "-fr" tmp-dir]))))))
+    pre-reqs (update :cfg-item-deps (comp vec concat) (keys pre-reqs))
+    deps (update :cfg-item-deps (comp dedupe sort vec concat) deps)))
 
-#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
-(defn expand
+(defn expand-package-managers
   [cfg-items]
   (->> cfg-items
        (mapv (fn [[cfg-item-name cfg-item]]
                [cfg-item-name
-                (->> cfg-item
-                     ((juxt brew-update npm-update manual-update common-update))
+                (->> ((juxt brew-update npm-update manual-update common-update)
+                      cfg-item)
                      (apply merge))]))
-       (map #(update % :cfg-item-deps vec))
        (into {})))
 
 (defn read-data-as-resource
@@ -238,3 +237,12 @@
   [cfg-items]
   (->> (dag/topological-layers cfg-items (dag.map/simple :cfg-item-deps) 10)
        (dag/ordered-nodes cfg-items)))
+
+(defn prepare
+  "Build a configuration items for `os` and limited to the names in `cfg-item-names`.
+  If `cfg-item-names` is empty, all elements are returned."
+  [cfg-item-names os]
+  (-> (cond-> (cfg-items/read-configurations os) (seq cfg-item-names)
+              (cfg-items/limit-configurations cfg-item-names))
+      cfg-items/develop-pre-reqs
+      cfg-items/expand-package-managers))

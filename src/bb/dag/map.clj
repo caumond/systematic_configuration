@@ -49,21 +49,20 @@
   "Remove nodes from the list of "
   [edge-kw dag node-names]
   (-> dag
-      (update-vals
-       (fn [x]
-         (update x
-                 edge-kw
-                 (fn [edge]
-                   (->> edge
-                        (remove (set node-names))
-                        vec)))))))
+      (update-vals (fn [x]
+                     (update x
+                             edge-kw
+                             (fn [edge]
+                               (->> edge
+                                    (remove (set node-names))
+                                    vec)))))))
 
 (defn simple
   "For a dag which is a map, "
   [edge-kw]
   {:dag-nodes dag-nodes,
-   :node-edges (partial node-edges edge-kw)
+   :node-edges (partial node-edges edge-kw),
    :node-names node-names,
-   :valid (partial validate-simple edge-kw)
+   :valid (partial validate-simple edge-kw),
    :remove-nodes remove-nodes,
    :remove-successors (partial remove-successors edge-kw)})

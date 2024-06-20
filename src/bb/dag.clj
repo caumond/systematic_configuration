@@ -1,8 +1,7 @@
-(ns dag
-  "Direct Acyclic Graph.")
+(ns dag "Direct Acyclic Graph.")
 
 (defn topological-layers
-  "Returns the topoligical layers of graph `dag`.
+  "Returns the topological layers of graph `dag`.
 
   Let's consider the following `dag`:
   ```clojure
@@ -32,7 +31,7 @@
                                    dag-nodes
                                    (filter (comp empty? node-edges)))
           nodes-wo-successors-names (node-names nodes-wo-successors)]
-      (cond (empty? dag) (vec sorted-nodes)
+      (cond (empty? dag) {:cycle-detected false, :sorted (vec sorted-nodes)}
             (empty? nodes-wo-successors) {:cycle-detected true,
                                           :sorted (vec sorted-nodes),
                                           :subgraph-with-cycle dag}

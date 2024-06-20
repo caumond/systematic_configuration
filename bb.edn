@@ -1,103 +1,57 @@
 {:deps {metosin/malli {:mvn/version "0.13.0"},
         org.clojure/tools.cli {:mvn/version "1.0.219"}},
- :paths ["src" "resources"],
- :tasks
- {:enter {},
-  :init (do
-          (defn cli-options []
-            (->> cli-opts/cli-options
-                 (cli-opts/parse *command-line-args*)))
-
-          (let [cli-opts (cli-options)]
-            (cli-opts/print-summary cli-opts)
-            (cli-opts/valid-summary cli-opts))
-
-          (defn cfg-items
-            [cfg-item]
-            (-> (cond-> (cfg-items/read-configurations (current-os/current-os))
-                  cfg-item (cfg-items/limit-configurations cfg-item))
-                cfg-items/develop-pre-reqs
-                cfg-items/expand))
-
-          (defn execute-all-cmds
-            [cmds sandbox?]
-            (cond (empty? cmds) (println "nothing to do.")
-                  sandbox? (run! println (map ncmds/to-str cmds))
-                  :else (let [execution (ncmds/execute-all-cmds cmds)]
-                          (if (empty? execution)
-                            (println "success.")
-                            (run! (partial apply println)
-                                  (cons "Following commands have failed:\n"
-                                        (mapv :cmd execution)))))))),
-  :requires ([cli-opts :as cli-opts]
-             [current-os]
-             [babashka.fs :as fs]
-             [clojure.pprint :as pp]
-             [cfg-items]
-             [ncmds]
-             [tasks]
-             [tasks.nrepl :as nrepl]),
-  deps-graph {:doc "Show cfg-item dependencies.",
-              :task (let [cfg-items (-> (cli-options)
-                                        cli-opts/cli-args
-                                        cfg-items)]
-                      (println "cfg-items " cfg-items)
-                      (let [{:keys [cycle-detected subgraph-with-cycle sorted] :as cfg-items-by-layers}
-                            (cfg-items/cfg-items-by-layers cfg-items)]
-                        (if cycle-detected
-                          (do
-                            (println "Setup is invalid - a cycle has been detected.")
-                            (println "subgraph-with-cycle: " (keys subgraph-with-cycle))
-                            (println "sorted: " sorted))
-                          (run! println
-                                (keys cfg-items-by-layers)))))}
-  format {:doc "Format all project files",
-          :task (execute-all-cmds (tasks/format)
-                                  (cli-options))}
-  validate {:doc "Check the validity of your configuration file.",
-            :task (if-let [errors (-> cfg-items/cfg-filename
-                                      cfg-items/read-data-as-resource
-                                      cfg-items/validate-cfg)]
-                    (do (println "Error in the configuration: ")
-                        (pp/pprint errors))
-                    (println "Is valid configuration file."))}
-  nrepl {:doc "Launch the nrepl", :task (nrepl/nrepl)}
-  os {:doc "Display current os",
-      :task (do (println (format "os is `%s`, linked to configuration `%s`"
+ :paths ["src/bb" "resources"],
+ :tasks {:enter {},
+         :init (do
+                 (defn stop [n] (System/exit (or n 0)))
+                 (defn println [n]
+                   (when-not (zero? n)
+                     (clojure.core/println "Command has failed with exit code: " n))))
+         :requires [],
+         ci-check {:doc "Ask all cfg item to check their consistency",
+                   :requires [[core]],
+                   :task (core/ci-check *command-line-args* println)},
+         ci-clean {:doc "Clean the setup - remove outdated downloads",
+                   :requires [[core]],
+                   :task (core/ci-clean *command-line-args* println)},
+         ci-init {:doc "Init the setup - to be run only once",
+                  :requires [[core]],
+                  :task (core/ci-init *command-line-args* stop)},
+         ci-install {:doc "Use to install cfg-item",
+                     :requires [[core]],
+                     :task (core/ci-install *command-line-args* stop)},
+         ci-save {:doc "Save the current configuration",
+                  :requires [[core]],
+                  :task (core/ci-save *command-line-args* println)},
+         ci-update {:doc "Regularly update you environment",
+                    :requires [[core]],
+                    :task (core/ci-update *command-line-args* println)},
+         ci-validate {:doc "Check the validity of your configuration file.",
+                      :requires [[core]],
+                      :task (if-let [errors (-> cfg-items/cfg-filename
+                                                cfg-items/read-data-as-resource
+                                                cfg-items/validate-cfg)]
+                              (do (println "Error in the configuration: ")
+                                  (pp/pprint errors))
+                              (println "Is valid configuration file."))},
+         ci-version {:doc "Display current version of configuration items.",
+                     :requires [[core]],
+                     :task (core/ci-version *command-line-args* stop)},
+         format {:doc "Format all project files",
+                 :requires [[core]],
+                 :task (core/format *command-line-args* stop)},
+         nrepl {:doc "Launch the nrepl",
+                :requires [[tasks.nrepl]],
+                :task (tasks.nrepl/nrepl *command-line-args*)},
+         os {:doc "Display current os",
+             :requires [[current-os]],
+             :task (do (println (format
+                                 "os is `%s`, linked to configuration `%s`"
                                  (System/getProperty "os.name")
-                                 (current-os/current-os))))}
-
-  cfg-version {:doc "Display current version of configuration items.",
-               :task (execute-all-cmds (tasks/cfg-version (cfg-items)))},
-  check {:doc "Ask all cfg item to check their consistency",
-         :task (execute-all-cmds (tasks/check (cfg-items)))},
-  clean {:doc "Clean the setup - remove outdated downloads",
-         :task (execute-all-cmds (tasks/clean (cfg-items)))},
-  init {:doc "Init the setup - to be run only once",
-        :task (execute-all-cmds (tasks/init (cfg-items)))},
-  install {:doc "Use to install cfg-item",
-           :task (execute-all-cmds (-> (cfg-items)
-                                       cfg-items/cfg-items-sorted
-                                       tasks/install))},
-  save {:doc "Save the current configuration",
-        :task (let [files (tasks/save (cfg-items))]
-                (fs/delete-tree tasks/backup-dir)
-                (if (cli-opts/sandbox?)
-                  (run! println files)
-                  (run! (partial apply tasks/copy-file) files)))},
-  show {:doc "Show the detail of an app",
-        :task (let [c (cfg-items)]
-                (->> (with-out-str
-                       (pp/pprint (assoc c :before c)))
-                     (spit "tmp/ordered-items.edn"))
-                (let [ordered-cfg-items (cfg-items/cfg-items-by-layers c)]
-                  (->> (with-out-str
-                         (pp/pprint (assoc ordered-cfg-items
-                                           :before c)))
-                       (spit "tmp/ordered-items.edn"))
-                  (pp/pprint (keys ordered-cfg-items))))},
-  update {:doc "Regularly update you environment",
-          :task (execute-all-cmds (tasks/update (cfg-items)))}}}
+                                 (current-os/current-os))))},
+         show {:doc "Show cfg-item dependencies.",
+               :requires [[core]],
+               :task (core/show *command-line-args* stop)}}}
 
 ;; ssh -p 24736 91.171.44.225
 

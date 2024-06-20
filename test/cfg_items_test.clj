@@ -29,7 +29,7 @@
         "Wrong package manager is rejected.")
     (is (= {:cfg-version-cmds [["brew" "list" "aspell" "--versions"]],
             :check-cmds [],
-            :cfg-item-deps [:brew]
+            :cfg-item-deps [:brew],
             :clean-cmds [["brew" "cleanup" "aspell"]],
             :init-cmds [],
             :install-cmds [["brew" "install" "aspell" "-q"]],
@@ -42,10 +42,10 @@
                       :formula "aspell",
                       :tap "d12frosted/emacs-plus"}))
         "The schema of formula and tap is accepted.")
-    (is (= {:cfg-version-cmds [["brew" "list" "aspell" "--versions"]]
+    (is (= {:cfg-version-cmds [["brew" "list" "aspell" "--versions"]],
             :check-cmds [],
             :clean-cmds [["brew" "cleanup" "aspell"]],
-            :cfg-item-deps [:brew]
+            :cfg-item-deps [:brew],
             :init-cmds [],
             :install-cmds [["brew" "tap" "d12frosted/emacs-plus"]
                            ["brew" "install" "aspell" "-q"]],
@@ -65,14 +65,14 @@
                                            {:package-manager :npm-old,
                                             :npm-deps ["typewritten"]})))
         "Wrong package manager is rejected")
-    (is (= {:cfg-version-cmds []
-            :cfg-item-deps [:npm]
+    (is (= {:cfg-version-cmds [],
+            :cfg-item-deps [:npm],
             :check-cmds [["npm" "doctor" "typewritten"]],
             :clean-cmds [],
             :init-cmds [],
             :install-cmds [["npm" "install" "-g" "typewritten"]],
             :update-cmds [["npm" "update" "-g" "typewritten"]]}
-           (sut/npm-update {:npm-deps ["typewritten"] :package-manager :npm}))
+           (sut/npm-update {:npm-deps ["typewritten"], :package-manager :npm}))
         "Valid formula return expected commands.")))
 
 (deftest manual-update-test
@@ -84,28 +84,49 @@
                                          {:package-manager :manuel,
                                           :install-cmds [["pwd"]]})))
       "Invalid package manager is rejected")
-  (is (= {:cfg-version-cmds ["ls" "-la"]}
-         (sut/manual-update {:package-manager :manual
-                             :cfg-version-cmds ["ls" "-la"]}))
-      "A manual package is cleaned from post-package, deps, pre-reqs, cfg-files tmp-files tmp-dirs and package-manager"))
+  (is
+   (= {:cfg-version-cmds ["ls" "-la"]}
+      (sut/manual-update {:package-manager :manual,
+                          :cfg-version-cmds ["ls" "-la"]}))
+   "A manual package is cleaned from post-package, deps, pre-reqs, cfg-files tmp-files tmp-dirs and package-manager"))
 
 (deftest common-update-test
-  (is (= {} (sut/common-update {})) "It is possible to have no common parameter.")
-  (is (= {:clean-cmds []}
-         (sut/common-update {:tmp-files [], :clean-cmds []}))
+  (is (= {} (sut/common-update {}))
+      "It is possible to have no common parameter.")
+  (is (= {}
+         (sut/common-update {:clean-cmds []})
+         (sut/common-update {:tmp-files [], :clean-cmds []})
+         (sut/common-update {:tmp-dirs [], :clean-cmds []}))
       "No files deletions is ok.")
-  (is (= {:clean-cmds [["rm" "-f" "a"] ["rm" "-f" "b"] ["clean" "clean"]]}
-         (sut/common-update {:tmp-files ["a" "b"], :clean-cmds [["clean" "clean"]]}))
-      "File deletion and commands deletion are ok.")
-  (is (= {:cfg-files ["a" "b"]}
-         (sut/common-update {:cfg-files ["a" "b"]}))
-      "Configuration files are copied"))
-;;TODO Add tests for pre-reqs deps and tmp-dirs
+  (is (= {:clean-cmds [["clean" "clean"]]}
+         (sut/common-update {:clean-cmds [["clean" "clean"]]}))
+      "Clean commands are copied.")
+  (is (= {:clean-cmds [["clean" "clean"] ["rm" "-f" "a"] ["rm" "-f" "b"]]}
+         (sut/common-update {:tmp-files ["a" "b"],
+                             :clean-cmds [["clean" "clean"]]}))
+      "File deletion and clean commands deletion are merged.")
+  (is (= {:clean-cmds [["clean" "clean"] ["rm" "-fr" "a"] ["rm" "-fr" "b"]]}
+         (sut/common-update {:tmp-dirs ["a" "b"],
+                             :clean-cmds [["clean" "clean"]]}))
+      "File deletion and clean commands deletion are merged.")
+  (is (= {:cfg-files ["a" "b"]} (sut/common-update {:cfg-files ["a" "b"]}))
+      "Configuration files are copied")
+  (is (= {:post-package {:a 1, :b 1}}
+         (sut/common-update {:post-package {:a 1, :b 1}}))
+      "Post package are copied")
+  (is (= {:cfg-item-deps [:a :b]} (sut/common-update {:pre-reqs {:a 1, :b 1}}))
+      "Pre reqs creates dependencies")
+  (is (= {:cfg-item-deps [:a :b]} (sut/common-update {:deps [:a :b]}))
+      "Deps are copied in dependencies")
+  (is (= {:cfg-item-deps [:a :b :c :d]}
+         (sut/common-update {:deps [:a :b], :pre-reqs {:c 2, :d 2, :b 1}}))
+      "Deps and pre reqs are concatened"))
 
 (deftest tmp-files-update-test
-  (is (= {:tmp-files ["a" "b" "cd"],
-          :clean-cmds [["rm" "-fr" "a"] ["rm" "-fr" "b"] ["rm" "-fr" "cd"]]}
-         (sut/common-update {:tmp-files ["a" "b" "cd"]}))))
+  (is (= {:clean-cmds [["rm" "-f" "a"] ["rm" "-f" "b"] ["rm" "-f" "cd"]]}
+         (sut/common-update {:tmp-files ["a" "b" "cd"]})))
+  (is (= {:clean-cmds [["rm" "-fr" "a"] ["rm" "-fr" "b"] ["rm" "-fr" "cd"]]}
+         (sut/common-update {:tmp-dirs ["a" "b" "cd"]}))))
 
 (deftest expand-test
   (is (= {:test {:clean-cmds [["rm" "-f" "a"] ["rm" "-f" "b"]

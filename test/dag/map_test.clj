@@ -27,15 +27,16 @@
 
 (deftest remove-successors-test
   (is (= {:c {:edges [:q :d]}, :b {:edges [:d]}, :a {:edges []}}
-         (sut/remove-successors :edges
-                                {:c {:edges [:q :d :a]}, :b {:edges [:d :a]}, :a {:edges []}}
-                                [:a]))
+         (sut/remove-successors
+          :edges
+          {:c {:edges [:q :d :a]}, :b {:edges [:d :a]}, :a {:edges []}}
+          [:a]))
       "Node names are returned into a set."))
 
-(sut/remove-nodes  {:c {:edges [:d]}, :a {:edges []}}
-                   (-> {:c {:edges [:d]}, :a {:edges []}}
-                       sut/dag-nodes
-                       sut/node-names))
+(sut/remove-nodes {:c {:edges [:d]}, :a {:edges []}}
+                  (-> {:c {:edges [:d]}, :a {:edges []}}
+                      sut/dag-nodes
+                      sut/node-names))
 
 (deftest assembly-test
   (let [dag {:c {:edges [:d]}, :a {:edges []}}
@@ -50,5 +51,5 @@
                   sut/node-names)]
     (is (= {}
            (as-> (sut/remove-nodes dag nodes) dag
-                (sut/remove-successors :edges dag nodes)))
+             (sut/remove-successors :edges dag nodes)))
         "Removing nodes through nodes is ok.")))

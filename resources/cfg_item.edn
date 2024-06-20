@@ -45,7 +45,7 @@
               "~/.config/doom/snippets"],
   :cfg-version-cmds [["doom" "info"]],
   :check-cmds [["doom" "doctor"]],
-  :clean-cmds [["doom" "clean"] ["doom" "purge" "-g"]],
+  :clean-cmds [["doom" "gc"]],
   :deps [:git],
   :install-cmds [["git" "clone" "--depth" "1"
                   "https://github.com/doomemacs/doomemacs" "~/.config/emacs"]

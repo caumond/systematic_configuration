@@ -1,613 +1,481 @@
-{:cycle-detected true,
- :sorted
- [#{:ssh-keygen :npm :os :glpk :curl}
-  #{:shadow-cljs :js-beautify :stylelint :typewritten :stylelint-config-standard :cljfmt}],
- :subgraph-with-cycle
- {:zprint
-  {:clean-cmds [["rm" "-fr" ".zprint/urlcache"]],
-   :init-cmds [],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "zprint"]],
-   :cfg-version-cmds [["brew" "list" "--cask" "zprint" "--versions"]],
-   :install-cmds [["brew" "install" "--cask" "zprint" "-q" nil]],
-   :check-cmds [],
-   :edges [:brew],
-   :cfg-files ["~/.zprintrc"]},
-  :security-tools
-  {:description "What is necessary to manage security keys",
-   :package-manager :manual,
-   :deps [:gnupg :ssh-keygen],
-   :edges [[:gnupg :ssh-keygen]]},
-  :ffmpeg
-  {:cfg-version-cmds [["brew" "list" "ffmpeg" "--versions"]],
-   :check-cmds [],
-   :clean-cmds [["brew" "cleanup" "ffmpeg"]],
-   :edges [:brew],
-   :init-cmds [],
-   :install-cmds [["brew" "install" "ffmpeg" "-q" nil]],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "ffmpeg"]]},
-  :vim
-  {:cfg-version-cmds [["brew" "list" "vim" "--versions"]],
-   :check-cmds [],
-   :clean-cmds [["brew" "cleanup" "vim"]],
-   :edges [:brew],
-   :init-cmds [],
-   :install-cmds [["brew" "install" "vim" "-q" nil]],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "vim"]]},
-  :nano
-  {:cfg-version-cmds [["brew" "list" "nano" "--versions"]],
-   :check-cmds [],
-   :clean-cmds [["brew" "cleanup" "nano"]],
-   :edges [:brew],
-   :init-cmds [],
-   :install-cmds [["brew" "install" "nano" "-q" nil]],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "nano"]]},
-  :markdown
-  {:cfg-version-cmds [["brew" "list" "markdown" "--versions"]],
-   :check-cmds [],
-   :clean-cmds [["brew" "cleanup" "markdown"]],
-   :edges [:brew],
-   :init-cmds [],
-   :install-cmds [["brew" "install" "markdown" "-q" nil]],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "markdown"]]},
-  :androidstudio
-  {:cfg-version-cmds
-   [["brew" "list" "--cask" "android-studio" "--versions"]],
+{:before
+ {:androidstudio
+  {:cfg-item-deps [:brew],
+   :cfg-version-cmds [["brew" "list" "--cask" "android-studio" "--versions"]],
    :check-cmds [],
    :clean-cmds [["brew" "cleanup" "android-studio"]],
-   :edges [:brew],
    :init-cmds [],
-   :install-cmds
-   [["brew" "install" "--cask" "android-studio" "-q" nil]],
-   :package-manager :brew,
+   :install-cmds [["brew" "install" "--cask" "android-studio" "-q"]],
    :update-cmds [["brew" "upgrade" "android-studio"]]},
-  :tree
-  {:cfg-version-cmds [["brew" "list" "tree" "--versions"]],
-   :check-cmds [],
-   :clean-cmds [["brew" "cleanup" "tree"]],
-   :edges [:brew],
-   :init-cmds [],
-   :install-cmds [["brew" "install" "tree" "-q" nil]],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "tree"]]},
-  :oh-my-zsh
-  {:cfg-files ["~/.zshrc"],
-   :cfg-version-cmds [["omz" "version"]],
-   :deps [:zsh],
-   :install-cmds
-   [["curl"
-     "-fsSL"
-     "https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh"
-     "-o"
-     "ohmyzsh-install.sh"]
-    ["chmod" "+x" "ohmyzsh-install.sh"]
-    ["./ohmyzsh-install.sh"]
-    ["rm" "./ohmyzsh-install.sh"]],
-   :package-manager :manual,
-   :update-cmds [["omz" "update"]],
-   :edges [[:zsh]]},
-  :gcc
-  {:cfg-version-cmds [["brew" "list" "gcc" "--versions"]],
-   :check-cmds [],
-   :clean-cmds [["brew" "cleanup" "gcc"]],
-   :edges [:brew],
-   :init-cmds [],
-   :install-cmds [["brew" "install" "gcc" "-q" nil]],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "gcc"]]},
-  :zsh-env
-  {:cfg-version-cmds [["zsh" "--version"]],
-   :deps [:zsh],
-   :package-manager :manual,
-   :update-cmds [["doom" "env"]],
-   :edges [[:zsh]]},
-  :jq
-  {:cfg-version-cmds [["brew" "list" "jq" "--versions"]],
-   :check-cmds [],
-   :clean-cmds [["brew" "cleanup" "jq"]],
-   :edges [:brew],
-   :init-cmds [],
-   :install-cmds [["brew" "install" "jq" "-q" nil]],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "jq"]]},
-  :coreutils
-  {:cfg-version-cmds [["brew" "list" "coreutils" "--versions"]],
-   :check-cmds [],
-   :clean-cmds [["brew" "cleanup" "coreutils"]],
-   :edges [:brew],
-   :init-cmds [],
-   :install-cmds [["brew" "install" "coreutils" "-q" nil]],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "coreutils"]]},
-  :iterm2
-  {:clean-cmds [["brew" "cleanup" "iterm2"]],
-   :init-cmds [],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "iterm2"]],
-   :cfg-version-cmds [["brew" "list" "--cask" "iterm2" "--versions"]],
-   :install-cmds [["brew" "install" "--cask" "iterm2" "-q" nil]],
-   :check-cmds [],
-   :edges [[:coreutils :grep :htop :nano :tmux :tree]],
-   :cfg-files ["~/Library/Preferences/com.googlecode.iterm2.plist"]},
-  :rlwrap
-  {:cfg-version-cmds [["brew" "list" "rlwrap" "--versions"]],
-   :check-cmds [],
-   :clean-cmds [["brew" "cleanup" "rlwrap"]],
-   :edges [:brew],
-   :init-cmds [],
-   :install-cmds [["brew" "install" "rlwrap" "-q" nil]],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "rlwrap"]]},
-  :clojure
-  {:clean-cmds
-   [["rm" "-fr" ".clojure/.cpcache"] ["rm" "-fr" ".m2/repository"]],
-   :init-cmds [],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "clojure"]],
-   :cfg-version-cmds [["brew" "list" "clojure" "--versions"]],
-   :install-cmds [["brew" "install" "clojure" "-q" nil]],
-   :check-cmds [],
-   :edges [:brew],
-   :cfg-files ["~/.clojure/deps.edn"]},
+  :aspell {:cfg-item-deps [:brew],
+           :cfg-version-cmds [["brew" "list" "aspell" "--versions"]],
+           :check-cmds [],
+           :clean-cmds [["brew" "cleanup" "aspell"]],
+           :init-cmds [],
+           :install-cmds [["brew" "install" "aspell" "-q"]],
+           :update-cmds [["brew" "upgrade" "aspell"]]},
+  :black {:cfg-item-deps [:brew],
+          :cfg-version-cmds [["brew" "list" "black" "--versions"]],
+          :check-cmds [],
+          :clean-cmds [["brew" "cleanup" "black"]],
+          :init-cmds [],
+          :install-cmds [["brew" "install" "black" "-q"]],
+          :update-cmds [["brew" "upgrade" "black"]]},
+  :brew {:cfg-item-deps (:curl),
+         :check-cmds [["brew" "doctor"]],
+         :install-cmds
+         [["curl" "-fsSL"
+           "https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
+           "-o" "brew-install.sh"] ["chmod" "+x" "brew-install.sh"]
+          ["echo" "You need to connect as admin to install brew"]
+          ["./brew-install.sh"] ["rm" "./brew-install.sh"]],
+         :update-cmds [["brew" "update"]]},
+  :c-project {:cfg-item-deps (:gcc)},
+  :clever {:cfg-files ["~/.config/clever-cloud/clever-tools.json"],
+           :cfg-item-deps [:brew],
+           :cfg-version-cmds [["brew" "list" "clever-tools" "--versions"]],
+           :check-cmds [],
+           :clean-cmds [["brew" "cleanup" "clever-tools"]],
+           :init-cmds [],
+           :install-cmds [["brew" "install" "clever-tools" "-q"]],
+           :update-cmds [["brew" "upgrade" "clever-tools"]]},
+  :clj-kondo {:cfg-item-deps [:brew],
+              :cfg-version-cmds [["brew" "list" "borkdude/brew/clj-kondo"
+                                  "--versions"]],
+              :check-cmds [],
+              :clean-cmds [["rm" "-fr" ".clojure/.clj-kondo/.cache"]],
+              :init-cmds [],
+              :install-cmds [["brew" "install" "borkdude/brew/clj-kondo" "-q"]],
+              :update-cmds [["brew" "upgrade" "borkdude/brew/clj-kondo"]]},
+  :cljfmt {:cfg-item-deps [:npm],
+           :cfg-version-cmds [],
+           :check-cmds [["npm" "doctor" "node-cljfmt"]],
+           :clean-cmds [],
+           :init-cmds [],
+           :install-cmds [["npm" "install" "-g" "node-cljfmt"]],
+           :update-cmds [["npm" "update" "-g" "node-cljfmt"]]},
+  :clojure {:cfg-files ["~/.clojure/deps.edn"],
+            :cfg-item-deps [:brew],
+            :cfg-version-cmds [["brew" "list" "clojure" "--versions"]],
+            :check-cmds [],
+            :clean-cmds [["rm" "-fr" ".clojure/.cpcache"]
+                         ["rm" "-fr" ".m2/repository"]],
+            :init-cmds [],
+            :install-cmds [["brew" "install" "clojure" "-q"]],
+            :update-cmds [["brew" "upgrade" "clojure"]]},
   :clojure-lsp-native
-  {:cfg-version-cmds
-   [["brew"
-     "list"
-     "clojure-lsp/brew/clojure-lsp-native"
-     "--versions"]],
+  {:cfg-item-deps [:brew],
+   :cfg-version-cmds [["brew" "list" "clojure-lsp/brew/clojure-lsp-native"
+                       "--versions"]],
    :check-cmds [],
-   :clean-cmds
-   [["rm" "-fr" ".clojure/.lsp/.cache"]
-    ["rm" "-fr" ".cache/clojure-lsp"]],
-   :edges [:brew],
+   :clean-cmds [["rm" "-fr" ".clojure/.lsp/.cache"]
+                ["rm" "-fr" ".cache/clojure-lsp"]],
    :init-cmds [],
-   :install-cmds
-   [["brew" "install" "clojure-lsp/brew/clojure-lsp-native" "-q" nil]],
-   :package-manager :brew,
-   :update-cmds
-   [["brew" "upgrade" "clojure-lsp/brew/clojure-lsp-native"]]},
-  :fd
-  {:cfg-version-cmds [["brew" "list" "fd" "--versions"]],
-   :check-cmds [],
-   :clean-cmds [["brew" "cleanup" "fd"]],
-   :edges [:brew],
+   :install-cmds [["brew" "install" "clojure-lsp/brew/clojure-lsp-native"
+                   "-q"]],
+   :update-cmds [["brew" "upgrade" "clojure-lsp/brew/clojure-lsp-native"]]},
+  :clojure-project {:cfg-item-deps (:clj-kondo :clojure :jq
+                                               :lein :openjdk
+                                               :rlwrap :shadow-cljs
+                                               :tools-clojure :tree-sitter)},
+  :cmake {:cfg-item-deps [:brew],
+          :cfg-version-cmds [["brew" "list" "cmake" "--versions"]],
+          :check-cmds [],
+          :clean-cmds [["brew" "cleanup" "cmake"]],
+          :init-cmds [],
+          :install-cmds [["brew" "install" "cmake" "-q"]],
+          :update-cmds [["brew" "upgrade" "cmake"]]},
+  :cmake-docs {:cfg-item-deps [:brew],
+               :cfg-version-cmds [["brew" "list" "cmake-docs" "--versions"]],
+               :check-cmds [],
+               :clean-cmds [["brew" "cleanup" "cmake-docs"]],
+               :init-cmds [],
+               :install-cmds [["brew" "install" "cmake-docs" "-q"]],
+               :update-cmds [["brew" "upgrade" "cmake-docs"]]},
+  :coreutils {:cfg-item-deps [:brew],
+              :cfg-version-cmds [["brew" "list" "coreutils" "--versions"]],
+              :check-cmds [],
+              :clean-cmds [["brew" "cleanup" "coreutils"]],
+              :init-cmds [],
+              :install-cmds [["brew" "install" "coreutils" "-q"]],
+              :update-cmds [["brew" "upgrade" "coreutils"]]},
+  :curl {},
+  :docker {:cfg-item-deps (:dockutil)},
+  :dockutil {:cfg-item-deps [:brew],
+             :cfg-version-cmds [["brew" "list" "dockutil" "--versions"]],
+             :check-cmds [],
+             :clean-cmds [["brew" "cleanup" "dockutil"]],
+             :init-cmds [],
+             :install-cmds [["brew" "install" "dockutil" "-q"]],
+             :update-cmds [["brew" "upgrade" "dockutil"]]},
+  :doom {:cfg-files ["~/.config/doom/config.el" "~/.config/doom/custom.el"
+                     "~/.config/doom/init.el" "~/.config/doom/packages.el"
+                     "~/.config/doom/snippets"],
+         :cfg-item-deps (:aspell :black :cljfmt
+                                 :clojure-lsp-native :cmake
+                                 :cmake-docs :emacs
+                                 :fd :graphviz
+                                 :js-beautify :ktlint
+                                 :openjpeg :ripgrep
+                                 :shellcheck :shfmt
+                                 :stylelint :stylelint-config-standard
+                                 :tidy-html5 :zprint),
+         :cfg-version-cmds [["doom" "info"]],
+         :check-cmds [["doom" "doctor"]],
+         :clean-cmds [["doom" "clean"] ["doom" "purge" "-g"]],
+         :install-cmds [["git" "clone" "--depth" "1"
+                         "https://github.com/doomemacs/doomemacs"
+                         "~/.config/emacs"] ["doom" "install"]],
+         :update-cmds [["doom" "upgrade"]]},
+  :emacs {:cfg-item-deps (:imagemagick),
+          :cfg-version-cmds [["brew" "list" "emacs-plus@29" "--versions"]],
+          :check-cmds [],
+          :clean-cmds [["brew" "cleanup" "emacs-plus@29"]],
+          :init-cmds [],
+          :install-cmds [["brew" "tap" "d12frosted/emacs-plus"]
+                         "--with-imagemagick --with-native-comp"
+                         ["brew" "install" "emacs-plus@29" "-q"]],
+          :update-cmds [["brew" "upgrade" "emacs-plus@29"]]},
+  :fd {:cfg-item-deps [:brew],
+       :cfg-version-cmds [["brew" "list" "fd" "--versions"]],
+       :check-cmds [],
+       :clean-cmds [["brew" "cleanup" "fd"]],
+       :init-cmds [],
+       :install-cmds [["brew" "install" "fd" "-q"]],
+       :update-cmds [["brew" "upgrade" "fd"]]},
+  :ffmpeg {:cfg-item-deps [:brew],
+           :cfg-version-cmds [["brew" "list" "ffmpeg" "--versions"]],
+           :check-cmds [],
+           :clean-cmds [["brew" "cleanup" "ffmpeg"]],
+           :init-cmds [],
+           :install-cmds [["brew" "install" "ffmpeg" "-q"]],
+           :update-cmds [["brew" "upgrade" "ffmpeg"]]},
+  :gcc {:cfg-item-deps [:brew],
+        :cfg-version-cmds [["brew" "list" "gcc" "--versions"]],
+        :check-cmds [],
+        :clean-cmds [["brew" "cleanup" "gcc"]],
+        :init-cmds [],
+        :install-cmds [["brew" "install" "gcc" "-q"]],
+        :update-cmds [["brew" "upgrade" "gcc"]]},
+  :gd {:cfg-item-deps [:brew],
+       :cfg-version-cmds [["brew" "list" "gd" "--versions"]],
+       :check-cmds [],
+       :clean-cmds [["brew" "cleanup" "gd"]],
+       :init-cmds [],
+       :install-cmds [["brew" "install" "gd" "-q"]],
+       :update-cmds [["brew" "upgrade" "gd"]]},
+  :gimp {:cfg-item-deps [:brew],
+         :cfg-version-cmds [["brew" "list" "--cask" "gimp" "--versions"]],
+         :check-cmds [],
+         :clean-cmds [["brew" "cleanup" "gimp"]],
+         :init-cmds [],
+         :install-cmds [["brew" "install" "--cask" "gimp" "-q"]],
+         :update-cmds [["brew" "upgrade" "gimp"]]},
+  :git {:cfg-files ["~/.gitconfig"],
+        :cfg-item-deps (:gd :git-lfs),
+        :cfg-version-cmds [["brew" "list" "git" "--versions"]],
+        :check-cmds [],
+        :clean-cmds [["brew" "cleanup" "git"]],
+        :init-cmds [],
+        :install-cmds [["brew" "install" "git" "-q"]],
+        :update-cmds [["brew" "upgrade" "git"]]},
+  :git-lfs {:cfg-item-deps [:brew],
+            :cfg-version-cmds [["brew" "list" "git-lfs" "--versions"]],
+            :check-cmds [],
+            :clean-cmds [["brew" "cleanup" "git-lfs"]],
+            :init-cmds [],
+            :install-cmds [["brew" "install" "git-lfs" "-q"]],
+            :update-cmds [["brew" "upgrade" "git-lfs"]]},
+  :glpk {:install-cmds [["mkdir -p ~/Dev/install" "cd ~/Dev/install"
+                         "wget http://ftp.gnu.org/gnu/glpk/glpk-5.0.tar.gz"
+                         "tar -xvzf glpk-5.0.tar.gz" "cd glpk-5.0"
+                         "./configure"]]},
+  :gnupg {:cfg-item-deps [:brew],
+          :cfg-version-cmds [["brew" "list" "gnupg" "--versions"]],
+          :check-cmds [],
+          :clean-cmds [["brew" "cleanup" "gnupg"]],
+          :init-cmds [],
+          :install-cmds [["brew" "install" "gnupg" "-q"]],
+          :update-cmds [["brew" "upgrade" "gnupg"]]},
+  :graphviz {:cfg-item-deps [:brew],
+             :cfg-version-cmds [["brew" "list" "graphviz" "--versions"]],
+             :check-cmds [],
+             :clean-cmds [["brew" "cleanup" "graphviz"]],
+             :init-cmds [],
+             :install-cmds [["brew" "install" "graphviz" "-q"]],
+             :update-cmds [["brew" "upgrade" "graphviz"]]},
+  :grep {:cfg-item-deps [:brew],
+         :cfg-version-cmds [["brew" "list" "grep" "--versions"]],
+         :check-cmds [],
+         :clean-cmds [["brew" "cleanup" "grep"]],
+         :init-cmds [],
+         :install-cmds [["brew" "install" "grep" "-q"]],
+         :update-cmds [["brew" "upgrade" "grep"]]},
+  :htop {:cfg-item-deps [:brew],
+         :cfg-version-cmds [["brew" "list" "htop" "--versions"]],
+         :check-cmds [],
+         :clean-cmds [["brew" "cleanup" "htop"]],
+         :init-cmds [],
+         :install-cmds [["brew" "install" "htop" "-q"]],
+         :update-cmds [["brew" "upgrade" "htop"]]},
+  :imagemagick {:cfg-item-deps [:brew],
+                :cfg-version-cmds [["brew" "list" "imagemagick" "--versions"]],
+                :check-cmds [],
+                :clean-cmds [["brew" "cleanup" "imagemagick"]],
+                :init-cmds [],
+                :install-cmds [["brew" "install" "imagemagick" "-q"]],
+                :update-cmds [["brew" "upgrade" "imagemagick"]]},
+  :iterm2 {:cfg-files ["~/Library/Preferences/com.googlecode.iterm2.plist"],
+           :cfg-item-deps (:coreutils :grep :htop :nano :tmux :tree),
+           :cfg-version-cmds [["brew" "list" "--cask" "iterm2" "--versions"]],
+           :check-cmds [],
+           :clean-cmds [["brew" "cleanup" "iterm2"]],
+           :init-cmds [],
+           :install-cmds [["brew" "install" "--cask" "iterm2" "-q"]],
+           :update-cmds [["brew" "upgrade" "iterm2"]]},
+  :jq {:cfg-item-deps [:brew],
+       :cfg-version-cmds [["brew" "list" "jq" "--versions"]],
+       :check-cmds [],
+       :clean-cmds [["brew" "cleanup" "jq"]],
+       :init-cmds [],
+       :install-cmds [["brew" "install" "jq" "-q"]],
+       :update-cmds [["brew" "upgrade" "jq"]]},
+  :js-beautify {:cfg-item-deps [:npm],
+                :cfg-version-cmds [],
+                :check-cmds [["npm" "doctor" "js-beautify"]],
+                :clean-cmds [],
+                :init-cmds [],
+                :install-cmds [["npm" "install" "-g" "js-beautify"]],
+                :update-cmds [["npm" "update" "-g" "js-beautify"]]},
+  :ktlint {:cfg-item-deps [:brew],
+           :cfg-version-cmds [["brew" "list" "ktlint" "--versions"]],
+           :check-cmds [],
+           :clean-cmds [["brew" "cleanup" "ktlint"]],
+           :init-cmds [],
+           :install-cmds [["brew" "install" "ktlint" "-q"]],
+           :update-cmds [["brew" "upgrade" "ktlint"]]},
+  :lein {:cfg-item-deps [:brew],
+         :cfg-version-cmds [["brew" "list" "leiningen" "--versions"]],
+         :check-cmds [],
+         :clean-cmds [["brew" "cleanup" "leiningen"]],
+         :init-cmds [],
+         :install-cmds [["brew" "install" "leiningen" "-q"]],
+         :update-cmds [["brew" "upgrade" "leiningen"]]},
+  :markdown {:cfg-item-deps [:brew],
+             :cfg-version-cmds [["brew" "list" "markdown" "--versions"]],
+             :check-cmds [],
+             :clean-cmds [["brew" "cleanup" "markdown"]],
+             :init-cmds [],
+             :install-cmds [["brew" "install" "markdown" "-q"]],
+             :update-cmds [["brew" "upgrade" "markdown"]]},
+  :nano {:cfg-item-deps [:brew],
+         :cfg-version-cmds [["brew" "list" "nano" "--versions"]],
+         :check-cmds [],
+         :clean-cmds [["brew" "cleanup" "nano"]],
+         :init-cmds [],
+         :install-cmds [["brew" "install" "nano" "-q"]],
+         :update-cmds [["brew" "upgrade" "nano"]]},
+  :node {:cfg-item-deps [:brew],
+         :cfg-version-cmds [["brew" "list" "node" "--versions"]],
+         :check-cmds [],
+         :clean-cmds [["brew" "cleanup" "node"]],
+         :init-cmds [],
+         :install-cmds [["brew" "install" "node" "-q"]],
+         :update-cmds [["brew" "upgrade" "node"]]},
+  :npm {:cfg-version-cmds [["npm" "version" "-g"]]},
+  :obs {:cfg-item-deps [:brew],
+        :cfg-version-cmds [["brew" "list" "--cask" "obs" "--versions"]],
+        :check-cmds [],
+        :clean-cmds [["brew" "cleanup" "obs"]],
+        :init-cmds [],
+        :install-cmds [["brew" "install" "--cask" "obs" "-q"]],
+        :update-cmds [["brew" "upgrade" "obs"]]},
+  :oh-my-zsh {:cfg-files ["~/.zshrc"],
+              :cfg-item-deps (:zsh),
+              :cfg-version-cmds [["omz" "version"]],
+              :install-cmds
+              [["curl" "-fsSL"
+                "https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh"
+                "-o" "ohmyzsh-install.sh"] ["chmod" "+x" "ohmyzsh-install.sh"]
+               ["./ohmyzsh-install.sh"] ["rm" "./ohmyzsh-install.sh"]],
+              :update-cmds [["omz" "update"]]},
+  :openjdk {:cfg-item-deps [:brew],
+            :cfg-version-cmds [["brew" "list" "openjdk" "--versions"]],
+            :check-cmds [],
+            :clean-cmds [["brew" "cleanup" "openjdk"]],
+            :init-cmds [],
+            :install-cmds [["brew" "install" "openjdk" "-q"]],
+            :update-cmds [["brew" "upgrade" "openjdk"]]},
+  :openjpeg {:cfg-item-deps [:brew],
+             :cfg-version-cmds [["brew" "list" "openjpeg" "--versions"]],
+             :check-cmds [],
+             :clean-cmds [["brew" "cleanup" "openjpeg"]],
+             :init-cmds [],
+             :install-cmds [["brew" "install" "openjpeg" "-q"]],
+             :update-cmds [["brew" "upgrade" "openjpeg"]]},
+  :os {:clean-cmds [["fd" "-H" "-I" "-g" "'**/.DS_Store'" "-x" "rm" "{}"]]},
+  :ripgrep {:cfg-item-deps (:rust),
+            :cfg-version-cmds [["rg --version"]],
+            :install-cmds [["git" "clone"
+                            "https://github.com/BurntSushi/ripgrep"
+                            "~/Dev/install"] ["cd" "~/Dev/install/ripgrep"]
+                           ["cargo" "build" "--release"]]},
+  :rlwrap {:cfg-item-deps [:brew],
+           :cfg-version-cmds [["brew" "list" "rlwrap" "--versions"]],
+           :check-cmds [],
+           :clean-cmds [["brew" "cleanup" "rlwrap"]],
+           :init-cmds [],
+           :install-cmds [["brew" "install" "rlwrap" "-q"]],
+           :update-cmds [["brew" "upgrade" "rlwrap"]]},
+  :rust {:cfg-item-deps [:brew],
+         :cfg-version-cmds [["brew" "list" "rust" "--versions"]],
+         :check-cmds [],
+         :clean-cmds [["brew" "cleanup" "rust"]],
+         :init-cmds [],
+         :install-cmds [["brew" "install" "rust" "-q"]],
+         :update-cmds [["brew" "upgrade" "rust"]]},
+  :security-tools {:cfg-item-deps (:gnupg :ssh-keygen)},
+  :shadow-cljs {:cfg-files ["~/.shadow-cljs/config.edn"],
+                :cfg-item-deps [:npm],
+                :cfg-version-cmds [],
+                :check-cmds [["npm" "doctor" "shadow-cljs"]],
+                :clean-cmds [],
+                :init-cmds [],
+                :install-cmds [["npm" "install" "-g" "shadow-cljs"]],
+                :update-cmds [["npm" "update" "-g" "shadow-cljs"]]},
+  :shellcheck {:cfg-item-deps [:brew],
+               :cfg-version-cmds [["brew" "list" "shellcheck" "--versions"]],
+               :check-cmds [],
+               :clean-cmds [["brew" "cleanup" "shellcheck"]],
+               :init-cmds [],
+               :install-cmds [["brew" "install" "shellcheck" "-q"]],
+               :update-cmds [["brew" "upgrade" "shellcheck"]]},
+  :shfmt {:cfg-item-deps [:brew],
+          :cfg-version-cmds [["brew" "list" "shfmt" "--versions"]],
+          :check-cmds [],
+          :clean-cmds [["brew" "cleanup" "shfmt"]],
+          :init-cmds [],
+          :install-cmds [["brew" "install" "shfmt" "-q"]],
+          :update-cmds [["brew" "upgrade" "shfmt"]]},
+  :ssh-keygen {:init-cmds [["ssh-keygen" "-t" "rsa" "-b" "4096" "-C"
+                            "anthony@caumond.com"]
+                           ["cat" "~/.ssh/id_rsa.pub"]]},
+  :stylelint {:cfg-item-deps [:npm],
+              :cfg-version-cmds [],
+              :check-cmds [["npm" "doctor" "stylelint"]],
+              :clean-cmds [],
+              :init-cmds [],
+              :install-cmds [["npm" "install" "-g" "stylelint"]],
+              :update-cmds [["npm" "update" "-g" "stylelint"]]},
+  :stylelint-config-standard
+  {:cfg-item-deps [:npm],
+   :cfg-version-cmds [],
+   :check-cmds [["npm" "doctor" "stylelint-config-standard"]],
+   :clean-cmds [],
    :init-cmds [],
-   :install-cmds [["brew" "install" "fd" "-q" nil]],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "fd"]]},
-  :aspell
-  {:cfg-version-cmds [["brew" "list" "aspell" "--versions"]],
-   :check-cmds [],
-   :clean-cmds [["brew" "cleanup" "aspell"]],
-   :edges [:brew],
-   :init-cmds [],
-   :install-cmds [["brew" "install" "aspell" "-q" nil]],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "aspell"]]},
-  :grep
-  {:cfg-version-cmds [["brew" "list" "grep" "--versions"]],
-   :check-cmds [],
-   :clean-cmds [["brew" "cleanup" "grep"]],
-   :edges [:brew],
-   :init-cmds [],
-   :install-cmds [["brew" "install" "grep" "-q" nil]],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "grep"]]},
-  :git
-  {:clean-cmds [["brew" "cleanup" "git"]],
-   :init-cmds [],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "git"]],
-   :cfg-version-cmds [["brew" "list" "git" "--versions"]],
-   :install-cmds [["brew" "install" "git" "-q" nil]],
-   :check-cmds [],
-   :edges [[:gd :git-lfs]],
-   :cfg-files ["~/.gitconfig"]},
-  :docker
-  {:package-manager :manual, :deps [:dockutil], :edges [[:dockutil]]},
-  :clojure-project
-  {:package-manager :manual,
-   :deps
-   [:shadow-cljs
-    :jq
-    :rlwrap
-    :clojure
-    :tree-sitter
-    :openjdk
-    :tools-clojure
-    :clj-kondo
-    :lein],
-   :edges
-   [[:shadow-cljs
-     :jq
-     :rlwrap
-     :clojure
-     :tree-sitter
-     :openjdk
-     :tools-clojure
-     :clj-kondo
-     :lein]]},
-  :shellcheck
-  {:cfg-version-cmds [["brew" "list" "shellcheck" "--versions"]],
-   :check-cmds [],
-   :clean-cmds [["brew" "cleanup" "shellcheck"]],
-   :edges [:brew],
-   :init-cmds [],
-   :install-cmds [["brew" "install" "shellcheck" "-q" nil]],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "shellcheck"]]},
-  :dockutil
-  {:cfg-version-cmds [["brew" "list" "dockutil" "--versions"]],
-   :check-cmds [],
-   :clean-cmds [["brew" "cleanup" "dockutil"]],
-   :edges [:brew],
-   :init-cmds [],
-   :install-cmds [["brew" "install" "dockutil" "-q" nil]],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "dockutil"]]},
-  :obs
-  {:cfg-version-cmds [["brew" "list" "--cask" "obs" "--versions"]],
-   :check-cmds [],
-   :clean-cmds [["brew" "cleanup" "obs"]],
-   :edges [:brew],
-   :init-cmds [],
-   :install-cmds [["brew" "install" "--cask" "obs" "-q" nil]],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "obs"]]},
-  :gimp
-  {:cfg-version-cmds [["brew" "list" "--cask" "gimp" "--versions"]],
-   :check-cmds [],
-   :clean-cmds [["brew" "cleanup" "gimp"]],
-   :edges [:brew],
-   :init-cmds [],
-   :install-cmds [["brew" "install" "--cask" "gimp" "-q" nil]],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "gimp"]]},
-  :clever
-  {:clean-cmds [["brew" "cleanup" "clever-tools"]],
-   :init-cmds [],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "clever-tools"]],
-   :cfg-version-cmds [["brew" "list" "clever-tools" "--versions"]],
-   :install-cmds [["brew" "install" "clever-tools" "-q" nil]],
-   :check-cmds [],
-   :edges [:brew],
-   :cfg-files ["~/.config/clever-cloud/clever-tools.json"]},
-  :node
-  {:cfg-version-cmds [["brew" "list" "node" "--versions"]],
-   :check-cmds [],
-   :clean-cmds [["brew" "cleanup" "node"]],
-   :edges [:brew],
-   :init-cmds [],
-   :install-cmds [["brew" "install" "node" "-q" nil]],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "node"]]},
-  :brew
-  {:check-cmds [["brew" "doctor"]],
-   :deps [:curl],
-   :description "Brew installation and global tasks",
-   :install-cmds
-   [["curl"
-     "-fsSL"
-     "https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
-     "-o"
-     "brew-install.sh"]
-    ["chmod" "+x" "brew-install.sh"]
-    ["echo" "You need to connect as admin to install brew"]
-    ["./brew-install.sh"]
-    ["rm" "./brew-install.sh"]],
-   :package-manager :manual,
-   :update-cmds [["brew" "update"]],
-   :edges [[:curl]]},
-  :cmake-docs
-  {:cfg-version-cmds [["brew" "list" "cmake-docs" "--versions"]],
-   :check-cmds [],
-   :clean-cmds [["brew" "cleanup" "cmake-docs"]],
-   :edges [:brew],
-   :init-cmds [],
-   :install-cmds [["brew" "install" "cmake-docs" "-q" nil]],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "cmake-docs"]]},
-  :tree-sitter
-  {:cfg-version-cmds [["brew" "list" "tree-sitter" "--versions"]],
-   :check-cmds [],
-   :clean-cmds [["brew" "cleanup" "tree-sitter"]],
-   :edges [:brew],
-   :init-cmds [],
-   :install-cmds [["brew" "install" "tree-sitter" "-q" nil]],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "tree-sitter"]]},
-  :openjdk
-  {:cfg-version-cmds [["brew" "list" "openjdk" "--versions"]],
-   :check-cmds [],
-   :clean-cmds [["brew" "cleanup" "openjdk"]],
-   :edges [:brew],
-   :init-cmds [],
-   :install-cmds [["brew" "install" "openjdk" "-q" nil]],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "openjdk"]]},
-  :ktlint
-  {:cfg-version-cmds [["brew" "list" "ktlint" "--versions"]],
-   :check-cmds [],
-   :clean-cmds [["brew" "cleanup" "ktlint"]],
-   :edges [:brew],
-   :init-cmds [],
-   :install-cmds [["brew" "install" "ktlint" "-q" nil]],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "ktlint"]]},
-  :gnupg
-  {:cfg-version-cmds [["brew" "list" "gnupg" "--versions"]],
-   :check-cmds [],
-   :clean-cmds [["brew" "cleanup" "gnupg"]],
-   :edges [:brew],
-   :init-cmds [],
-   :install-cmds [["brew" "install" "gnupg" "-q" nil]],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "gnupg"]]},
-  :gd
-  {:cfg-version-cmds [["brew" "list" "gd" "--versions"]],
-   :check-cmds [],
-   :clean-cmds [["brew" "cleanup" "gd"]],
-   :edges [:brew],
-   :init-cmds [],
-   :install-cmds [["brew" "install" "gd" "-q" nil]],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "gd"]]},
-  :git-lfs
-  {:cfg-version-cmds [["brew" "list" "git-lfs" "--versions"]],
-   :check-cmds [],
-   :clean-cmds [["brew" "cleanup" "git-lfs"]],
-   :edges [:brew],
-   :init-cmds [],
-   :install-cmds [["brew" "install" "git-lfs" "-q" nil]],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "git-lfs"]]},
-  :c-project {:package-manager :manual, :deps [:gcc], :edges [[:gcc]]},
-  :graphviz
-  {:cfg-version-cmds [["brew" "list" "graphviz" "--versions"]],
-   :check-cmds [],
-   :clean-cmds [["brew" "cleanup" "graphviz"]],
-   :edges [:brew],
-   :init-cmds [],
-   :install-cmds [["brew" "install" "graphviz" "-q" nil]],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "graphviz"]]},
+   :install-cmds [["npm" "install" "-g" "stylelint-config-standard"]],
+   :update-cmds [["npm" "update" "-g" "stylelint-config-standard"]]},
+  :tidy-html5 {:cfg-item-deps [:brew],
+               :cfg-version-cmds [["brew" "list" "tidy-html5" "--versions"]],
+               :check-cmds [],
+               :clean-cmds [["brew" "cleanup" "tidy-html5"]],
+               :init-cmds [],
+               :install-cmds [["brew" "install" "tidy-html5" "-q"]],
+               :update-cmds [["brew" "upgrade" "tidy-html5"]]},
+  :tmux {:cfg-item-deps [:brew],
+         :cfg-version-cmds [["brew" "list" "tmux" "--versions"]],
+         :check-cmds [],
+         :clean-cmds [["brew" "cleanup" "tmux"]],
+         :init-cmds [],
+         :install-cmds [["brew" "install" "tmux" "-q"]],
+         :update-cmds [["brew" "upgrade" "tmux"]]},
   :tools-clojure
-  {:clean-cmds [["brew" "cleanup" "clojure/tools/clojure"]],
-   :init-cmds [],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "clojure/tools/clojure"]],
-   :cfg-version-cmds
-   [["brew" "list" "clojure/tools/clojure" "--versions"]],
-   :install-cmds [["brew" "install" "clojure/tools/clojure" "-q" nil]],
+  {:cfg-files ["~/.clojure/tools/tools.edn"],
+   :cfg-item-deps [:brew],
+   :cfg-version-cmds [["brew" "list" "clojure/tools/clojure" "--versions"]],
    :check-cmds [],
-   :edges [:brew],
-   :cfg-files ["~/.clojure/tools/tools.edn"]},
-  :htop
-  {:cfg-version-cmds [["brew" "list" "htop" "--versions"]],
-   :check-cmds [],
-   :clean-cmds [["brew" "cleanup" "htop"]],
-   :edges [:brew],
+   :clean-cmds [["brew" "cleanup" "clojure/tools/clojure"]],
    :init-cmds [],
-   :install-cmds [["brew" "install" "htop" "-q" nil]],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "htop"]]},
-  :ripgrep
-  {:cfg-version-cmds [["rg --version"]],
-   :install-cmds
-   [["git"
-     "clone"
-     "https://github.com/BurntSushi/ripgrep"
-     "~/Dev/install"]
-    ["cd" "~/Dev/install/ripgrep"]
-    ["cargo" "build" "--release"]],
-   :package-manager :manual,
-   :deps [:rust],
-   :edges [[:rust]]},
-  :tmux
-  {:cfg-version-cmds [["brew" "list" "tmux" "--versions"]],
-   :check-cmds [],
-   :clean-cmds [["brew" "cleanup" "tmux"]],
-   :edges [:brew],
-   :init-cmds [],
-   :install-cmds [["brew" "install" "tmux" "-q" nil]],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "tmux"]]},
-  :vlc
-  {:cfg-version-cmds [["brew" "list" "--cask" "vlc" "--versions"]],
-   :check-cmds [],
-   :clean-cmds [["brew" "cleanup" "vlc"]],
-   :edges [:brew],
-   :init-cmds [],
-   :install-cmds [["brew" "install" "--cask" "vlc" "-q" nil]],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "vlc"]]},
-  :shfmt
-  {:cfg-version-cmds [["brew" "list" "shfmt" "--versions"]],
-   :check-cmds [],
-   :clean-cmds [["brew" "cleanup" "shfmt"]],
-   :edges [:brew],
-   :init-cmds [],
-   :install-cmds [["brew" "install" "shfmt" "-q" nil]],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "shfmt"]]},
-  :rust
-  {:cfg-version-cmds [["brew" "list" "rust" "--versions"]],
-   :check-cmds [],
-   :clean-cmds [["brew" "cleanup" "rust"]],
-   :edges [:brew],
-   :init-cmds [],
-   :install-cmds [["brew" "install" "rust" "-q" nil]],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "rust"]]},
-  :cmake
-  {:cfg-version-cmds [["brew" "list" "cmake" "--versions"]],
-   :check-cmds [],
-   :clean-cmds [["brew" "cleanup" "cmake"]],
-   :edges [:brew],
-   :init-cmds [],
-   :install-cmds [["brew" "install" "cmake" "-q" nil]],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "cmake"]]},
-  :zsh-completions
-  {:cfg-version-cmds [["brew" "list" "zsh-completions" "--versions"]],
-   :check-cmds [],
-   :clean-cmds [["brew" "cleanup" "zsh-completions"]],
-   :edges [:brew],
-   :init-cmds [],
-   :install-cmds [["brew" "install" "zsh-completions" "-q" nil]],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "zsh-completions"]]},
-  :zsh
-  {:cfg-version-cmds [["brew" "list" "zsh" "--versions"]],
-   :check-cmds [],
-   :clean-cmds [["brew" "cleanup" "zsh"]],
-   :edges [[:typewritten :zsh-completions]],
-   :init-cmds [],
-   :install-cmds [["brew" "install" "zsh" "-q" nil]],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "zsh"]]},
-  :imagemagick
-  {:cfg-version-cmds [["brew" "list" "imagemagick" "--versions"]],
-   :check-cmds [],
-   :clean-cmds [["brew" "cleanup" "imagemagick"]],
-   :edges [:brew],
-   :init-cmds [],
-   :install-cmds [["brew" "install" "imagemagick" "-q" nil]],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "imagemagick"]]},
-  :doom
-  {:clean-cmds [["doom" "clean"] ["doom" "purge" "-g"]],
-   :package-manager :manual,
-   :update-cmds [["doom" "upgrade"]],
-   :cfg-version-cmds [["doom" "info"]],
-   :install-cmds
-   [["git"
-     "clone"
-     "--depth"
-     "1"
-     "https://github.com/doomemacs/doomemacs"
-     "~/.config/emacs"]
-    ["doom" "install"]],
-   :check-cmds [["doom" "doctor"]],
-   :edges
-   [[:zprint
-     :js-beautify
-     :clojure-lsp-native
-     :fd
-     :aspell
-     :stylelint
-     :shellcheck
-     :cmake-docs
-     :ktlint
-     :graphviz
-     :ripgrep
-     :shfmt
-     :cmake
-     :openjpeg
-     :emacs
-     :stylelint-config-standard
-     :tidy-html5
-     :cljfmt
-     :black]],
-   :cfg-files
-   ["~/.config/doom/config.el"
-    "~/.config/doom/custom.el"
-    "~/.config/doom/init.el"
-    "~/.config/doom/packages.el"
-    "~/.config/doom/snippets"],
-   :deps
-   [:zprint
-    :js-beautify
-    :clojure-lsp-native
-    :fd
-    :aspell
-    :stylelint
-    :shellcheck
-    :cmake-docs
-    :ktlint
-    :graphviz
-    :ripgrep
-    :shfmt
-    :cmake
-    :openjpeg
-    :emacs
-    :stylelint-config-standard
-    :tidy-html5
-    :cljfmt
-    :black]},
-  :openjpeg
-  {:cfg-version-cmds [["brew" "list" "openjpeg" "--versions"]],
-   :check-cmds [],
-   :clean-cmds [["brew" "cleanup" "openjpeg"]],
-   :edges [:brew],
-   :init-cmds [],
-   :install-cmds [["brew" "install" "openjpeg" "-q" nil]],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "openjpeg"]]},
-  :emacs
-  {:cfg-version-cmds [["brew" "list" "emacs-plus@29" "--versions"]],
-   :check-cmds [],
-   :clean-cmds [["brew" "cleanup" "emacs-plus@29"]],
-   :edges [[:imagemagick]],
-   :init-cmds [],
-   :install-cmds
-   [["brew" "tap" "d12frosted/emacs-plus"]
-    ["brew"
-     "install"
-     "emacs-plus@29"
-     "-q"
-     "--with-imagemagick --with-native-comp"]],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "emacs-plus@29"]]},
-  :tidy-html5
-  {:cfg-version-cmds [["brew" "list" "tidy-html5" "--versions"]],
-   :check-cmds [],
-   :clean-cmds [["brew" "cleanup" "tidy-html5"]],
-   :edges [:brew],
-   :init-cmds [],
-   :install-cmds [["brew" "install" "tidy-html5" "-q" nil]],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "tidy-html5"]]},
-  :clj-kondo
-  {:cfg-version-cmds
-   [["brew" "list" "borkdude/brew/clj-kondo" "--versions"]],
-   :check-cmds [],
-   :clean-cmds [["rm" "-fr" ".clojure/.clj-kondo/.cache"]],
-   :edges [:brew],
-   :init-cmds [],
-   :install-cmds
-   [["brew" "install" "borkdude/brew/clj-kondo" "-q" nil]],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "borkdude/brew/clj-kondo"]]},
-  :lein
-  {:cfg-version-cmds [["brew" "list" "leiningen" "--versions"]],
-   :check-cmds [],
-   :clean-cmds [["brew" "cleanup" "leiningen"]],
-   :edges [:brew],
-   :init-cmds [],
-   :install-cmds [["brew" "install" "leiningen" "-q" nil]],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "leiningen"]]},
-  :wget
-  {:cfg-version-cmds [["brew" "list" "wget" "--versions"]],
-   :check-cmds [],
-   :clean-cmds [["brew" "cleanup" "wget"]],
-   :edges [:brew],
-   :init-cmds [],
-   :install-cmds [["brew" "install" "wget" "-q" nil]],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "wget"]]},
-  :black
-  {:cfg-version-cmds [["brew" "list" "black" "--versions"]],
-   :check-cmds [],
-   :clean-cmds [["brew" "cleanup" "black"]],
-   :edges [:brew],
-   :init-cmds [],
-   :install-cmds [["brew" "install" "black" "-q" nil]],
-   :package-manager :brew,
-   :update-cmds [["brew" "upgrade" "black"]]}}}
+   :install-cmds [["brew" "install" "clojure/tools/clojure" "-q"]],
+   :update-cmds [["brew" "upgrade" "clojure/tools/clojure"]]},
+  :tree {:cfg-item-deps [:brew],
+         :cfg-version-cmds [["brew" "list" "tree" "--versions"]],
+         :check-cmds [],
+         :clean-cmds [["brew" "cleanup" "tree"]],
+         :init-cmds [],
+         :install-cmds [["brew" "install" "tree" "-q"]],
+         :update-cmds [["brew" "upgrade" "tree"]]},
+  :tree-sitter {:cfg-item-deps [:brew],
+                :cfg-version-cmds [["brew" "list" "tree-sitter" "--versions"]],
+                :check-cmds [],
+                :clean-cmds [["brew" "cleanup" "tree-sitter"]],
+                :init-cmds [],
+                :install-cmds [["brew" "install" "tree-sitter" "-q"]],
+                :update-cmds [["brew" "upgrade" "tree-sitter"]]},
+  :typewritten {:cfg-item-deps [:npm],
+                :cfg-version-cmds [],
+                :check-cmds [["npm" "doctor" "typewritten"]],
+                :clean-cmds [],
+                :init-cmds [],
+                :install-cmds [["npm" "install" "-g" "typewritten"]],
+                :update-cmds [["npm" "update" "-g" "typewritten"]]},
+  :vim {:cfg-item-deps [:brew],
+        :cfg-version-cmds [["brew" "list" "vim" "--versions"]],
+        :check-cmds [],
+        :clean-cmds [["brew" "cleanup" "vim"]],
+        :init-cmds [],
+        :install-cmds [["brew" "install" "vim" "-q"]],
+        :update-cmds [["brew" "upgrade" "vim"]]},
+  :vlc {:cfg-item-deps [:brew],
+        :cfg-version-cmds [["brew" "list" "--cask" "vlc" "--versions"]],
+        :check-cmds [],
+        :clean-cmds [["brew" "cleanup" "vlc"]],
+        :init-cmds [],
+        :install-cmds [["brew" "install" "--cask" "vlc" "-q"]],
+        :update-cmds [["brew" "upgrade" "vlc"]]},
+  :wget {:cfg-item-deps [:brew],
+         :cfg-version-cmds [["brew" "list" "wget" "--versions"]],
+         :check-cmds [],
+         :clean-cmds [["brew" "cleanup" "wget"]],
+         :init-cmds [],
+         :install-cmds [["brew" "install" "wget" "-q"]],
+         :update-cmds [["brew" "upgrade" "wget"]]},
+  :zprint {:cfg-files ["~/.zprintrc"],
+           :cfg-item-deps [:brew],
+           :cfg-version-cmds [["brew" "list" "--cask" "zprint" "--versions"]],
+           :check-cmds [],
+           :clean-cmds [["rm" "-fr" ".zprint/urlcache"]],
+           :init-cmds [],
+           :install-cmds [["brew" "install" "--cask" "zprint" "-q"]],
+           :update-cmds [["brew" "upgrade" "zprint"]]},
+  :zsh {:cfg-item-deps (:typewritten :zsh-completions),
+        :cfg-version-cmds [["brew" "list" "zsh" "--versions"]],
+        :check-cmds [],
+        :clean-cmds [["brew" "cleanup" "zsh"]],
+        :init-cmds [],
+        :install-cmds [["brew" "install" "zsh" "-q"]],
+        :update-cmds [["brew" "upgrade" "zsh"]]},
+  :zsh-completions {:cfg-item-deps [:brew],
+                    :cfg-version-cmds [["brew" "list" "zsh-completions"
+                                        "--versions"]],
+                    :check-cmds [],
+                    :clean-cmds [["brew" "cleanup" "zsh-completions"]],
+                    :init-cmds [],
+                    :install-cmds [["brew" "install" "zsh-completions" "-q"]],
+                    :update-cmds [["brew" "upgrade" "zsh-completions"]]},
+  :zsh-env {:cfg-item-deps (:zsh),
+            :cfg-version-cmds [["zsh" "--version"]],
+            :update-cmds [["doom" "env"]]}},
+ :cycle-detected false,
+ :sorted [#{:curl :glpk :npm :os :ssh-keygen}
+          #{:brew :cljfmt :js-beautify :shadow-cljs :stylelint
+            :stylelint-config-standard :typewritten}
+          #{:androidstudio :aspell :black :clever :clj-kondo :clojure
+            :clojure-lsp-native :cmake :cmake-docs :coreutils :dockutil :fd
+            :ffmpeg :gcc :gd :gimp :git-lfs :gnupg :graphviz :grep :htop
+            :imagemagick :jq :ktlint :lein :markdown :nano :node :obs :openjdk
+            :openjpeg :rlwrap :rust :shellcheck :shfmt :tidy-html5 :tmux
+            :tools-clojure :tree :tree-sitter :vim :vlc :wget :zprint
+            :zsh-completions}
+          #{:c-project :clojure-project :docker :emacs :git :iterm2 :ripgrep
+            :security-tools :zsh} #{:doom :oh-my-zsh :zsh-env}]}

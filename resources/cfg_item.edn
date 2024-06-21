@@ -20,11 +20,13 @@
           :package-manager :manual
           :cfg-files ["~/.config/gh/hosts.yml" "~/.config/gh/config.yml"]}
  :clever {:cfg-files ["~/.config/clever-cloud/clever-tools.json"],
+          :tap "clevercloud/tap"
           :formula "clever-tools",
           :package-manager :brew},
  :clojure-project
  {:package-manager :manual,
   :pre-reqs {:clj-kondo {:formula "borkdude/brew/clj-kondo",
+                         :tap "borkdude/brew"
                          :package-manager :brew,
                          :tmp-dirs [".clojure/.clj-kondo/.cache"]},
              :clojure {:cfg-files ["~/.clojure/deps.edn"],
@@ -39,6 +41,7 @@
                            :npm-deps ["shadow-cljs"],
                            :package-manager :npm},
              :tools-clojure {:cfg-files ["~/.clojure/tools/tools.edn"],
+                             :tap "clojure/tools"
                              :formula "clojure/tools/clojure",
                              :package-manager :brew},
              :tree-sitter {:formula "tree-sitter", :package-manager :brew}}},
@@ -64,6 +67,7 @@
    :black {:formula "black", :package-manager :brew},
    :cljfmt {:npm-deps ["node-cljfmt"], :package-manager :npm},
    :clojure-lsp-native {:formula "clojure-lsp/brew/clojure-lsp-native",
+                        :tap "clojure-lsp/brew"
                         :package-manager :brew,
                         :tmp-dirs [".clojure/.lsp/.cache"
                                    ".cache/clojure-lsp"]},

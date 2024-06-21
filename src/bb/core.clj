@@ -121,6 +121,11 @@
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn ci-install
   [cli-args on-error-code]
+  (try
+    (fs/delete-tree "tmp/")
+    (catch Exception e
+      (on-error-code (str "Error during the deletion of tmp directory.\n"
+                          e))))
   (run-cmds cli-args on-error-code :install-cmds identity))
 
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}

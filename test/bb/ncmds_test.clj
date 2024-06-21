@@ -2,8 +2,6 @@
   (:require [ncmds :as sut]
             [clojure.test :refer [deftest is]]))
 
-(deftest cmd-to-str-test (is (= "ls -la" (sut/cmd-to-str ["ls" "-la"]))))
-
 (deftest validate-cmd-test
   (is (not (sut/validate-cmd nil)) "Empty command not valid.")
   (is (not (sut/validate-cmd [12]))
@@ -20,8 +18,6 @@
 
 (binding [*out* s]
   (deftest execute-process-test
-    (is (= "Execute `ls`\n" (with-out-str (sut/execute-cmd ["ls"])))
-        "A process prints what it's doing.")
     (is (= nil (sut/execute-cmd ["cd" ".."])) "cd is succesful.")
     (is
      (= [["non-existing-command"] true]

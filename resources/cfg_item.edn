@@ -1,6 +1,6 @@
 ;; This file is describing all configuration items.
 ;; Code specific platform stands in `os` subdir.
-{:androidstudio {:cask true, :formula "android-studio", :package-manager :brew},
+{:androidstudio [{:cask true, :formula "android-studio", :package-manager :brew :os :macos}]
  :brew {:check-cmds [["brew" "doctor"]],
         :deps [:curl],
         :description "Brew installation and global tasks",

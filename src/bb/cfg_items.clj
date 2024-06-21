@@ -81,10 +81,20 @@
    [:tmp-dirs {:optional true, :description "Temporary directory to remove."}
     [:vector :string]]])
 
+(def os-name
+  [:enum :macos :ubuntu])
+
 (def assembly
-  [:or [:union npm-package-manager common-behavior]
+  [:or
+   [:union npm-package-manager common-behavior]
+   [:vector
+    [:union npm-package-manager common-behavior [:map [:os os-name]]]]
    [:union manual-package-manager common-behavior]
-   [:union brew-package-manager common-behavior]])
+   [:vector
+    [:union manual-package-manager common-behavior [:map [:os os-name]]]]
+   [:union brew-package-manager common-behavior]
+   [:vector
+    [:union brew-package-manager common-behavior [:map [:os :keyword]]]]])
 
 (def registry (assoc malli-registry ::app assembly))
 
@@ -118,6 +128,8 @@
                         vec),
      :update-cmds [["brew" "upgrade" formula]]}))
 
+;;TODO Add tests for cacks
+;;TODO Add test for os
 (defn npm-update
   "Create commands for an npm package manager."
   [{:keys [npm-deps package-manager], :as _cfg-item} _os]
@@ -229,10 +241,9 @@
   [cfg-items]
   (dag/topological-layers cfg-items (dag.map/simple :cfg-item-deps) 10))
 
-(defn cfg-items-sorted
-  [cfg-items]
-  (->> (dag/topological-layers cfg-items (dag.map/simple :cfg-item-deps) 10)
-       #_(dag/ordered-nodes cfg-items)))
+(defn limit-to-os
+  "Select only items"
+  [cfg-items os])
 
 (defn prepare
   "Build a configuration items for `os` and limited to the names in `cfg-item-names`.
@@ -240,6 +251,7 @@
   [cfg-item-names os]
   (-> (cond-> (cfg-items/read-configurations os) (seq cfg-item-names)
               (cfg-items/limit-configurations cfg-item-names))
+      (cfg-items/limit-to-os os)
       cfg-items/develop-pre-reqs
       (cfg-items/expand-package-managers os)))
 
@@ -250,3 +262,30 @@
        (apply concat)
        (mapcat #(vector % (get cfg-items %)))
        (apply array-map)))
+
+;;TODO Add os filter so each ci can be described with one formula only or one for mac, one for linux, one for each, ...
+;;TODO Remove other configuration files
+;;TODO Consider to remove tmp before installing
+;;TODO Check doom emacs
+
+;; Seems to fail as already installed
+;; [tmp/brew/brew-install.sh]
+;; [tmp/ohmyzsh-install.sh]
+;; [git clone https://github.com/BurntSushi/ripgrep tmp/rg]
+;; [cargo -C tmp/rg build --release]
+;; [git clone --depth 1 https://github.com/doomemacs/doomemacs ~/.config/emacs]
+
+;; What's up?
+;; [brew reinstall zprint -q]
+;; [brew reinstall dockutil -q]
+;; [brew reinstall clever-tools -q]
+;; [brew reinstall emacs-plus@29 -q --with-imagemagick --with-native-comp]
+;
+;; Macos only
+;; [brew reinstall iterm2 -q]
+;; [brew reinstall android-studio -q]
+;;
+;Is apparently apt
+;; [brew reinstall vlc -q]
+;; [brew reinstall obs -q]
+;; [brew reinstall gimp -q]

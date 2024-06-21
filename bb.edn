@@ -1,6 +1,6 @@
 {:deps {metosin/malli {:mvn/version "0.13.0"},
         org.clojure/tools.cli {:mvn/version "1.0.219"}},
- :paths ["src/bb" "resources"],
+ :paths ["src/bb" "test/bb" "resources"],
  :tasks
  {:enter {},
   :init (do
@@ -46,6 +46,9 @@
       :task (println (format "os is `%s`, linked to configuration `%s`"
                              (System/getProperty "os.name")
                              (current-os/current-os)))},
+  test {:doc "Test the project"
+        :requires [[test-runner]]
+        :task test-runner/exec}
   show {:doc "Show cfg-item dependencies.",
         :requires [[core]],
         :task (core/show *command-line-args*)},

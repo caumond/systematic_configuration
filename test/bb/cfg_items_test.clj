@@ -30,12 +30,12 @@
         "Wrong package manager is rejected.")
     (is (= {:cfg-version-cmds [["brew" "list" "aspell" "--versions"]],
             :check-cmds [],
-            :cfg-item-deps [:brew],
             :clean-cmds [["brew" "cleanup" "aspell"]],
+            :cfg-item-deps [:brew],
             :init-cmds [],
-            :install-cmds [["brew" "install" "aspell" "-q"]],
+            :install-cmds [["brew" "reinstall" "aspell" "-q"]],
             :update-cmds [["brew" "upgrade" "aspell"]]}
-           (sut/brew-update {:formula "aspell", :package-manager :brew}))))
+           (sut/brew-update {:formula "aspell", :package-manager :brew} :macos))))
   (testing "Formula with a tap."
     (is (= nil
            (humanize sut/brew-package-manager
@@ -49,11 +49,12 @@
             :cfg-item-deps [:brew],
             :init-cmds [],
             :install-cmds [["brew" "tap" "d12frosted/emacs-plus"]
-                           ["brew" "install" "aspell" "-q"]],
+                           ["brew" "reinstall" "aspell" "-q"]],
             :update-cmds [["brew" "upgrade" "aspell"]]}
            (sut/brew-update {:package-manager :brew,
                              :formula "aspell",
-                             :tap "d12frosted/emacs-plus"}))
+                             :tap "d12frosted/emacs-plus"}
+                            :mac-os))
         "Valid formula return expected commands.")))
 
 (deftest npm-update-test
@@ -73,7 +74,8 @@
             :init-cmds [],
             :install-cmds [["npm" "install" "-g" "typewritten"]],
             :update-cmds [["npm" "update" "-g" "typewritten"]]}
-           (sut/npm-update {:npm-deps ["typewritten"], :package-manager :npm}))
+           (sut/npm-update {:npm-deps ["typewritten"], :package-manager :npm}
+                           :mac-os))
         "Valid formula return expected commands.")))
 
 (deftest manual-update-test
@@ -88,51 +90,61 @@
   (is
    (= {:cfg-version-cmds ["ls" "-la"]}
       (sut/manual-update {:package-manager :manual,
-                          :cfg-version-cmds ["ls" "-la"]}))
+                          :cfg-version-cmds ["ls" "-la"]}
+                         :mac-os))
    "A manual package is cleaned from post-package, deps, pre-reqs, cfg-files tmp-files tmp-dirs and package-manager"))
 
 (deftest common-update-test
-  (is (= {} (sut/common-update {}))
+  (is (= {} (sut/common-update {} :mac-os))
       "It is possible to have no common parameter.")
   (is (= {}
-         (sut/common-update {:clean-cmds []})
-         (sut/common-update {:tmp-files [], :clean-cmds []})
-         (sut/common-update {:tmp-dirs [], :clean-cmds []}))
+         (sut/common-update {:clean-cmds []} :mac-os)
+         (sut/common-update {:tmp-files [], :clean-cmds []} :mac-os)
+         (sut/common-update {:tmp-dirs [], :clean-cmds []} :mac-os))
       "No files deletions is ok.")
   (is (= {:clean-cmds [["clean" "clean"]]}
-         (sut/common-update {:clean-cmds [["clean" "clean"]]}))
+         (sut/common-update {:clean-cmds [["clean" "clean"]]} :mac-os))
       "Clean commands are copied.")
   (is (= {:clean-cmds [["clean" "clean"] ["rm" "-f" "a"] ["rm" "-f" "b"]]}
          (sut/common-update {:tmp-files ["a" "b"],
-                             :clean-cmds [["clean" "clean"]]}))
+                             :clean-cmds [["clean" "clean"]]} :mac-os))
       "File deletion and clean commands deletion are merged.")
   (is (= {:clean-cmds [["clean" "clean"] ["rm" "-fr" "a"] ["rm" "-fr" "b"]]}
          (sut/common-update {:tmp-dirs ["a" "b"],
-                             :clean-cmds [["clean" "clean"]]}))
+                             :clean-cmds [["clean" "clean"]]}
+                            :mac-os))
       "File deletion and clean commands deletion are merged.")
-  (is (= {:cfg-files ["a" "b"]} (sut/common-update {:cfg-files ["a" "b"]}))
+  (is (= {:cfg-files ["a" "b"]} (sut/common-update {:cfg-files ["a" "b"]}
+                                                   :mac-os))
       "Configuration files are copied")
   (is (= {:post-package {:a 1, :b 1}}
-         (sut/common-update {:post-package {:a 1, :b 1}}))
+         (sut/common-update {:post-package {:a 1, :b 1}}
+                            :mac-os))
       "Post package are copied")
-  (is (= {:cfg-item-deps [:a :b]} (sut/common-update {:pre-reqs {:a 1, :b 1}}))
+  (is (= {:cfg-item-deps [:a :b]} (sut/common-update {:pre-reqs {:a 1, :b 1}}
+                                                     :mac-os))
       "Pre reqs creates dependencies")
-  (is (= {:cfg-item-deps [:a :b]} (sut/common-update {:deps [:a :b]}))
+  (is (= {:cfg-item-deps [:a :b]} (sut/common-update {:deps [:a :b]}
+                                                     :mac-os))
       "Deps are copied in dependencies")
   (is (= {:cfg-item-deps [:a :b :c :d]}
-         (sut/common-update {:deps [:a :b], :pre-reqs {:c 2, :d 2, :b 1}}))
+         (sut/common-update {:deps [:a :b], :pre-reqs {:c 2, :d 2, :b 1}}
+                            :mac-os))
       "Deps and pre reqs are concatened"))
 
 (deftest tmp-files-update-test
   (is (= {:clean-cmds [["rm" "-f" "a"] ["rm" "-f" "b"] ["rm" "-f" "cd"]]}
-         (sut/common-update {:tmp-files ["a" "b" "cd"]})))
+         (sut/common-update {:tmp-files ["a" "b" "cd"]}
+                            :mac-os)))
   (is (= {:clean-cmds [["rm" "-fr" "a"] ["rm" "-fr" "b"] ["rm" "-fr" "cd"]]}
-         (sut/common-update {:tmp-dirs ["a" "b" "cd"]}))))
+         (sut/common-update {:tmp-dirs ["a" "b" "cd"]}
+                            :mac-os))))
 
 (deftest expand-test
   (is (= {:test {:clean-cmds [["rm" "-f" "a"] ["rm" "-f" "b"]
                               ["rm" "-f" "cd"]]}}
-         (sut/expand-package-managers {:test {:tmp-files ["a" "b" "cd"]}})))
+         (sut/expand-package-managers {:test {:tmp-files ["a" "b" "cd"]}}
+                                      :mac-os)))
   (is (=
        {:test {:clean-cmds [["rm" "-f" "a"] ["rm" "-f" "b"] ["rm" "-f" "cd"]]},
         :test2 {:cfg-version-cmds [["brew" "list" "black" "--versions"]],
@@ -140,12 +152,13 @@
                 :clean-cmds [["rm" "-f" "a"] ["rm" "-f" "b"] ["rm" "-f" "cd"]],
                 :cfg-item-deps [:brew],
                 :init-cmds [],
-                :install-cmds [["brew" "install" "black" "-q"]],
+                :install-cmds [["brew" "reinstall" "black" "-q"]],
                 :update-cmds [["brew" "upgrade" "black"]]}}
        (sut/expand-package-managers {:test {:tmp-files ["a" "b" "cd"]},
                                      :test2 {:tmp-files ["a" "b" "cd"],
                                              :package-manager :brew,
-                                             :formula "black"}}))))
+                                             :formula "black"}}
+                                    :mac-os))))
 
 (deftest read-configurations-test
   (is (< 20 (count (sut/read-configurations :linux)))
@@ -166,18 +179,6 @@
              (sut/limit-configurations [:doom])))
       "If not found, it returns empty maps."))
 
-(deftest cfg-items-sorted-test
-  (is (= [:docker-3 :docker-2 :docker-1 :docker]
-         (->> {:docker-3 {},
-               :docker-2 {:cfg-item-deps [:docker-3]},
-               :docker {:cfg-item-deps [:docker-1]},
-               :docker-1 {:cfg-item-deps [:docker-2]}}
-              sut/cfg-items-sorted
-              :sorted
-              (apply concat)
-              vec))
-      "Sort cfg-item according to their `:pre-reqs` dependency graph."))
-
 (deftest cfg-test
   (is (< 15
          (-> (sut/read-configurations :macos)
@@ -189,7 +190,8 @@
          (-> (sut/read-configurations :macos)
              (sut/limit-configurations [:doom])
              sut/develop-pre-reqs
-             sut/expand-package-managers))))
+             (sut/expand-package-managers :mac-os)
+             count))))
 
 (deftest ordered-cfg-items-test
   (is (= ((juxt identity keys)
@@ -204,5 +206,3 @@
            ((juxt identity keys)
             (->> (sut/cfg-items-by-layers cfg-items)
                  (sut/ordered-cfg-items cfg-items)))))))
-
-(apply sorted-map [:b 1 :a 2])

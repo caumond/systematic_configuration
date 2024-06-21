@@ -1,34 +1,42 @@
 ;; This file is describing all configuration items.
 ;; Code specific platform stands in `os` subdir.
-{:androidstudio [{:cask true, :formula "android-studio", :package-manager :brew :os :macos}]
+{:androidstudio
+ {:cask true, :formula "android-studio", :os :macos, :package-manager :brew},
+ :apt {:cfg-version-cmds [],
+       :check-cmds [],
+       :clean-cmds [["sudo" "apt" "autoremove"]],
+       :init-cmds [],
+       :install-cmds [],
+       :package-manager :manual,
+       :update-cmds [["sudo" "apt" "update"] ["sudo" "apt" "full-upgrade"]]},
  :brew {:check-cmds [["brew" "doctor"]],
-        :deps [:curl],
         :description "Brew installation and global tasks",
         :install-cmds
         [["mkdir" "-p" "tmp/brew"]
-         ["curl" "-fsSL" "https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh" "-o" "tmp/brew/brew-install.sh"]
+         ["curl" "-fsSL"
+          "https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
+          "-o" "tmp/brew/brew-install.sh"]
          ["chmod" "+x" "tmp/brew/brew-install.sh"]
          ["echo" "You need to connect as admin to install brew"]
          ["tmp/brew/brew-install.sh"]],
         :package-manager :manual,
         :update-cmds [["brew" "update"]]},
  :c-project {:package-manager :manual,
-             :pre-reqs {:gcc {:formula "gcc", :package-manager :brew}}},
- :go {:package-manager :brew
-      :formula "go"}
- :github {:description "Github cli"
-          :package-manager :manual
-          :cfg-files ["~/.config/gh/hosts.yml" "~/.config/gh/config.yml"]}
- :clever {:cfg-files ["~/.config/clever-cloud/clever-tools.json"],
-          :tap "clevercloud/tap"
-          :formula "clever-tools",
-          :package-manager :brew},
+             :pre-reqs {:gcc [{:formula "gcc", :package-manager :brew}]}},
+ :clever [{:npm-deps ["clever-tools"], :os :ubuntu, :package-manager :npm}
+          {:cfg-files ["~/.config/clever-cloud/clever-tools.json"],
+           :formula "clever-tools",
+           :os :macos,
+           :package-manager :brew,
+           :tap "clevercloud/tap"}],
  :clojure-project
  {:package-manager :manual,
   :pre-reqs {:clj-kondo {:formula "borkdude/brew/clj-kondo",
-                         :tap "borkdude/brew"
                          :package-manager :brew,
+                         :tap "borkdude/brew",
                          :tmp-dirs [".clojure/.clj-kondo/.cache"]},
+             :cljfmt {:npm-deps ["node-cljfmt"]
+                      :package-manager :npmw}
              :clojure {:cfg-files ["~/.clojure/deps.edn"],
                        :formula "clojure",
                        :package-manager :brew,
@@ -41,15 +49,19 @@
                            :npm-deps ["shadow-cljs"],
                            :package-manager :npm},
              :tools-clojure {:cfg-files ["~/.clojure/tools/tools.edn"],
-                             :tap "clojure/tools"
                              :formula "clojure/tools/clojure",
-                             :package-manager :brew},
+                             :package-manager :brew,
+                             :tap "clojure/tools"},
              :tree-sitter {:formula "tree-sitter", :package-manager :brew}}},
- :docker {:package-manager :manual,
-          :pre-reqs {:dockutil {:formula "dockutil", :package-manager :brew}
-                     :dockfmt  {:install-cmds [["go" "install" "github.com/jessfraz/dockfmt@latest"]]
-                                :deps [:go]
-                                :package-manager :manual}}},
+ :curl {:os :ubuntu, :package-manager :manual},
+ :docker
+ {:package-manager :manual,
+  :pre-reqs
+  {:dockfmt {:deps [:go],
+             :install-cmds [["go" "install"
+                             "github.com/jessfraz/dockfmt@latest"]],
+             :package-manager :manual},
+   :dockutil {:formula "dockutil", :os :macos, :package-manager :brew}}},
  :doom
  {:cfg-files ["~/.config/doom/config.el" "~/.config/doom/custom.el"
               "~/.config/doom/init.el" "~/.config/doom/packages.el"
@@ -60,126 +72,119 @@
   :deps [:git],
   :install-cmds [["git" "clone" "--depth" "1"
                   "https://github.com/doomemacs/doomemacs" "~/.config/emacs"]
-                 ["doom" "install"]],
+                 ["~/.config/emacs/bin/doom" "install"]],
   :package-manager :manual,
   :pre-reqs
-  {:aspell {:formula "aspell", :package-manager :brew},
+  {:aspell [{:formula "aspell", :package-manager :brew}],
    :black {:formula "black", :package-manager :brew},
    :cljfmt {:npm-deps ["node-cljfmt"], :package-manager :npm},
-   :clojure-lsp-native {:formula "clojure-lsp/brew/clojure-lsp-native",
-                        :tap "clojure-lsp/brew"
-                        :package-manager :brew,
-                        :tmp-dirs [".clojure/.lsp/.cache"
-                                   ".cache/clojure-lsp"]},
-   :cmake {:formula "cmake", :cask true :package-manager :brew},
+   :clojure-lsp-native [{:formula "clojure-lsp/brew/clojure-lsp-native",
+                         :package-manager :brew,
+                         :tap "clojure-lsp/brew",
+                         :tmp-dirs [".clojure/.lsp/.cache"
+                                    ".cache/clojure-lsp"]}],
+   :cmake {:cask true, :formula "cmake", :os :macos, :package-manager :brew},
    :cmake-docs {:formula "cmake-docs", :package-manager :brew},
    :emacs
-   {:description
-    "# See https://github.com/d12frosted/homebrew-emacs-plus for more details, may be emacs-plus@28 emacs-plus@29",
-    :formula "emacs-plus@29",
-    :install-options ["--with-imagemagick --with-native-comp"],
-    :package-manager :brew,
-    :pre-reqs {:imagemagick {:formula "imagemagick", :package-manager :brew}},
-    :tap "d12frosted/emacs-plus"},
-   :fd {:formula "fd", :package-manager :brew},
-   :graphviz {:formula "graphviz", :package-manager :brew},
-   :js-beautify {:npm-deps ["js-beautify"], :package-manager :npm},
-   :ktlint {:formula "ktlint", :package-manager :brew},
-   :openjpeg {:formula "openjpeg", :package-manager :brew},
-   :ripgrep {:cfg-version-cmds [["rg --version"]],
-             :install-cmds [["git" "clone" "https://github.com/BurntSushi/ripgrep" "tmp/rg"]
-                            ["cargo" "-C" "tmp/rg" "build" "--release"]],
-             :package-manager :manual,
-             :pre-reqs {:rust {:formula "rust", :package-manager :brew}}},
-   :shellcheck {:formula "shellcheck", :package-manager :brew},
-   :shfmt {:formula "shfmt", :package-manager :brew},
-   :stylelint {:npm-deps ["stylelint"], :package-manager :npm},
-   :stylelint-config-standard {:npm-deps ["stylelint-config-standard"],
-                               :package-manager :npm},
-   :tidy-html5 {:formula "tidy-html5", :package-manager :brew},
-   :zprint {:cask true,
-            :cfg-files ["~/.zprintrc"],
-            :formula "zprint",
-            :package-manager :brew,
-            :tmp-dirs [".zprint/urlcache"]}},
+   [{:description
+     "# See https://github.com/d12frosted/homebrew-emacs-plus for more details, may be emacs-plus@28 emacs-plus@29",
+     :formula "emacs-plus@29",
+     :install-options ["--with-imagemagick" "--with-native-comp"],
+     :os :macos,
+     :package-manager :brew,
+     :pre-reqs {:imagemagick [{:formula "imagemagick",
+                               :package-manager :brew}]},
+     :tap "d12frosted/emacs-plus"}
+    {:formula "emacs", :os :ubuntu, :package-manager :brew}],
+   :fd [{:formula "fd", :package-manager :brew}],
+   :graphviz [{:formula "graphviz", :package-manager :brew}],
+   :js-beautify [{:npm-deps ["js-beautify"], :package-manager :npm}],
+   :ktlint [{:formula "ktlint", :package-manager :brew}],
+   :openjpeg [{:formula "openjpeg", :package-manager :brew}],
+   :ripgrep [{:formula "ripgrep", :package-manager :brew}],
+   :shellcheck [{:formula "shellcheck", :package-manager :brew}],
+   :shfmt [{:formula "shfmt", :package-manager :brew}],
+   :stylelint [{:npm-deps ["stylelint"], :package-manager :npm}],
+   :stylelint-config-standard [{:npm-deps ["stylelint-config-standard"],
+                                :package-manager :npm}],
+   :tidy-html5 [{:formula "tidy-html5", :package-manager :brew}],
+   :zprint [{:cask true,
+             :cfg-files ["~/.zprintrc"],
+             :formula "zprint",
+             :os :macos,
+             :package-manager :brew,
+             :tmp-dirs [".zprint/urlcache"]}]},
   :update-cmds [["doom" "upgrade"]]},
  :ffmpeg {:formula "ffmpeg", :package-manager :brew},
- :gimp {:cask true, :formula "gimp", :package-manager :brew},
+ :gimp {:cask true, :formula "gimp", :os :macos, :package-manager :brew},
  :git {:cfg-files ["~/.gitconfig"],
        :formula "git",
        :package-manager :brew,
-       :pre-reqs {:gd {:formula "gd", :package-manager :brew},
-                  :git-lfs {:formula "git-lfs", :package-manager :brew}}},
+       :pre-reqs {:gd [{:formula "gd", :package-manager :brew}],
+                  :git-lfs [{:formula "git-lfs", :package-manager :brew}]}},
+ :github {:cfg-files ["~/.config/gh/hosts.yml" "~/.config/gh/config.yml"],
+          :description "Github cli",
+          :package-manager :manual},
  :glpk {:install-cmds [["mkdir" "-p" "tmp/glpk"]
-                       ["wget" "http://ftp.gnu.org/gnu/glpk/glpk-5.0.tar.gz" "-P" "tmp/glpk"]
+                       ["wget" "http://ftp.gnu.org/gnu/glpk/glpk-5.0.tar.gz"
+                        "-P" "tmp/glpk"]
                        ["tar" "-xzf" "tmp/glpk/glpk-5.0.tar.gz" "-C" "tmp/glpk"]
                        ["tmp/glpk/glpk-5.0/configure"]],
         :package-manager :manual},
- :curl {:package-manager :manual},
+ :go {:formula "go", :package-manager :brew},
  :iterm2 {:cask true,
           :cfg-files ["~/Library/Preferences/com.googlecode.iterm2.plist"],
-          :deps [:curl],
           :formula "iterm2",
+          :os :macos,
           :package-manager :brew,
-          :pre-reqs {:coreutils {:formula "coreutils", :package-manager :brew},
-                     :grep {:formula "grep", :package-manager :brew},
-                     :htop {:formula "htop", :package-manager :brew},
-                     :tmux {:formula "tmux", :package-manager :brew},
-                     :tree {:formula "tree", :package-manager :brew}}},
+          :pre-reqs {:coreutils [{:formula "coreutils",
+                                  :package-manager :brew}],
+                     :grep [{:formula "grep", :package-manager :brew}],
+                     :htop [{:formula "htop", :package-manager :brew}],
+                     :tmux [{:formula "tmux", :package-manager :brew}],
+                     :tree [{:formula "tree", :package-manager :brew}]}},
+ :macos {:clean-cmds [["fd" "-H" "-I" "-g" "'**/.DS_Store'" "-x" "rm" "{}"]],
+         :package-manager :manual},
  :markdown {:formula "markdown", :package-manager :brew},
  :node {:formula "node", :package-manager :brew},
  :npm {:formula "npm", :package-manager :brew},
- :obs {:cask true, :formula "obs", :package-manager :brew},
- :python {:package-manager :brew :formula "python-setuptools"}
+ :obs {:cask true, :formula "obs", :os :macos, :package-manager :brew},
+ :oh-my-zsh {:cfg-files ["~/.zshrc"],
+             :cfg-version-cmds [["omz" "version"]],
+             :install-cmds [["curl" "-fsSL"
+                             "https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh" "-o"
+                             "tmp/ohmyzsh-install.sh"] ["chmod" "+x" "tmp/ohmyzsh-install.sh"]
+                            ["rm" "-f" "~/.oh-my-zsh"] ["tmp/ohmyzsh-install.sh"]],
+             :package-manager :manual,
+             :pre-reqs {:zsh {:formula "zsh",
+                              :package-manager :brew,
+                              :pre-reqs {:typewritten
+                                         {:npm-deps ["typewritten"], :package-manager :npm},
+                                         :zsh-completions
+                                         {:formula "zsh-completions", :package-manager :brew}}}
+                        :zsh-integration {:package-manager :manual
+                                          :install-cmds [["curl" "-L" "https://iterm2.com/shell_integration/zsh" "-o" "~/.iterm2_shell_integration.zsh"]]}},
+             :update-cmds [["omz" "update"]]},
  :os {:package-manager :manual},
- ;; :python-projects {:pre-reqs {:pip {:install-cmds [["python3.12" "-m" "pip" "install" "--upgrade" "pip"]],
- ;;                                    :update-cmds [["python3.11" "-m" "pip" "install" "--upgrade" "pip"]]
- ;;                                    :package-manager :manual},
- ;;                              :pipenv {:package "pipenv"},
- ;;                              :pyflakes {:package "pyflakes"},
- ;;                              :python {:formula "python",
- ;;                                       :package-manager :brew :pre-reqs
- ;;                                       {:isort {:package
- ;;                                                                                 "isort"},
- ;;                                                                         :nose
- ;;                                                                         {:package
- ;;                                                                         "nose"},
- ;;                                                                         :pytest
- ;;                                                                         {:package
- ;;                                                                         "pytest"}}},
- ;;                              :testresources {:package "testresources"},
- ;;                              :virtualenv {:package "virtualenv"}}
- ;;                   :package-manager :manual}
+ :os-network [{:cfg-files ["/etc/hosts" "/etc/ssh/ssh_config"
+                           "/etc/ssh/sshd_config"],
+               :description "System network for macos",
+               :os :macos,
+               :package-manager :manual}],
+ :python {:formula "python-setuptools", :package-manager :brew},
  :security-tools
  {:description "What is necessary to manage security keys",
   :package-manager :manual,
   :pre-reqs {:gnupg {:formula "gnupg", :package-manager :brew},
-             :ssh-keygen {:init-cmds [["ssh-keygen" "-t" "rsa" "-b" "4096" "-C"
-                                       "anthony@caumond.com"]
-                                      ["cat" "~/.ssh/id_rsa.pub"]
-                                      ["ssh-copy-id" "anthony@fix-computer -p 24736"]],
-                          :cfg-files ["/etc/ssh/ssh_config"]
+             :ssh-keygen {:cfg-files ["/etc/ssh/ssh_config"],
+                          :init-cmds
+                          [["ssh-keygen" "-t" "rsa" "-b" "4096" "-C"
+                            "anthony@caumond.com"] ["cat" "~/.ssh/id_rsa.pub"]
+                           ["ssh-copy-id" "anthony@fix-computer -p 24736"]],
                           :package-manager :manual}}},
  :vim {:formula "vim", :package-manager :brew},
- :vlc {:cask true, :formula "vlc", :package-manager :brew},
+ :vlc {:cask true, :formula "vlc", :os :macos, :package-manager :brew},
  :wget {:formula "wget", :package-manager :brew},
- :oh-my-zsh {:cfg-files ["~/.zshrc"],
-             :cfg-version-cmds [["omz" "version"]],
-             :deps [:curl],
-             :install-cmds
-             [["curl" "-fsSL" "https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh" "-o" "tmp/ohmyzsh-install.sh"]
-              ["chmod" "+x" "tmp/ohmyzsh-install.sh"]
-              ["tmp/ohmyzsh-install.sh"]],
-             :package-manager :manual,
-             :pre-reqs
-             {:zsh {:formula "zsh",
-                    :package-manager :brew,
-                    :pre-reqs
-                    {:typewritten
-                     {:npm-deps ["typewritten"], :package-manager :npm},
-                     :zsh-completions
-                     {:formula "zsh-completions", :package-manager :brew}}}},
-             :update-cmds [["omz" "update"]]},
  :zsh-env {:cfg-version-cmds [["zsh" "--version"]],
            :deps [:zsh],
            :package-manager :manual,

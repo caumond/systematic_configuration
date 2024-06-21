@@ -1,6 +1,7 @@
 (ns ncmds-test
   (:require [ncmds :as sut]
-            [clojure.test :refer [deftest is]]))
+            [clojure.test :refer [deftest is]]
+            [clojure.string :as str]))
 
 (deftest validate-cmd-test
   (is (not (sut/validate-cmd nil)) "Empty command not valid.")
@@ -15,6 +16,13 @@
       "Succesful operation returns string."))
 
 (def ^:private s (new java.io.StringWriter))
+
+(deftest expand-str-test
+  (is (= "foo/bar"
+         (sut/expand-home-str "foo/bar")
+         "Path without home is not modified."))
+  (is (str/ends-with? (sut/expand-home-str "~/bar") "bar")
+      "Path starting with `~` is replaced with home."))
 
 (binding [*out* s]
   (deftest execute-process-test

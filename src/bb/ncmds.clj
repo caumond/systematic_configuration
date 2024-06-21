@@ -4,7 +4,8 @@
   (:require [babashka.process :refer [shell]]
             [clojure.string :as str]
             [malli.core :as m]
-            [clojure.pprint :as pp]))
+            [clojure.pprint :as pp]
+            [babashka.fs :as fs]))
 
 (defn to-str [cmd] (str/join " " cmd))
 
@@ -28,14 +29,23 @@
            :out)
        (catch Exception _ nil)))
 
+(defn expand-home-str
+  "In string `str`,~ is expanded to home."
+  [str]
+  (-> str
+      fs/path
+      fs/expand-home
+      clojure.core/str))
+
 (defn execute-cmd
   "Helper for executing a command.
   Returns `nil` if succesful, an error map with
   * `:cmd` and `exit-code` keys in the map in case execution has failed in shell.
   * `:cmd` and `:exception` keys in the map in case the execution has not started."
   [cmd]
-  (try (let [res (-> cmd
-                     (execute-process* false))]
+  (try (let [res (as-> cmd cmd
+                   (map expand-home-str cmd)
+                   (execute-process* cmd false))]
          (when-not (zero? (:exit res)) {:cmd cmd, :exit-code (:exit res)}))
        (catch Exception e {:cmd cmd, :exception e})))
 
@@ -59,16 +69,16 @@
               (filterv some?)))))
 
 (defn println-summary-errors
-  [error-maps exception?]
+  [error-maps exception]
   (when-not (empty? error-maps)
     (let [n (count (map :cmd error-maps))]
       (if (= 1 n)
         (println "One command has failed.")
         (println (format "%s commands have failed." n)))
       (run! println (map :cmd error-maps))
-      (when exception?
-        (println "Detailed errors:")
-        (run! pp/pprint error-maps)))))
+      (if exception
+        (do (println "Detailed errors:") (run! pp/pprint error-maps))
+        (println "   Run with `-e` to see the exceptions.")))))
 
 (defn merge-cmds
   "All cmd in the `cmds` collection that starts with `starts-with` and end with `ends-with` are transformed so

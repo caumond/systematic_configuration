@@ -1,4 +1,5 @@
-{:open-file-command ["emacsclient" "-n" ["+%s:%s" :line :column] :file]
- :dependencies [[cider/cider-nrepl "0.45.0"]
-                [refactor-nrepl/refactor-nrepl "3.9.1"]]
- :nrepl {:middleware [cider.nrepl/cider-middleware refactor-nrepl.middleware/wrap-refactor]}}
+{:dependencies [[cider/cider-nrepl "0.45.0"]
+                [refactor-nrepl/refactor-nrepl "3.9.1"]],
+ :nrepl {:middleware [cider.nrepl/cider-middleware
+                      refactor-nrepl.middleware/wrap-refactor]},
+ :open-file-command ["emacsclient" "-n" ["+%s:%s" :line :column] :file]}

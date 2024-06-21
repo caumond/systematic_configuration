@@ -2,10 +2,12 @@
 export PATH=/opt/homebrew/opt/openjdk/bin:$HOME/bin:/usr/local/bin:/opt/homebrew/bin:$HOME/.config/emacs/bin:/opt/homebrew/bin/:~/go/bin:$PATH
 #/opt/homebrew/opt/coreutils/libexec/gnubin has been removed as brew doctor requires
 
+source ~/.oh-my-zsh-hidden
+
+export HOMEBREW_NO_ENV_HINTS=1
+
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
-
-export GH_TOKEN="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"
 #
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
@@ -77,7 +79,7 @@ DISABLE_AUTO_TITLE="true"
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.:0
 #
-plugins=(git chucknorris colored-man-pages colorize copybuffer dircycle docker docker-compose docker-machine emacs emoji fd gh git git-auto-fetch git-prompt github iterm2 kubectl lein npm nvm react-native ripgrep terraform z)
+plugins=(git colored-man-pages colorize copybuffer dircycle docker docker-compose docker-machine emacs emoji fd gh git git-auto-fetch git-prompt github iterm2 kubectl lein npm nvm react-native ripgrep terraform z)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -142,6 +144,5 @@ _hh_tasks() {
 compdef _hh_tasks hh
 export PATH="/opt/homebrew/sbin:$HOME/.hephaistox/:$PATH"
 export CLOJARS_USERNAME=hephaistox
-export CLOJARS_PASSWORD=CLOJARS_18a4d3955692dec652c770219ff13c9a9d823b7b95e896ca36a5fd792a3e
 
 fpath=($fpath "/Users/anthonycaumond/.zfunctions")

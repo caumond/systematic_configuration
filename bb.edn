@@ -24,8 +24,8 @@
               :requires [[core]],
               :task (core/ci-install *command-line-args* stop)},
   ci-restore {:doc "Restore the current configuration",
-           :requires [[core]],
-           :task (core/ci-restore *command-line-args* print-error-code)}
+              :requires [[core]],
+              :task (core/ci-restore *command-line-args* print-error-code)},
   ci-save {:doc "Save the current configuration",
            :requires [[core]],
            :task (core/ci-save *command-line-args* print-error-code)},
@@ -46,12 +46,11 @@
       :task (println (format "os is `%s`, linked to configuration `%s`"
                              (System/getProperty "os.name")
                              (current-os/current-os)))},
-  test {:doc "Test the project"
-        :requires [[test-runner]]
-        :task test-runner/exec}
   show {:doc "Show cfg-item dependencies.",
         :requires [[core]],
         :task (core/show *command-line-args*)},
+  test
+  {:doc "Test the project", :requires [[test-runner]], :task test-runner/exec},
   validate {:doc "Check the validity of your configuration file.",
             :requires [[core]],
             :task (core/validate)}}}

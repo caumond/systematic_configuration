@@ -24,8 +24,7 @@
  :c-project {:package-manager :manual,
              :pre-reqs {:gcc [{:formula "gcc", :package-manager :brew}]}},
  :clever [{:npm-deps ["clever-tools"], :os :ubuntu, :package-manager :npm}
-          {:cfg-files ["~/.config/clever-cloud/clever-tools.json"],
-           :formula "clever-tools",
+          {:formula "clever-tools",
            :os :macos,
            :package-manager :brew,
            :tap "clevercloud/tap"}],

@@ -24,9 +24,8 @@
  :c-project {:package-manager :manual,
              :pre-reqs {:gcc [{:formula "gcc", :package-manager :brew}]}},
  :clever [{:npm-deps ["clever-tools"], :os :ubuntu, :package-manager :npm}
-          {:formula "clever-tools",
-           :os :macos,
-           :package-manager :brew,
+          {:formula "clever-tools",:package-manager :brew,
+           ;;TODO os is removed to be able to run on macos
            :tap "clevercloud/tap"}],
  :clojure-project
  {:package-manager :manual,

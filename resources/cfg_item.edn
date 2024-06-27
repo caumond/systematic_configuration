@@ -53,7 +53,9 @@
              :tree-sitter {:formula "tree-sitter", :package-manager :brew}}},
  :curl {:os :ubuntu, :package-manager :manual},
  :docker
- {:package-manager :manual,
+ {:package-manager :brew,
+  :formula "docker"
+  :cask true
   :pre-reqs
   {:dockfmt {:deps [:go],
              :install-cmds [["go" "install"
@@ -178,7 +180,7 @@
                           :init-cmds
                           [["ssh-keygen" "-t" "rsa" "-b" "4096" "-C"
                             "anthony@caumond.com"] ["cat" "~/.ssh/id_rsa.pub"]
-                           ["ssh-copy-id" "anthony@fix-computer -p 24736"]],
+                           ["ssh-copy-id" "-p" "24736" "anthony@fix-computer"]],
                           :package-manager :manual}}},
  :vim {:formula "vim", :package-manager :brew},
  :vlc {:cask true, :formula "vlc", :os :macos, :package-manager :brew},

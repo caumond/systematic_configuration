@@ -55,3 +55,4 @@ Host *
     SendEnv LANG LC_*
 Host fix-computer
 	Port 24736
+	user anthony

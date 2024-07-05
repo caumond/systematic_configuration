@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: clojure-code
+# key: clojure-code
+# condition: t
+# --
+\`\`\`clojure
+   $0
+\`\`\`

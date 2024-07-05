@@ -146,3 +146,5 @@ export PATH="/opt/homebrew/sbin:$HOME/.hephaistox/:$PATH"
 export CLOJARS_USERNAME=hephaistox
 
 fpath=($fpath "/Users/anthonycaumond/.zfunctions")
+fpath=($fpath "/Users/anthonycaumond/.zfunctions")
+fpath=($fpath "/Users/anthonycaumond/.zfunctions")

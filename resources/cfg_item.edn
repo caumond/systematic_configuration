@@ -172,6 +172,8 @@
                :os :macos,
                :package-manager :manual}],
  :python {:formula "python-setuptools", :package-manager :brew},
+ :puppeteer {:package-manager :npm :npm-deps ["puppeteer"]}
+ :mmdc {:package :npm :npm-deps ["mermaid.cli"] :deps [:puppeteer]}
  :security-tools
  {:description "What is necessary to manage security keys",
   :package-manager :manual,

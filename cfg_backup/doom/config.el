@@ -12,13 +12,13 @@
 ;; ;; Configure projectile
 ;; ;; See `https://docs.projectile.mx/projectile/configuration.html', for details
 (after! projectile
-   (setq projectile-create-missing-test-files t) ;; Create the test file if does not exist
-   (setq projectile-auto-discover nil)  ;; Don't create projectile project automatically.
-   (setq projectile-sort-order 'access-time)  ;; Projectile shows files sorted with access time
-   (add-to-list 'projectile-globally-ignored-directories "~")  ;; User directory is not considered as a project
-   (add-to-list 'projectile-globally-ignored-directories "~/Dev/hephaistox/monorepo") ;; Monorepo is not considered as a project
-   (setq projectile-project-root-files-bottom-up (remove ".git"
-                                                         projectile-project-root-files-bottom-up))) ;; Our monorepo may have some `.git' subdirectories and there are not projects, just temporary copies.
+  (setq projectile-create-missing-test-files t) ;; Create the test file if does not exist
+  (setq projectile-auto-discover nil)  ;; Don't create projectile project automatically.
+  (setq projectile-sort-order 'access-time)  ;; Projectile shows files sorted with access time
+  (add-to-list 'projectile-globally-ignored-directories "~")  ;; User directory is not considered as a project
+  (add-to-list 'projectile-globally-ignored-directories "~/Dev/hephaistox/monorepo") ;; Monorepo is not considered as a project
+  (setq projectile-project-root-files-bottom-up (remove ".git"
+                                                        projectile-project-root-files-bottom-up))) ;; Our monorepo may have some `.git' subdirectories and there are not projects, just temporary copies.
 
 
 ;; ;; Cider setup
@@ -41,21 +41,21 @@
 
 ;; ;; cljr is used together with lsp.
 ;; ;; See `https://github.com/clojure-emacs/clj-refactor.el/wiki#customization' for details
- (after! clj-refactor
-   ;; Settings to automatically insert headers of test files.
-   (setq cljr-expectations-test-declaration
-         "[clojure.test :refer [deftest is testing]]")
-   (setq cljr-clojure-test-declaration
-         "[clojure.test :refer [deftest is testing]]")
-   (setq cljr-cljs-clojure-test-declaration
-         "[cljs.test :refer [deftest is testing] :include-macros true]")
-   (setq cljr-cljc-clojure-test-declaration
-         "#?(:clj [clojure.test :refer [deftest is testing]]
+(after! clj-refactor
+  ;; Settings to automatically insert headers of test files.
+  (setq cljr-expectations-test-declaration
+        "[clojure.test :refer [deftest is testing]]")
+  (setq cljr-clojure-test-declaration
+        "[clojure.test :refer [deftest is testing]]")
+  (setq cljr-cljs-clojure-test-declaration
+        "[cljs.test :refer [deftest is testing] :include-macros true]")
+  (setq cljr-cljc-clojure-test-declaration
+        "#?(:clj [clojure.test :refer [deftest is testing]]
  :cljs [cljs.test :refer [deftest is testing] :include-macros true])"))
- ;; (use-package! clj-refactor
- ;;   :after clojure-mode
- ;;   :config
- ;;   (set-lookup-handlers! 'clj-refactor-mode nil))
+;; (use-package! clj-refactor
+;;   :after clojure-mode
+;;   :config
+;;   (set-lookup-handlers! 'clj-refactor-mode nil))
 
 ;; (use-package tree-sitter
 ;;   :config
@@ -84,7 +84,7 @@
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets. It is optional.
 (setq user-full-name "Anthony CAUMOND"
-       user-mail-address "anthony@caumond.com")
+      user-mail-address "anthony@caumond.com")
 
 ;; Doom exposes five (optional) variables for controlling fonts in Doom:
 ;;
@@ -124,7 +124,7 @@
 (setq org-directory "~/org/")
 
 (after! org
-   (setq org-duration-format (quote h:mm)))
+  (setq org-duration-format (quote h:mm)))
 ;; Whenever you reconfigure a package, make sure to wrap your config in an
 ;; `after!' block, otherwise Doom's defaults may override your settings. E.g.
 ;;
@@ -157,7 +157,7 @@
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
 (setq! initial-frame-alist
-        '((fullscreen . maximized)))
+       '((fullscreen . maximized)))
 
 ;; C Control
 ;; M Option

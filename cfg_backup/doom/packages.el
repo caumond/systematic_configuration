@@ -51,6 +51,7 @@
 
 
 (package! babashka)
+(package! html-to-hiccup)
 (package! zprint-mode)
 (package! mermaid-mode)
 (package! lsp-grammarly)

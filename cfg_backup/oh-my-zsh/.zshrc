@@ -148,3 +148,5 @@ export CLOJARS_USERNAME=hephaistox
 fpath=($fpath "/Users/anthonycaumond/.zfunctions")
 fpath=($fpath "/Users/anthonycaumond/.zfunctions")
 fpath=($fpath "/Users/anthonycaumond/.zfunctions")
+fpath=($fpath "/Users/anthonycaumond/.zfunctions")
+fpath=($fpath "/Users/anthonycaumond/.zfunctions")

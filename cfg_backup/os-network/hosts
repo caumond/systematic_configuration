@@ -8,3 +8,23 @@
 255.255.255.255	broadcasthost
 91.171.44.225   fix-computer
 ::1             localhost
+
+192.168.0.01	freebox
+192.168.0.03	tplink
+192.168.0.04	balancenokia
+192.168.0.19	ipad2011
+192.168.0.29	hpraf
+192.168.0.30	ipad2017
+192.168.0.31	hybridesandra
+192.168.0.33	mbp2017
+192.168.0.34	3DS
+192.168.0.39	imac2
+192.168.0.61	iphone
+192.168.0.62	NAS
+192.168.0.63	freeboxplayer
+192.168.0.65	androidsandra
+192.168.0.66	mbp2010
+192.168.0.68	freeboxmini
+192.168.0.69	ps4
+
+192.168.1.1 tp-link-admin # When connected to the tplink

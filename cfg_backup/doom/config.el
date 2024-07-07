@@ -70,12 +70,12 @@
 
 
 ;; lsp grammarly
-(use-package! lsp-grammarly
-  :ensure t
-  :hook (text-mode . (lambda ()
-                       (require 'lsp-grammarly)
-                       (lsp)
-                       (set-lsp-priority! 'lsp-grammarly 2))))
+;; (use-package! lsp-grammarly
+;;   :ensure t
+;;   :hook (text-mode . (lambda ()
+;;                        (require 'lsp-grammarly)
+;;                        (lsp)
+;;                        (set-lsp-priority! 'lsp-grammarly 2))))
 
 ;; lsp clojure
 (after! lsp-clojure

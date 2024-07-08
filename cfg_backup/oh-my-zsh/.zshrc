@@ -111,8 +111,6 @@ source $ZSH/oh-my-zsh.sh
 export JAVA_HOME=/opt/homebrew/opt/openjdk/bin/
 export CPPFLAGS="-I/opt/homebrew/opt/openjdk/include"
 
-fpath=($fpath "/Users/anthonycaumond/.zfunctions")
-
 # See https://typewritten.dev/#/prompt_customization?id=typewritten_prompt_layout
 # Set typewritten ZSH as a prompt
 # TYPEWRITTEN_RIGHT_PROMPT_PREFIX=$HOST" "
@@ -121,6 +119,7 @@ TYPEWRITTEN_PROMPT_LAYOUT="pure"
 TYPEWRITTEN_SYMBOL="->"
 TYPEWRITTEN_RELATIVE_PATH="adaptive"
 
+fpath=($fpath "/Users/anthonycaumond/.zfunctions")
 autoload -U promptinit; promptinit
 prompt typewritten
 
@@ -129,6 +128,7 @@ test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell
 source ~/.iterm2_shell_integration.zsh
 alias l="ls -la --color"
 
+alias n="cd ~/org/my-notes"
 alias h="cd ~/Dev/hephaistox/monorepo/clojure"
 
 _bb_tasks() {
@@ -145,8 +145,4 @@ compdef _hh_tasks hh
 export PATH="/opt/homebrew/sbin:$HOME/.hephaistox/:$PATH"
 export CLOJARS_USERNAME=hephaistox
 
-fpath=($fpath "/Users/anthonycaumond/.zfunctions")
-fpath=($fpath "/Users/anthonycaumond/.zfunctions")
-fpath=($fpath "/Users/anthonycaumond/.zfunctions")
-fpath=($fpath "/Users/anthonycaumond/.zfunctions")
 fpath=($fpath "/Users/anthonycaumond/.zfunctions")

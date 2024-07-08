@@ -176,3 +176,12 @@
 (map! :nvi "s-r" #'evil-multiedit-match-all
       :nvi "s-d" #'evil-multiedit-match-symbol-and-next
       :nvi "s-D" #'evil-multiedit-match-symbol-and-prev)
+
+(defun zprint ()
+  (when (or (eq major-mode 'clojure-mode)
+            (eq major-mode 'clojurec-mode)
+            (eq major-mode 'clojurescript-mode))
+    (shell-command-to-string (format "zprint -w %s" buffer-file-name))
+    (revert-buffer :ignore-auto :noconfirm)))
+
+(add-hook 'after-save-hook #'zprint)

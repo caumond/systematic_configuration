@@ -28,7 +28,7 @@
 ;; ;;   :config
 ;; ;;   (set-lookup-handlers! 'cider-mode nil))
 (after! cider
-  (setq cider-eldoc-display-for-symbol-at-point nil)
+  ;(setq cider-eldoc-display-for-symbol-at-point nil)
   (setq cider-auto-test-mode t) ;; Automatically run tests when compiling a namespace.
   (setq cider-default-cljs-repl 'shadow) ;; Shadow is the default cljs repl.
   (setq cider-comment-prefix "") ;; Remove comment prefix as I use it to generate test values.
@@ -158,6 +158,9 @@
 ;; they are implemented.
 (setq! initial-frame-alist
        '((fullscreen . maximized)))
+
+(after! treemacs
+  (setq treemacs-width 40))
 
 ;; C Control
 ;; M Option

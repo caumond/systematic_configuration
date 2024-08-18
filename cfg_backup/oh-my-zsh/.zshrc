@@ -80,7 +80,7 @@ DISABLE_AUTO_TITLE="true"
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.:0
 #
-plugins=(git colored-man-pages colorize copybuffer dircycle docker docker-compose docker-machine emacs emoji fd gh git git-auto-fetch git-prompt github iterm2 kubectl lein npm nvm react-native ripgrep terraform z)
+plugins=(git colored-man-pages colorize copybuffer dircycle docker docker-compose emacs emoji gh git git-auto-fetch git-prompt github iterm2 kubectl lein macos npm nvm react-native ssh sudo terraform z)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -146,6 +146,7 @@ compdef _hh_tasks hh
 export PATH="/opt/homebrew/sbin:$HOME/.hephaistox/:$PATH"
 export CLOJARS_USERNAME=hephaistox
 
+fpath=($fpath "/Users/anthonycaumond/.zfunctions")
 fpath=($fpath "/Users/anthonycaumond/.zfunctions")
 fpath=($fpath "/Users/anthonycaumond/.zfunctions")
 fpath=($fpath "/Users/anthonycaumond/.zfunctions")

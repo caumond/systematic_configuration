@@ -44,14 +44,14 @@
 (after! clj-refactor
   ;; Settings to automatically insert headers of test files.
   (setq cljr-expectations-test-declaration
-        "[clojure.test :refer [deftest is testing]]")
+        "[clojure.test :refer [deftest is]]")
   (setq cljr-clojure-test-declaration
-        "[clojure.test :refer [deftest is testing]]")
+        "[clojure.test :refer [deftest is]]")
   (setq cljr-cljs-clojure-test-declaration
-        "[cljs.test :refer [deftest is testing] :include-macros true]")
+        "[cljs.test :refer [deftest is] :include-macros true]")
   (setq cljr-cljc-clojure-test-declaration
-        "#?(:clj [clojure.test :refer [deftest is testing]]
- :cljs [cljs.test :refer [deftest is testing] :include-macros true])"))
+        "#?(:clj [clojure.test :refer [deftest is]]
+ :cljs [cljs.test :refer [deftest is] :include-macros true])"))
 ;; (use-package! clj-refactor
 ;;   :after clojure-mode
 ;;   :config

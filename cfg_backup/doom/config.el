@@ -175,6 +175,7 @@
 (map! "C-M-è" #'sp-wrap-curly)
 (map! "C-M-(" #'sp-wrap-round)
 (map! "C-M-§" #'sp-wrap-square)
+(map! "s-@" #'er/expand-region)
 
 (map! :nvi "s-r" #'evil-multiedit-match-all
       :nvi "s-d" #'evil-multiedit-match-symbol-and-next

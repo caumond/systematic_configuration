@@ -2,8 +2,8 @@
 export PATH=/opt/homebrew/opt/openjdk/bin:$HOME/bin:/usr/local/bin:/opt/homebrew/bin:$HOME/.config/emacs/bin:/opt/homebrew/bin/:~/go/bin:/Users/anthonycaumond/Library/Android/sdk/platform-tools:$PATH
 #/opt/homebrew/opt/coreutils/libexec/gnubin has been removed as brew doctor requires
 
-export ANDROID_PRODUCT_OUT=/Users/anthonycaumond/Downloads/android
-source ~/.oh-my-zsh-hidden
+export ANDROID_PRODUCT_OUT=/Users/anthonycaumond/Downloads/android # For android adb
+source ~/.oh-my-zsh-hidden # Get the passwords
 
 export HOMEBREW_NO_ENV_HINTS=1
 
@@ -145,13 +145,3 @@ _hh_tasks() {
 compdef _hh_tasks hh
 export PATH="/opt/homebrew/sbin:$HOME/.hephaistox/:$PATH"
 export CLOJARS_USERNAME=hephaistox
-
-fpath=($fpath "/Users/anthonycaumond/.zfunctions")
-fpath=($fpath "/Users/anthonycaumond/.zfunctions")
-fpath=($fpath "/Users/anthonycaumond/.zfunctions")
-fpath=($fpath "/Users/anthonycaumond/.zfunctions")
-fpath=($fpath "/Users/anthonycaumond/.zfunctions")
-fpath=($fpath "/Users/anthonycaumond/.zfunctions")
-fpath=($fpath "/Users/anthonycaumond/.zfunctions")
-fpath=($fpath "/Users/anthonycaumond/.zfunctions")
-fpath=($fpath "/Users/anthonycaumond/.zfunctions")

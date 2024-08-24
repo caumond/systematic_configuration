@@ -189,3 +189,15 @@
     (revert-buffer :ignore-auto :noconfirm)))
 
 (add-hook 'after-save-hook #'zprint)
+
+;; My aliases
+(defalias 'test-ns
+   (kmacro "C-x 3 C-x o M-s-t C-c C-k")
+   "Launch a test window for that one.")
+
+;; Does not work for an unknown reason it doesn't appear
+(defun test-file ()
+  (interactive "*")
+  (find-file (cl-substitute "/src/" "/test/" (buffer-file-name (window-buffer (minibuffer-selected-window))))))
+
+;; (map! "C-M-;" #'test-file)

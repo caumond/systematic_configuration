@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: test-nil
+# condition: t
+# key: test-nil
+# --
+(deftest ${2:fn-name}-test$>
+   (is (nil? $>
+           (sut/${2} ${3:fn-params}))$>
+           "${1:doc-string}"))$>

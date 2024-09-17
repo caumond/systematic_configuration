@@ -26,5 +26,6 @@
 192.168.0.66	mbp2010
 192.168.0.68	freeboxmini
 192.168.0.69	ps4
+192.168.0.130   portable-linux-raph
 
 192.168.1.1 tp-link-admin # When connected to the tplink

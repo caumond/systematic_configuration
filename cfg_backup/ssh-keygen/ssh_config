@@ -53,3 +53,6 @@ Include /etc/ssh/ssh_config.d/*
 #   UserKnownHostsFile ~/.ssh/known_hosts.d/%k
 Host *
     SendEnv LANG LC_*
+Host fix-computer
+	Port 24736
+	user anthony

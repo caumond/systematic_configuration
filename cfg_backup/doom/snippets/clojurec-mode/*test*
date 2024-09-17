@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: test
+# key: test
+# --
+(deftest ${1:fn-name}-test$>
+  (is (= ${2:expected-result}$>
+         (sut/${1} ${3:fn-params}))$>
+   "${0:doc-string}"))$>

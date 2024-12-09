@@ -4,9 +4,10 @@
 
 (defn exec
   []
-  (cp/add-classpath "src/bb:test/bb")
-  (require 'dag.map-test 'cfg-items-test 'dag-test 'ncmds-test)
-  (let [test-results
-        (t/run-tests 'dag.map-test 'cfg-items-test 'dag-test 'ncmds-test)]
-    (let [{:keys [fail error]} test-results]
+  (let [path ['cfg-items.cmds-test 'dag.map-test 'cfg-items-schema-test
+              'cfg-items-test 'dag-test 'ncmds-test]]
+    (cp/add-classpath "src/bb:test/bb")
+    (apply require path)
+    (let [test-results (apply t/run-tests path)
+          {:keys [fail error]} test-results]
       (when (pos? (+ fail error)) (System/exit 1)))))

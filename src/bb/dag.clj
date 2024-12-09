@@ -1,4 +1,7 @@
-(ns dag "Direct Acyclic Graph.")
+(ns dag
+  "Direct Acyclic Graph algorithms.
+
+  The graph data are in `dag`, how the graph is organized is defined in `graph-manipulator`")
 
 (defn topological-layers
   "Returns the topological layers of graph `dag`.

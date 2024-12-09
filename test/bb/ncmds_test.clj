@@ -18,9 +18,8 @@
 (def ^:private s (new java.io.StringWriter))
 
 (deftest expand-str-test
-  (is (= "foo/bar"
-         (sut/expand-home-str "foo/bar")
-         "Path without home is not modified."))
+  (is (= "foo/bar" (sut/expand-home-str "foo/bar"))
+      "Path without home is not modified.")
   (is (str/ends-with? (sut/expand-home-str "~/bar") "bar")
       "Path starting with `~` is replaced with home."))
 

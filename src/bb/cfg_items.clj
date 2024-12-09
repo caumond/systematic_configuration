@@ -1,190 +1,13 @@
 (ns cfg-items
-  "`cfg-items` stands for configuration items."
-  (:require [clojure.edn :as edn]
-            [clojure.java.io :as io]
-            [dag]
+  "`cfg-items` stands for configuration items.
+
+  They are describing one element to be installed, whatever the OS."
+  (:require [dag]
             [dag.map]
-            [malli.core :as m]
-            [malli.error :as me]
-            [malli.util :as mu]
-            [utils]))
+            [cfg-items.read]
+            [cfg-items.cmds :refer [expand-package-managers]]))
 
-(def ^:private malli-registry (merge (m/default-schemas) (mu/schemas)))
-
-(def ^:private cfg-dir "Directory where configuration per os are stored" "os")
-
-(def cfg-filename "cfg_item.edn")
-
-(def ^:private cfg-envs
-  "Name of each os subdir"
-  {:macos {:subdir "macos"}, :ubuntu {:subdir "ubuntu"}})
-
-(def os-name
-  (->> (keys cfg-envs)
-       (concat [:enum])
-       vec))
-
-(def cmds [:sequential [:vector :string]])
-
-(def cfg-item-name :keyword)
-
-(def brew-package-manager
-  "Package management with brew."
-  [:map {:closed true} [:package-manager [:enum :brew]]
-   [:cask {:description "Is the formula a cask?", :optional true} :boolean]
-   [:formula {:description "`brew` formula to install the `cfg-item`."} :string]
-   [:install-options
-    {:optional true,
-     :description "What options to be added when installing the formula."}
-    [:vector :string]]
-   [:tap {:optional true, :description "`brew` tap where to find the formula."}
-    :string]])
-
-(def npm-package-manager
-  "Package management with npm."
-  [:map {:closed true} [:package-manager [:enum :npm]]
-   [:npm-deps {:description "`npm` dependency."} [:vector :string]]])
-
-(def manual-package-manager
-  "No package management, done manually with sh commands."
-  [:map {:closed true} [:package-manager [:enum :manual]]
-   [:check-cmds
-    {:optional true, :description "Check the installation of the `cfg-item`."}
-    cmds]
-   [:clean-cmds {:optional true, :description "Clean the `cfg-item`."} cmds]
-   [:init-cmds
-    {:optional true,
-     :description "Commands to init - run once - the configuration item."} cmds]
-   [:install-cmds
-    {:description "Commands describing how to manually install the `cfg-item`.",
-     :optional true} cmds]
-   [:update-cmds
-    {:optional true, :description "Update the installation of `cfg-item`."}
-    cmds]
-   [:cfg-version-cmds
-    {:optional true, :description "Command for displaying the version."} cmds]])
-
-(def common-behavior
-  [:map
-   [:description
-    {:optional true, :description "Optional description of the `cfg-item`."}
-    :string]
-   [:post-package
-    {:optional true,
-     :description "Command to setup after package has been installed."} cmds]
-   [:deps
-    {:optional true,
-     :description
-     "List of `cfg-item-name`s that this configuration item depends on."}
-    [:sequential cfg-item-name]]
-   [:pre-reqs
-    {:optional true,
-     :description
-     "List of cfg-item pre requisites. They have the exact same compatibility."}
-    [:map-of cfg-item-name [:ref ::cfg-item-per-os]]]
-   [:cfg-files
-    {:optional true,
-     :description "Configuration files of this `cfg-item` to save."}
-    [:vector :string]]
-   [:tmp-files {:optional true, :description "Temporary files to remove."}
-    [:vector :string]] [:os {:optional true} os-name]
-   [:tmp-dirs {:optional true, :description "Temporary directory to remove."}
-    [:vector :string]]])
-
-(def cfg-item-per-os
-  [:or [:union npm-package-manager common-behavior]
-   [:union manual-package-manager common-behavior]
-   [:union brew-package-manager common-behavior]])
-
-(def registry
-  (assoc malli-registry
-         ::cfg-item-per-os
-         [:or cfg-item-per-os [:vector cfg-item-per-os]]))
-
-(def cfg-items-schema
-  "`cfg-items` is a map associating `cfg-item-name` to their `cfg-item-per-os`."
-  [:map-of cfg-item-name [:ref ::cfg-item-per-os]])
-
-(defn brew-update
-  "Create commands for a brew package manager."
-  [{:keys [tap formula package-manager cask install-options], :as _cfg-item}]
-  (when (= package-manager :brew)
-    {:cfg-version-cmds [(vec (concat ["brew" "list"]
-                                     (when cask ["--cask"])
-                                     [formula "--versions"]))],
-     :check-cmds [], ;; brew cfg-item is checking all managed cfg-items at
-     ;; once.
-     :clean-cmds [["brew" "cleanup" formula]],
-     :cfg-item-deps [package-manager],
-     :init-cmds [], ;; no need
-     :install-cmds (->> [(vec (concat ["brew" "reinstall"]
-                                      (when cask ["--cask"])
-                                      [formula "-q"]
-                                      (when install-options install-options)))]
-                        (concat (when tap [["brew" "tap" tap]]))
-                        vec),
-     :update-cmds [["brew" "upgrade" formula]]}))
-
-(defn npm-update
-  "Create commands for an npm package manager."
-  [{:keys [npm-deps package-manager], :as _cfg-item}]
-  (when (= package-manager :npm)
-    {:cfg-version-cmds [],
-     :check-cmds (mapv (fn [npm-dep] ["npm" "doctor" npm-dep]) npm-deps),
-     :clean-cmds [], ;; npm cache clean is discouraged by npm.
-     :cfg-item-deps [package-manager],
-     :init-cmds [], ;; no need
-     :install-cmds (mapv (fn [npm-dep] ["npm" "install" "-g" npm-dep])
-                         npm-deps),
-     :update-cmds (mapv (fn [npm-dep] ["npm" "update" "-g" npm-dep])
-                        npm-deps)}))
-
-(defn manual-update
-  "Create commands for the manual package manager."
-  [{:keys [package-manager], :as cfg-item}]
-  (when (= package-manager :manual)
-    (select-keys cfg-item
-                 [:cfg-version-cmds :check-cmds :clean-cmds :init-cmds
-                  :install-cmds :update-cmds])))
-
-(defn common-update
-  "Create common commands for the package manager."
-  [{:keys [tmp-files clean-cmds pre-reqs deps tmp-dirs post-package cfg-files],
-    :as _cfg-item}]
-  (cond-> {}
-    (seq clean-cmds) (assoc :clean-cmds (vec clean-cmds))
-    (seq tmp-files) (update :clean-cmds
-                            (comp vec concat)
-                            (->> tmp-files
-                                 (map (fn [tmp-file] ["rm" "-f" tmp-file]))))
-    (seq tmp-dirs) (update :clean-cmds
-                           (comp vec concat)
-                           (->> tmp-dirs
-                                (map (fn [tmp-dir] ["rm" "-fr" tmp-dir]))))
-    cfg-files (assoc :cfg-files (vec cfg-files))
-    post-package (assoc :post-package post-package)
-    pre-reqs (update :cfg-item-deps (comp vec concat) (keys pre-reqs))
-    deps (update :cfg-item-deps (comp vec dedupe sort vec concat) deps)))
-
-(defn expand-package-managers
-  [cfg-items]
-  (->> cfg-items
-       (mapv (fn [[cfg-item-name cfg-item]]
-               [cfg-item-name
-                (->> ((juxt brew-update npm-update manual-update common-update)
-                      cfg-item)
-                     (apply merge))]))
-       (into {})))
-
-(defn read-data-as-resource
-  [filename]
-  (try (->> filename
-            io/resource
-            slurp
-            edn/read-string)
-       (catch Exception _
-         (println (format "File `%s` could not be loaded" filename))
-         nil)))
+(def cfg-filename "Name of the configuration file to load" "cfg_item.edn")
 
 (defn filter-cfg-item-names
   "Filter `cfg-items` to the one declared in `cfg-item-names`. If `cfg-item-names` is `nil`, none is removed."
@@ -256,14 +79,8 @@
         ncfg-items))))
 
 ;;TODO For a reason I don't get, os is not pushed in show
-;;TODO And the `pre-reqs` that are not active for this os should be removed from pre-reqs, so bb show -o ubuntu
-(defn validate-cfg
-  [file-content]
-  (when-not (m/validate cfg-items-schema file-content {:registry registry})
-    {:error (->> file-content
-                 (m/explain (m/schema cfg-items-schema {:registry registry}))
-                 me/with-spell-checking
-                 me/humanize)}))
+;;TODO And the `pre-reqs` that are not active for this os should be removed
+;;from pre-reqs, so bb show -o ubuntu
 
 (defn cfg-items-by-layers
   [cfg-items]
@@ -273,9 +90,12 @@
   "Build a configuration items for `os` and limited to the names in `cfg-item-names`.
   If `cfg-item-names` is empty, all elements are returned."
   [cfg-item-names os]
-  (-> (read-data-as-resource cfg-filename)
+  (-> (cfg-items.read/read-data-as-resource cfg-filename)
       (normalize os cfg-item-names)
       expand-package-managers))
+
+;; ********************************************************************************
+;; Public API
 
 (defn ordered-cfg-items
   [cfg-items cfg-items-by-layers]
@@ -291,9 +111,3 @@
 ;; [git clone https://github.com/BurntSushi/ripgrep tmp/rg]
 ;; [cargo -C tmp/rg build --release]
 ;; [git clone --depth 1 https://github.com/doomemacs/doomemacs ~/.config/emacs]
-
-;; What's up?
-;; [brew reinstall zprint -q]
-;; [brew reinstall dockutil -q]
-;; [brew reinstall clever-tools -q]
-;; [brew reinstall emacs-plus@29 -q --with-imagemagick --with-native-comp]

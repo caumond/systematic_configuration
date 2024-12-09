@@ -36,8 +36,8 @@
               :requires [[core]],
               :task (core/ci-version *command-line-args* stop)},
   format {:doc "Format all project files",
-          :requires [[core]],
-          :task (core/format *command-line-args* stop)},
+          :requires [[tasks.format]],
+          :task (tasks.format/format *command-line-args* stop)},
   nrepl {:doc "Launch the nrepl",
          :requires [[tasks.nrepl]],
          :task (tasks.nrepl/nrepl *command-line-args*)},
@@ -47,8 +47,8 @@
                              (System/getProperty "os.name")
                              (current-os/current-os)))},
   show {:doc "Show cfg-item dependencies.",
-        :requires [[core]],
-        :task (core/show *command-line-args*)},
+        :requires [[tasks.show]],
+        :task (tasks.show/show *command-line-args* stop)},
   test
   {:doc "Test the project", :requires [[test-runner]], :task test-runner/exec},
   validate {:doc "Check the validity of your configuration file.",

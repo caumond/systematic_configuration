@@ -1,6 +1,7 @@
 (ns cli-opts
   (:refer-clojure :exclude [get])
-  (:require [clojure.tools.cli :refer [parse-opts]]))
+  (:require [clojure.tools.cli :refer [parse-opts]]
+            [current-os]))
 
 (def common-cli-opts
   [["-h" "--help" "Displays this help"] ["-v" "--verbose" "Verbose"]])
@@ -47,3 +48,20 @@
         (merge (valid-summary parsed-cli-opts))
         (assoc :parsed-cli-opts parsed-cli-opts)
         cli-error-code)))
+
+(defn- stop [n] (System/exit (or n 0)))
+
+(defn parsed-cli-opts
+  "Parse the `cli-opts` defined in this parameter and return it, except if an error occurs, so `(on-error-code err-code)` is called with `err-code` the exit code."
+  [cli-args task-cli-opts on-error-code]
+  (let [parsed-cli-opts (validate-task cli-args task-cli-opts)]
+    (when (get parsed-cli-opts :verbose)
+      (println "Verbose mode: ")
+      (println "   Arguments: "
+               (get-in parsed-cli-opts [:parsed-cli-opts :arguments]))
+      (println "   Options: "
+               (get-in parsed-cli-opts [:parsed-cli-opts :options])))
+    (if-let [error-code (:error-code parsed-cli-opts)]
+      (do (if (nil? on-error-code) (stop error-code) (on-error-code error-code))
+          nil)
+      parsed-cli-opts)))

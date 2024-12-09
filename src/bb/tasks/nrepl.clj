@@ -6,7 +6,6 @@
 
 (def nrepl-file ".nrepl-port")
 
-#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn nrepl
   "Launch a repl locally."
   [cli-args]
